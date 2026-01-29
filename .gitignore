@@ -26,7 +26,21 @@ go.work.sum
 
 # env file
 .env
+.env.*
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+
+# Air hot reload
+apps/api-go/tmp/
+
+# Node/Bun
+node_modules/
+.svelte-kit/
+build/
+*.lock
+
+# OS
+.DS_Store
+Thumbs.db
