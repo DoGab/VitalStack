@@ -1,5 +1,3 @@
-# MacroGuard
-
 <h1 align="center" style="border-bottom: none">
     <a href="https://github.com/DoGab/MacroGuard" target="_blank"><img alt="MacroGuard" src=""></a><br>MacroGuard
 </h1>
