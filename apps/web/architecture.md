@@ -6,14 +6,14 @@ The MacroGuard web frontend is a **SvelteKit** application with a mobile-first, 
 
 ## Tech Stack
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| SvelteKit | 2.x | Full-stack framework |
-| Svelte | 5.x | UI framework (Runes mode) |
-| TailwindCSS | 4.x | Utility-first CSS |
-| DaisyUI | 5.x | Component library |
-| Lucide Svelte | - | Icon library |
-| Bun | - | Package manager |
+| Technology    | Version | Purpose                   |
+| ------------- | ------- | ------------------------- |
+| SvelteKit     | 2.x     | Full-stack framework      |
+| Svelte        | 5.x     | UI framework (Runes mode) |
+| TailwindCSS   | 4.x     | Utility-first CSS         |
+| DaisyUI       | 5.x     | Component library         |
+| Lucide Svelte | -       | Icon library              |
+| Bun           | -       | Package manager           |
 
 ---
 
@@ -68,9 +68,9 @@ Using **Svelte 5 Runes** for reactive state:
 
 ```svelte
 <script lang="ts">
-  let count = $state(0);           // Reactive state
-  let doubled = $derived(count * 2); // Derived value
-  let { data } = $props();         // Component props
+	let count = $state(0); // Reactive state
+	let doubled = $derived(count * 2); // Derived value
+	let { data } = $props(); // Component props
 </script>
 ```
 
@@ -80,12 +80,12 @@ Using **Svelte 5 Runes** for reactive state:
 
 ### Color Palette
 
-| Role | Color | OKLCH | Usage |
-|------|-------|-------|-------|
-| Primary | Emerald | `oklch(62.8% 0.21 142.5)` | CTAs, active states |
-| Secondary | Orange | `oklch(70.5% 0.21 41.3)` | Macros, energy |
-| Accent | Cyan | `oklch(70% 0.15 195)` | Water, hydration |
-| Base | White | `oklch(100% 0 0)` | Content background |
+| Role      | Color   | OKLCH                     | Usage               |
+| --------- | ------- | ------------------------- | ------------------- |
+| Primary   | Emerald | `oklch(62.8% 0.21 142.5)` | CTAs, active states |
+| Secondary | Orange  | `oklch(70.5% 0.21 41.3)`  | Macros, energy      |
+| Accent    | Cyan    | `oklch(70% 0.15 195)`     | Water, hydration    |
+| Base      | White   | `oklch(100% 0 0)`         | Content background  |
 
 ### Theme Configuration
 
@@ -94,12 +94,14 @@ Defined in `src/app.css` using TailwindCSS v4 CSS-first approach:
 ```css
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: nutrifresh --default, dark --prefersdark;
+	themes:
+		nutrifresh --default,
+		dark --prefersdark;
 }
 
 [data-theme="nutrifresh"] {
-  --color-primary: oklch(62.8% 0.21 142.5);
-  /* ... */
+	--color-primary: oklch(62.8% 0.21 142.5);
+	/* ... */
 }
 ```
 
@@ -118,9 +120,9 @@ Defined in `src/app.css` using TailwindCSS v4 CSS-first approach:
 
 ```json
 {
-  "name": "MacroGuard",
-  "display": "standalone",
-  "theme_color": "#22c55e"
+	"name": "MacroGuard",
+	"display": "standalone",
+	"theme_color": "#22c55e"
 }
 ```
 
@@ -156,9 +158,9 @@ npx openapi-typescript http://localhost:8080/openapi.json -o src/lib/api/schema.
 
 ## Key Routes
 
-| Route | Component | Description |
-|-------|-----------|-------------|
-| `/` | `+page.svelte` | Homepage with upload UI |
-| `/scan` | (planned) | Camera/upload flow |
-| `/history` | (planned) | Scan history |
-| `/profile` | (planned) | User settings |
+| Route      | Component      | Description             |
+| ---------- | -------------- | ----------------------- |
+| `/`        | `+page.svelte` | Homepage with upload UI |
+| `/scan`    | (planned)      | Camera/upload flow      |
+| `/history` | (planned)      | Scan history            |
+| `/profile` | (planned)      | User settings           |

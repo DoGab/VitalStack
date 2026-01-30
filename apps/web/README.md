@@ -29,7 +29,7 @@ TailwindCSS v4 uses a Vite plugin (no `tailwind.config.js`). See `vite.config.ts
 ```typescript
 import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
-  plugins: [tailwindcss(), sveltekit()],
+	plugins: [tailwindcss(), sveltekit()]
 });
 ```
 
@@ -40,12 +40,14 @@ Custom themes are defined in `src/app.css` using CSS variables:
 ```css
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: nutrifresh --default, dark --prefersdark;
+	themes:
+		nutrifresh --default,
+		dark --prefersdark;
 }
 
 [data-theme="nutrifresh"] {
-  --color-primary: oklch(62.8% 0.21 142.5);
-  /* ... */
+	--color-primary: oklch(62.8% 0.21 142.5);
+	/* ... */
 }
 ```
 
@@ -74,21 +76,22 @@ bun run preview
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `vite.config.ts` | TailwindCSS v4 Vite plugin |
-| `src/app.css` | Tailwind + DaisyUI + NutriFresh theme |
-| `src/app.html` | HTML template with `data-theme` |
-| `src/routes/+layout.svelte` | App shell (Navbar) |
-| `src/routes/+page.svelte` | Homepage |
-| `static/manifest.json` | PWA manifest |
-| `src/service-worker.ts` | PWA offline support |
+| File                        | Purpose                               |
+| --------------------------- | ------------------------------------- |
+| `vite.config.ts`            | TailwindCSS v4 Vite plugin            |
+| `src/app.css`               | Tailwind + DaisyUI + NutriFresh theme |
+| `src/app.html`              | HTML template with `data-theme`       |
+| `src/routes/+layout.svelte` | App shell (Navbar)                    |
+| `src/routes/+page.svelte`   | Homepage                              |
+| `static/manifest.json`      | PWA manifest                          |
+| `src/service-worker.ts`     | PWA offline support                   |
 
 ---
 
 ## PWA
 
 The app is PWA-ready:
+
 - `static/manifest.json` - App metadata
 - `src/service-worker.ts` - Offline caching
 - `src/app.html` - Mobile meta tags

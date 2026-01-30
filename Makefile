@@ -9,7 +9,8 @@ RESET := \033[0m
 CHECK := ✓
 ARROW := →
 
-.PHONY: dev dev-api dev-web install install-api install-web clean help
+.PHONY: dev dev-api dev-web install install-api install-web clean help \
+        lint lint-api lint-web format format-api format-web fix fix-api fix-web
 
 # Start both backend and frontend concurrently
 dev:
@@ -21,10 +22,14 @@ dev-api:
 	@echo "🔧 Starting Go API server with Air hot reload..."
 	@cd apps/api-go && air
 
-# Start SvelteKit frontend dev server
+# Start SvelteKit frontend dev server (network accessible)
 dev-web:
 	@echo "🌐 Starting SvelteKit frontend..."
-	@cd apps/web && bun run dev
+	@cd apps/web && bun run dev --host
+
+# ─────────────────────────────────────
+# Install
+# ─────────────────────────────────────
 
 # Install all dependencies
 install: install-api install-web
@@ -40,6 +45,64 @@ install-web:
 	@echo "📦 Installing frontend dependencies..."
 	@cd apps/web && bun install
 
+# ─────────────────────────────────────
+# Lint
+# ─────────────────────────────────────
+
+# Lint both projects
+lint: lint-api lint-web
+	@echo "✅ Linting complete"
+
+# Lint Go API
+lint-api:
+	@echo "🔍 Linting Go API..."
+	@cd apps/api-go && golangci-lint run
+
+# Lint frontend
+lint-web:
+	@echo "🔍 Linting frontend..."
+	@cd apps/web && bun run lint
+
+# ─────────────────────────────────────
+# Format
+# ─────────────────────────────────────
+
+# Format both projects
+format: format-api format-web
+	@echo "✅ Formatting complete"
+
+# Format Go API
+format-api:
+	@echo "✨ Formatting Go API..."
+	@cd apps/api-go && gofmt -w . && goimports -w .
+
+# Format frontend
+format-web:
+	@echo "✨ Formatting frontend..."
+	@cd apps/web && bun run format
+
+# ─────────────────────────────────────
+# Lint + Format (fix)
+# ─────────────────────────────────────
+
+# Fix all lint and format issues
+fix: fix-api fix-web
+	@echo "✅ All fixes applied"
+
+# Fix Go API issues
+fix-api:
+	@echo "🔧 Fixing Go API..."
+	@cd apps/api-go && golangci-lint run --fix && gofmt -w . && goimports -w .
+
+# Fix frontend issues
+fix-web:
+	@echo "🔧 Fixing frontend..."
+	@cd apps/web && bun run lint:fix && bun run format
+
+# ─────────────────────────────────────
+# Clean
+# ─────────────────────────────────────
+
 # Clean build artifacts
 clean:
 	@echo "🧹 Cleaning build artifacts..."
@@ -47,17 +110,33 @@ clean:
 	@rm -rf apps/web/.svelte-kit
 	@rm -rf apps/web/node_modules
 
+# ─────────────────────────────────────
+# Help
+# ─────────────────────────────────────
+
 # Show available commands
 help:
 	@printf "\n${CYAN}MacroGuard Development Commands${RESET}\n"
 	@printf "$(DIM)────────────────────────────────────$(RESET)\n"
-	@printf "  make dev         $(ARROW) Start both backend and frontend (recommended)\n"
-	@printf "  make dev-api     $(ARROW) Start Go API server only (with Air hot reload)\n"
-	@printf "  make dev-web     $(ARROW) Start SvelteKit frontend only\n"
-	@printf "  make install     $(ARROW) Install all dependencies\n"
-	@printf "  make install-api $(ARROW) Install Go dependencies\n"
-	@printf "  make install-web $(ARROW) Install frontend dependencies\n"
-	@printf "  make clean       $(ARROW) Remove build artifacts\n"
+	@printf "\n${CYAN}Development${RESET}\n"
+	@printf "  make dev           $(ARROW) Start both backend and frontend\n"
+	@printf "  make dev-api       $(ARROW) Start Go API server (with Air)\n"
+	@printf "  make dev-web       $(ARROW) Start SvelteKit frontend (network accessible)\n"
+	@printf "\n${CYAN}Code Quality${RESET}\n"
+	@printf "  make lint          $(ARROW) Lint all projects\n"
+	@printf "  make lint-api      $(ARROW) Lint Go API only\n"
+	@printf "  make lint-web      $(ARROW) Lint frontend only\n"
+	@printf "  make format        $(ARROW) Format all projects\n"
+	@printf "  make format-api    $(ARROW) Format Go API only\n"
+	@printf "  make format-web    $(ARROW) Format frontend only\n"
+	@printf "  make fix           $(ARROW) Fix all lint + format issues\n"
+	@printf "  make fix-api       $(ARROW) Fix Go API issues\n"
+	@printf "  make fix-web       $(ARROW) Fix frontend issues\n"
+	@printf "\n${CYAN}Setup${RESET}\n"
+	@printf "  make install       $(ARROW) Install all dependencies\n"
+	@printf "  make install-api   $(ARROW) Install Go dependencies\n"
+	@printf "  make install-web   $(ARROW) Install frontend dependencies\n"
+	@printf "  make clean         $(ARROW) Remove build artifacts\n"
 	@printf "\n"
 	@printf "Endpoints:\n"
 	@printf "  Frontend:  ${CYAN}http://localhost:5173${RESET}\n"

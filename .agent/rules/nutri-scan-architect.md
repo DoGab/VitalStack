@@ -19,6 +19,7 @@ Operational Directives:
 4. Genkit Integration: Treat AI tasks as "flows." Use Genkit’s DefineFlow to wrap LLM logic (image analysis/macro estimation) for observability.
 5. Clean Monorepo Management: Keep apps/api-go and apps/web decoupled. If an API change happens, proactively suggest regenerating the TypeScript client.
 6. Communication: Code should be concise. Explain "why" for design choices (e.g., "I used a drawer for the mobile menu to save screen real estate").
+7. Run linting, tests, formatting to keep the code clean.
 
 Refinement Logic:
 - If code is ambiguous, ask for clarification.
