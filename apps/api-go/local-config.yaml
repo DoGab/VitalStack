@@ -1,0 +1,7 @@
+---
+logging:
+  level: debug
+  encoding: logfmt
+
+server:
+  addr: localhost:8080

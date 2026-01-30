@@ -1,5 +1,14 @@
 # MacroGuard Development
 
+# Simple color scheme
+CYAN := \033[36m
+DIM := \033[2m
+RESET := \033[0m
+
+# Basic symbols
+CHECK := ✓
+ARROW := →
+
 .PHONY: dev dev-api dev-web install install-api install-web clean help
 
 # Start both backend and frontend concurrently
@@ -40,17 +49,17 @@ clean:
 
 # Show available commands
 help:
-	@echo "MacroGuard Development Commands:"
-	@echo ""
-	@echo "  make dev         - Start both backend and frontend (recommended)"
-	@echo "  make dev-api     - Start Go API server only (with Air hot reload)"
-	@echo "  make dev-web     - Start SvelteKit frontend only"
-	@echo "  make install     - Install all dependencies"
-	@echo "  make install-api - Install Go dependencies"
-	@echo "  make install-web - Install frontend dependencies"
-	@echo "  make clean       - Remove build artifacts"
-	@echo ""
-	@echo "Endpoints:"
-	@echo "  Frontend:  http://localhost:5173"
-	@echo "  API:       http://localhost:8080"
-	@echo "  API Docs:  http://localhost:8080/docs"
+	@printf "\n${CYAN}MacroGuard Development Commands${RESET}\n"
+	@printf "$(DIM)────────────────────────────────────$(RESET)\n"
+	@printf "  make dev         $(ARROW) Start both backend and frontend (recommended)\n"
+	@printf "  make dev-api     $(ARROW) Start Go API server only (with Air hot reload)\n"
+	@printf "  make dev-web     $(ARROW) Start SvelteKit frontend only\n"
+	@printf "  make install     $(ARROW) Install all dependencies\n"
+	@printf "  make install-api $(ARROW) Install Go dependencies\n"
+	@printf "  make install-web $(ARROW) Install frontend dependencies\n"
+	@printf "  make clean       $(ARROW) Remove build artifacts\n"
+	@printf "\n"
+	@printf "Endpoints:\n"
+	@printf "  Frontend:  ${CYAN}http://localhost:5173${RESET}\n"
+	@printf "  API:       ${CYAN}http://localhost:8080${RESET}\n"
+	@printf "  API Docs:  ${CYAN}http://localhost:8080/docs${RESET}\n"
