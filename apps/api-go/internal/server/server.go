@@ -38,9 +38,6 @@ type Server struct {
 	srv    *http.Server
 	router *gin.Engine
 
-	metricsSrv    *http.Server
-	metricsRouter *gin.Engine
-
 	huma huma.API
 }
 
@@ -80,11 +77,6 @@ func NewServer(addr string, opts ...Option) (*Server, ShutdownFunc) {
 		slog.Info("MacroGuard API shutting down...")
 		if err := s.srv.Shutdown(ctx); err != nil {
 			return err
-		}
-		if s.metricsSrv != nil {
-			if err := s.metricsSrv.Shutdown(ctx); err != nil {
-				return err
-			}
 		}
 		return nil
 	}
