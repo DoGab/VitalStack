@@ -10,16 +10,26 @@ CHECK := ✓
 ARROW := →
 
 .PHONY: dev dev-api dev-web install install-api install-web clean help \
-        lint lint-api lint-web format format-api format-web fix fix-api fix-web
+        lint lint-api lint-web format format-api format-web fix fix-api fix-web \
+        openapi gen-openapi-spec gen-api-client
 
 # ─────────────────────────────────────
 # Development
 # ─────────────────────────────────────
 
-# Generate OpenAPI documentation
-openapi:
-	@echo "📝 Generating OpenAPI documentation..."
+# Generate OpenAPI spec and TypeScript client
+openapi: gen-openapi-spec gen-api-client
+	@echo "✅ OpenAPI spec and client generated"
+
+# Generate OpenAPI spec from Go API
+gen-openapi-spec:
+	@echo "📝 Generating OpenAPI spec..."
 	@cd apps/api-go && go run main.go openapi --config local-config.yaml
+
+# Generate TypeScript API client from OpenAPI spec
+gen-api-client:
+	@echo "🔄 Generating TypeScript API client..."
+	@cd apps/web && bun run generate:api
 
 # Start both backend and frontend concurrently
 dev:
@@ -146,6 +156,10 @@ help:
 	@printf "  make install-api   $(ARROW) Install Go dependencies\n"
 	@printf "  make install-web   $(ARROW) Install frontend dependencies\n"
 	@printf "  make clean         $(ARROW) Remove build artifacts\n"
+	@printf "\n${CYAN}Code Generation${RESET}\n"
+	@printf "  make openapi       $(ARROW) Generate spec + TypeScript client\n"
+	@printf "  make gen-openapi-spec $(ARROW) Generate OpenAPI spec only\n"
+	@printf "  make gen-api-client $(ARROW) Generate TypeScript client only\n"
 	@printf "\n"
 	@printf "Endpoints:\n"
 	@printf "  Frontend:  ${CYAN}http://localhost:5173${RESET}\n"
