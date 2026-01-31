@@ -50,6 +50,9 @@ func Execute() (err error) {
 	// Load configuration flags
 	conf.RegisterFlags(rootCmd)
 
+	// Add subcommands
+	rootCmd.AddCommand(openAPICmd)
+
 	// Generate markdown documentation
 	if len(os.Args) > 1 && os.Args[1] == "gendoc" {
 		return doc.GenMarkdownTree(rootCmd, ".")

@@ -37,6 +37,22 @@ const (
 	ServerShutdownTimeoutArg = serverKey + "shutdown-timeout"
 	// ServerShutdownTimeoutDefault is the default server shutdown grace period
 	ServerShutdownTimeoutDefault = 60 * time.Second
+
+	// OpenAPI
+	openapiKey = "openapi."
+	// OpenAPIPathArg is the flag name for the OpenAPI path
+	OpenAPIPathArg = openapiKey + "path"
+	// OpenAPIPathDefault is the default OpenAPI path
+	OpenAPIPathDefault = "openapi.yaml"
+	// OpenAPIPathHelp is the help message for the OpenAPI path flag
+	OpenAPIPathHelp = "Set the OpenAPI path"
+
+	// OpenAPIFormatArg is the flag name for the OpenAPI format
+	OpenAPIFormatArg = openapiKey + "format"
+	// OpenAPIFormatDefault is the default OpenAPI format
+	OpenAPIFormatDefault = "yaml"
+	// OpenAPIFormatHelp is the help message for the OpenAPI format flag
+	OpenAPIFormatHelp = "Set the OpenAPI format"
 )
 
 func RegisterFlags(cmd *cobra.Command) {
@@ -49,6 +65,10 @@ func RegisterFlags(cmd *cobra.Command) {
 	// Server
 	pflags.String(ServerAddrArg, ServerAddrDefault, ServerAddrHelp)
 	pflags.Duration(ServerShutdownTimeoutArg, ServerShutdownTimeoutDefault, "Duration to wait for the server to shutdown gracefully")
+
+	// OpenAPI
+	pflags.String(OpenAPIPathArg, OpenAPIPathDefault, OpenAPIPathHelp)
+	pflags.String(OpenAPIFormatArg, OpenAPIFormatDefault, OpenAPIFormatHelp)
 
 	_ = viper.BindPFlags(pflags)
 }

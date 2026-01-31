@@ -12,6 +12,15 @@ ARROW := →
 .PHONY: dev dev-api dev-web install install-api install-web clean help \
         lint lint-api lint-web format format-api format-web fix fix-api fix-web
 
+# ─────────────────────────────────────
+# Development
+# ─────────────────────────────────────
+
+# Generate OpenAPI documentation
+openapi:
+	@echo "📝 Generating OpenAPI documentation..."
+	@cd apps/api-go && go run main.go openapi --config local-config.yaml
+
 # Start both backend and frontend concurrently
 dev:
 	@echo "🚀 Starting MacroGuard development servers..."
