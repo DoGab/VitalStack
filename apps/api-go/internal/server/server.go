@@ -15,6 +15,8 @@ import (
 
 const (
 	DefaultReadHeaderTimeout = 30 * time.Second
+	// DefaultMaxMultipartMemory defines the maximum size of a multipart form request body (10MB)
+	DefaultMaxMultipartMemory = 10 << 20
 )
 
 // Controller is an interface for controllers
@@ -46,8 +48,20 @@ func NewServer(addr string, opts ...Option) (*Server, ShutdownFunc) {
 	router := gin.New()
 	router.Use(gin.Recovery())
 
+	// Allow large request bodies for image uploads (10MB)
+	router.MaxMultipartMemory = DefaultMaxMultipartMemory
+
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173"},
+		AllowOrigins: []string{
+			"http://localhost:5173",
+			"http://127.0.0.1:5173",
+			"https://localhost:5173",
+			"https://127.0.0.1:5173",
+		},
+		AllowOriginFunc: func(origin string) bool {
+			// Allow any local network origin for mobile testing
+			return true
+		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

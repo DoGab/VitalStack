@@ -1,7 +1,12 @@
 <script lang="ts">
   import { Camera, Upload, Zap, X } from "lucide-svelte";
+  import FoodScannerModal from "$lib/components/food/FoodScannerModal.svelte";
 
   let { open = $bindable() } = $props();
+
+  // Food scanner state
+  let scannerOpen = $state(false);
+  let scannerMode: "camera" | "upload" = $state("camera");
 
   const addOptions = [
     { icon: Camera, label: "Take Photo", action: "camera" },
@@ -10,11 +15,23 @@
   ];
 
   function handleAddOption(action: string) {
-    console.log("Add action:", action);
-    open = false;
-    // Placeholder - will be implemented later
+    if (action === "camera") {
+      scannerMode = "camera";
+      scannerOpen = true;
+      open = false;
+    } else if (action === "upload") {
+      scannerMode = "upload";
+      scannerOpen = true;
+      open = false;
+    } else {
+      console.log("Add action:", action);
+      open = false;
+    }
   }
 </script>
+
+<!-- Food Scanner Modal -->
+<FoodScannerModal bind:open={scannerOpen} mode={scannerMode} />
 
 {#if open}
   <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -31,7 +48,7 @@
         </button>
       </div>
       <div class="flex flex-col gap-2">
-        {#each addOptions as option}
+        {#each addOptions as option (option.action)}
           {@const Icon = option.icon}
           <button
             class="btn btn-ghost justify-start gap-3 h-14"

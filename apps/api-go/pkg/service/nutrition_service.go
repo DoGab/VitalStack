@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log/slog"
 )
 
 // NutritionService is a service for nutritional information
@@ -15,6 +16,8 @@ func NewNutritionService() *NutritionService {
 
 // ScanFood scans the food in the image and returns the nutritional information
 func (s *NutritionService) ScanFood(ctx context.Context, input *ScanInput) (*ScanOutput, error) {
+	slog.Info("received food scan request", "input", input)
+
 	response := &ScanOutput{
 		FoodName:   "Grilled Chicken Salad",
 		Confidence: 0.92,

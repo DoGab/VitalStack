@@ -37,10 +37,11 @@ func (c *NutritionController) Register(api huma.API) {
 
 // ScanHandler handles the scan request
 func (c *NutritionController) ScanHandler(ctx context.Context, input *ScanInput) (*ScanOutput, error) {
-	out := &ScanOutput{}
+	out := &ScanOutput{Body: &ScanOutputBody{}}
 
 	req := &service.ScanInput{
 		ImageBase64: input.Body.ImageBase64,
+		Description: input.Body.Description,
 	}
 	resp, err := c.Service.ScanFood(ctx, req)
 	if err != nil {

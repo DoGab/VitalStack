@@ -6,7 +6,8 @@ type ScanInput struct {
 }
 
 type ScanInputBody struct {
-	ImageBase64 string `json:"image_base64,omitempty" doc:"Base64 encoded image data"`
+	ImageBase64 string  `json:"image_base64" required:"true" doc:"Base64 encoded image data"`
+	Description *string `json:"description,omitempty" doc:"Optional meal description for better AI analysis"`
 }
 
 // MacroData represents nutritional macro information

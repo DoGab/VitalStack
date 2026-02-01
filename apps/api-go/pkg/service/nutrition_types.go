@@ -1,7 +1,21 @@
 package service
 
+import "log/slog"
+
 type ScanInput struct {
-	ImageBase64 string `json:"image_base64,omitempty"`
+	ImageBase64 string  `json:"image_base64"`
+	Description *string `json:"description,omitempty"`
+}
+
+// LogValue implements slog.LogValuer for structured logging
+func (s *ScanInput) LogValue() slog.Value {
+	attrs := []slog.Attr{
+		slog.Int("image_size_bytes", len(s.ImageBase64)),
+	}
+	if s.Description != nil {
+		attrs = append(attrs, slog.String("description", *s.Description))
+	}
+	return slog.GroupValue(attrs...)
 }
 
 type ScanOutput struct {

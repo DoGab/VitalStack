@@ -63,18 +63,33 @@ components:
       additionalProperties: false
       properties:
         calories:
+          description: Total calories
+          examples:
+            - 450
           format: int64
           type: integer
         carbs:
+          description: Carbohydrates in grams
+          examples:
+            - 45
           format: double
           type: number
         fat:
+          description: Fat in grams
+          examples:
+            - 15.5
           format: double
           type: number
         fiber:
+          description: Fiber in grams
+          examples:
+            - 5
           format: double
           type: number
         protein:
+          description: Protein in grams
+          examples:
+            - 25.5
           format: double
           type: number
       required:
@@ -84,6 +99,60 @@ components:
         - fat
         - fiber
       type: object
+    ScanInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - //schemas/ScanInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          description: Optional meal description for better AI analysis
+          type: string
+        image_base64:
+          description: Base64 encoded image data
+          type: string
+      required:
+        - image_base64
+      type: object
+    ScanOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - //schemas/ScanOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        confidence:
+          description: Detection confidence score
+          examples:
+            - 0.92
+          format: double
+          type: number
+        food_name:
+          description: Detected food name
+          examples:
+            - Grilled Chicken Salad
+          type: string
+        macros:
+          $ref: "#/components/schemas/MacroData"
+          description: Nutritional macro information
+        serving_size:
+          description: Estimated serving size
+          examples:
+            - 1 plate (350g)
+          type: string
+      required:
+        - food_name
+        - confidence
+        - macros
+        - serving_size
+      type: object
 info:
   title: MacroGuard API
   version: 1.0.0
@@ -91,32 +160,27 @@ openapi: 3.1.0
 paths:
   /api/nutrition/scan:
     post:
-      description: Scan food
+      description: Upload a base64-encoded food image and optionally provide a description. Returns detected food name and macro breakdown.
       operationId: scan-food
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScanInputBody"
       responses:
-        "204":
-          description: No Content
-          headers:
-            Confidence:
+        "200":
+          content:
+            application/json:
               schema:
-                format: double
-                type: number
-            FoodName:
-              schema:
-                type: string
-            Macros:
-              schema:
-                $ref: "#/components/schemas/MacroData"
-            ServingSize:
-              schema:
-                type: string
+                $ref: "#/components/schemas/ScanOutputBody"
+          description: OK
         default:
           content:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
-      summary: Scan food
+      summary: Scan food image for nutritional information
       tags:
         - nutrition
 servers:

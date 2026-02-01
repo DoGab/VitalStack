@@ -14,8 +14,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Scan food
-         * @description Scan food
+         * Scan food image for nutritional information
+         * @description Upload a base64-encoded food image and optionally provide a description. Returns detected food name and macro breakdown.
          */
         post: operations["scan-food"];
         delete?: never;
@@ -76,16 +76,74 @@ export interface components {
             type: string;
         };
         MacroData: {
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description Total calories
+             * @example 450
+             */
             calories: number;
-            /** Format: double */
+            /**
+             * Format: double
+             * @description Carbohydrates in grams
+             * @example 45
+             */
             carbs: number;
-            /** Format: double */
+            /**
+             * Format: double
+             * @description Fat in grams
+             * @example 15.5
+             */
             fat: number;
-            /** Format: double */
+            /**
+             * Format: double
+             * @description Fiber in grams
+             * @example 5
+             */
             fiber: number;
-            /** Format: double */
+            /**
+             * Format: double
+             * @description Protein in grams
+             * @example 25.5
+             */
             protein: number;
+        };
+        ScanInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example //schemas/ScanInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Optional meal description for better AI analysis */
+            description?: string;
+            /** @description Base64 encoded image data */
+            image_base64: string;
+        };
+        ScanOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example //schemas/ScanOutputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: double
+             * @description Detection confidence score
+             * @example 0.92
+             */
+            confidence: number;
+            /**
+             * @description Detected food name
+             * @example Grilled Chicken Salad
+             */
+            food_name: string;
+            /** @description Nutritional macro information */
+            macros: components["schemas"]["MacroData"];
+            /**
+             * @description Estimated serving size
+             * @example 1 plate (350g)
+             */
+            serving_size: string;
         };
     };
     responses: never;
@@ -103,18 +161,20 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ScanInputBody"];
+            };
+        };
         responses: {
-            /** @description No Content */
-            204: {
+            /** @description OK */
+            200: {
                 headers: {
-                    Confidence?: number;
-                    FoodName?: string;
-                    Macros?: components["schemas"]["MacroData"];
-                    ServingSize?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ScanOutputBody"];
+                };
             };
             /** @description Error */
             default: {
