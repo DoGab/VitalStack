@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Home, Clock, MessageCircle, User, Plus, Utensils } from "lucide-svelte";
+  import ThemeSwap from "$lib/components/ui/ThemeSwap.svelte";
 
   let { addMenuOpen = $bindable() } = $props();
 
@@ -26,7 +27,7 @@
   <!-- Desktop Nav Links -->
   <div class="navbar-center hidden lg:flex">
     <ul class="menu menu-horizontal px-1 gap-1">
-      {#each navLinks as link}
+      {#each navLinks as link (link.href)}
         {@const Icon = link.icon}
         <li>
           <a href={link.href} class="btn btn-ghost btn-sm gap-2">
@@ -38,7 +39,10 @@
     </ul>
   </div>
 
-  <div class="navbar-end">
+  <div class="navbar-end gap-2">
+    <!-- Theme Swap -->
+    <ThemeSwap />
+
     <!-- Desktop: Add button -->
     <div class="hidden lg:flex">
       <button class="btn btn-primary btn-sm gap-2" onclick={() => (addMenuOpen = !addMenuOpen)}>

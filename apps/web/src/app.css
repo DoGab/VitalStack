@@ -1,41 +1,165 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
   themes:
-    nutrifresh --default,
-    dark --prefersdark;
+    biohacker --default,
+    nutrifresh,
+    organic,
+    clinical;
 }
 
-/* NutriFresh Custom Theme - DaisyUI v5 */
-/* Define the theme using CSS variables */
+/* Theme 1: NutriFresh - Original Theme
+  "Emerald & Orange"
+  Best for: Fresh, healthy, approachable
+*/
 [data-theme="nutrifresh"] {
-  --color-base-100: oklch(100% 0 0); /* #ffffff - Pure white */
-  --color-base-200: oklch(98.3% 0.003 247.86); /* #f8fafc - Off-white */
-  --color-base-300: oklch(96% 0.006 247.86); /* Slightly darker */
-  --color-base-content: oklch(27.8% 0.02 256); /* Dark text */
+  color-scheme: light;
+  --color-base-100: oklch(100% 0 0);
+  /* #ffffff - Pure white */
+  --color-base-200: oklch(98.3% 0.003 247.86);
+  /* #f8fafc - Off-white */
+  --color-base-300: oklch(96% 0.006 247.86);
+  /* Slightly darker */
+  --color-base-content: oklch(27.8% 0.02 256);
+  /* Dark text */
 
-  --color-primary: oklch(62.8% 0.21 142.5); /* #22c55e - Emerald Green */
-  --color-primary-content: oklch(100% 0 0); /* White text on primary */
+  --color-primary: oklch(62.8% 0.21 142.5);
+  /* #22c55e - Emerald Green */
+  --color-primary-content: oklch(100% 0 0);
+  /* White text on primary */
 
-  --color-secondary: oklch(70.5% 0.21 41.3); /* #f97316 - Orange */
-  --color-secondary-content: oklch(100% 0 0); /* White text on secondary */
+  --color-secondary: oklch(70.5% 0.21 41.3);
+  /* #f97316 - Orange */
+  --color-secondary-content: oklch(100% 0 0);
+  /* White text on secondary */
 
-  --color-accent: oklch(70% 0.15 195); /* #06b6d4 - Cyan */
-  --color-accent-content: oklch(100% 0 0); /* White text on accent */
+  --color-accent: oklch(70% 0.15 195);
+  /* #06b6d4 - Cyan */
+  --color-accent-content: oklch(100% 0 0);
+  /* White text on accent */
 
-  --color-neutral: oklch(35% 0.02 260); /* #3d4451 */
+  --color-neutral: oklch(35% 0.02 260);
+  /* #3d4451 */
   --color-neutral-content: oklch(100% 0 0);
 
-  --color-info: oklch(72% 0.15 220); /* #3abff8 */
+  --color-info: oklch(72% 0.15 220);
+  /* #3abff8 */
   --color-info-content: oklch(100% 0 0);
 
-  --color-success: oklch(72% 0.18 160); /* #36d399 */
+  --color-success: oklch(72% 0.18 160);
+  /* #36d399 */
   --color-success-content: oklch(100% 0 0);
 
-  --color-warning: oklch(80% 0.16 85); /* #fbbd23 */
+  --color-warning: oklch(80% 0.16 85);
+  /* #fbbd23 */
   --color-warning-content: oklch(25% 0.02 85);
 
-  --color-error: oklch(65% 0.2 25); /* #f87272 */
+  --color-error: oklch(65% 0.2 25);
+  /* #f87272 */
   --color-error-content: oklch(100% 0 0);
+}
+
+/* Theme 2: The Bio-Hacker 
+  "Neon Lime & Obsidian"
+  Best for: Gym, Dark Mode, High Performance
+*/
+[data-theme="biohacker"] {
+  color-scheme: dark;
+  --color-primary: #D4FF00;
+  --color-primary-content: #000000;
+  /* Black text on neon lime */
+  --color-secondary: #6366F1;
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #FFFFFF;
+  --color-accent-content: #000000;
+
+  --color-neutral: #A1A1AA;
+  --color-neutral-content: #121212;
+
+  --color-base-100: #121212;
+  --color-base-200: #1E1E1E;
+  --color-base-300: #2D2D2D;
+  --color-base-content: #FFFFFF;
+
+  --color-info: #38BDF8;
+  --color-info-content: #000000;
+  --color-success: #22C55E;
+  --color-success-content: #000000;
+  --color-warning: #FACC15;
+  --color-warning-content: #000000;
+  --color-error: #EF4444;
+  --color-error-content: #FFFFFF;
+
+  --radius-selector: 0px;
+  /* Sharp edges for tech/cyber feel */
+}
+
+/* Theme 3: The Organic Premium 
+  "Deep Arboretum & Burnished Gold"
+  Best for: Lifestyle, Premium Health, Longevity
+*/
+[data-theme="organic"] {
+  color-scheme: light;
+  --color-primary: #1B3022;
+  --color-primary-content: #F9F7F2;
+  --color-secondary: #C5A059;
+  --color-secondary-content: #1B3022;
+  --color-accent: #D65A31;
+  --color-accent-content: #F9F7F2;
+
+  --color-neutral: #2C2F2D;
+  --color-neutral-content: #F9F7F2;
+
+  --color-base-100: #F9F7F2;
+  --color-base-200: #EBE7DE;
+  --color-base-300: #D8D3C8;
+  --color-base-content: #1B3022;
+
+  --color-info: #5F8D8B;
+  --color-info-content: #F9F7F2;
+  --color-success: #4E8056;
+  --color-success-content: #F9F7F2;
+  --color-warning: #EDB654;
+  --color-warning-content: #1B3022;
+  --color-error: #B93632;
+  --color-error-content: #F9F7F2;
+
+  --radius-selector: 0.5rem;
+  /* Slightly rounded for organic feel */
+}
+
+/* Theme 4: The Clinical Modernist
+  "Teal & Soft Pink"
+  Best for: General Health, Medical tracking, Cleanliness
+*/
+[data-theme="clinical"] {
+  color-scheme: light;
+  --color-primary: #0D9488;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #F472B6;
+  --color-secondary-content: #0F172A;
+  --color-accent: #0F172A;
+  --color-accent-content: #FFFFFF;
+
+  --color-neutral: #334155;
+  --color-neutral-content: #FFFFFF;
+
+  --color-base-100: #FFFFFF;
+  --color-base-200: #F1F5F9;
+  --color-base-300: #E2E8F0;
+  --color-base-content: #0F172A;
+
+  --color-info: #60A5FA;
+  --color-info-content: #0F172A;
+  --color-success: #34D399;
+  --color-success-content: #0F172A;
+  --color-warning: #FBBF24;
+  --color-warning-content: #0F172A;
+  --color-error: #F87171;
+  --color-error-content: #0F172A;
+
+  --radius-selector: 1rem;
+  /* Soft, pill-shaped UI for friendly feel */
 }
 
 /* PWA App-like feel */
@@ -71,6 +195,7 @@ main {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
