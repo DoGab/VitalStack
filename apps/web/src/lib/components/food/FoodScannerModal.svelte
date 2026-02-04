@@ -9,6 +9,9 @@
   let { open = $bindable(), mode = "camera" }: { open: boolean; mode: "camera" | "upload" } =
     $props();
 
+  // Dialog element ref
+  let dialogElement: HTMLDialogElement | null = $state(null);
+
   // State
   let imagePreview: string | null = $state(null);
   let imageBase64: string | null = $state(null);
@@ -25,7 +28,18 @@
   // File input ref
   let fileInput: HTMLInputElement | null = $state(null);
 
-  // Initialize based on mode
+  // Sync dialog open state with `open` prop
+  $effect(() => {
+    if (dialogElement) {
+      if (open && !dialogElement.open) {
+        dialogElement.showModal();
+      } else if (!open && dialogElement.open) {
+        dialogElement.close();
+      }
+    }
+  });
+
+  // Initialize camera when opening in camera mode
   $effect(() => {
     if (open && mode === "camera" && !imagePreview && !scanResult) {
       startCamera();
@@ -153,146 +167,150 @@
     }
   }
 
-  function handleClose() {
+  // Handle dialog close event (ESC key, backdrop click via form)
+  function onDialogClose() {
     open = false;
   }
 </script>
 
-{#if open}
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div
-    class="fixed inset-0 bg-black/70 z-[80] flex items-center justify-center p-4"
-    onclick={handleClose}
-  >
-    <div
-      class="bg-base-100 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col"
-      onclick={(e) => e.stopPropagation()}
-    >
-      <!-- Header -->
-      <div class="flex justify-between items-center p-4 border-b border-base-200">
-        <h2 class="text-lg font-bold">
-          {#if scanResult}
-            Scan Results
-          {:else}
-            Scan Food
-          {/if}
-        </h2>
-        <button class="btn btn-ghost btn-sm btn-circle" onclick={handleClose}>
+<dialog
+  bind:this={dialogElement}
+  class="modal modal-bottom sm:modal-middle"
+  onclose={onDialogClose}
+>
+  <div class="modal-box max-w-md max-h-[90vh] flex flex-col p-0">
+    <!-- Header -->
+    <div class="flex justify-between items-center p-4 border-b border-base-200 shrink-0">
+      <h3 class="text-lg font-bold">
+        {#if scanResult}
+          Scan Results
+        {:else}
+          Scan Food
+        {/if}
+      </h3>
+      <form method="dialog">
+        <button class="btn btn-ghost btn-sm btn-circle">
           <X class="w-5 h-5" />
         </button>
-      </div>
+      </form>
+    </div>
 
-      <!-- Content -->
-      <div class="p-4 overflow-y-auto flex-1">
-        {#if scanResult}
-          <!-- Results View -->
-          <ScanResultsDisplay result={scanResult} />
-        {:else if showCamera}
-          <!-- Camera View -->
-          <div class="space-y-4">
-            <div class="relative aspect-[4/3] bg-black rounded-xl overflow-hidden">
-              <video
-                bind:this={videoElement}
-                autoplay
-                playsinline
-                muted
-                class="w-full h-full object-cover"
-              ></video>
+    <!-- Content -->
+    <div class="p-4 overflow-y-auto flex-1">
+      {#if scanResult}
+        <!-- Results View -->
+        <ScanResultsDisplay result={scanResult} />
+      {:else if showCamera}
+        <!-- Camera View -->
+        <div class="space-y-4">
+          <div class="relative aspect-[4/3] bg-black rounded-xl overflow-hidden">
+            <video
+              bind:this={videoElement}
+              autoplay
+              playsinline
+              muted
+              class="w-full h-full object-cover"
+            ></video>
+          </div>
+          <button class="btn btn-primary w-full" onclick={capturePhoto}>
+            <Camera class="w-5 h-5" />
+            Take Photo
+          </button>
+        </div>
+      {:else if imagePreview}
+        <!-- Preview View -->
+        <div class="space-y-4">
+          <div class="relative aspect-[4/3] bg-base-200 rounded-xl overflow-hidden">
+            <img src={imagePreview} alt="Food preview" class="w-full h-full object-cover" />
+          </div>
+
+          <!-- Optional Description -->
+          <div class="form-control">
+            <label class="label" for="food-description">
+              <span class="label-text">Description (optional)</span>
+            </label>
+            <input
+              id="food-description"
+              type="text"
+              placeholder="e.g., Lunch salad with grilled chicken"
+              class="input input-bordered w-full"
+              bind:value={description}
+            />
+          </div>
+
+          {#if error}
+            <div class="alert alert-error text-sm">
+              <span>{error}</span>
             </div>
-            <button class="btn btn-primary w-full" onclick={capturePhoto}>
-              <Camera class="w-5 h-5" />
-              Take Photo
+          {/if}
+
+          <div class="flex gap-2">
+            <button class="btn btn-ghost flex-1" onclick={retake} disabled={isScanning}>
+              <RotateCcw class="w-4 h-4" />
+              Retake
+            </button>
+            <button class="btn btn-primary flex-1" onclick={scanFood} disabled={isScanning}>
+              {#if isScanning}
+                <Loader2 class="w-4 h-4 animate-spin" />
+                Scanning...
+              {:else}
+                Scan Food
+              {/if}
             </button>
           </div>
-        {:else if imagePreview}
-          <!-- Preview View -->
-          <div class="space-y-4">
-            <div class="relative aspect-[4/3] bg-base-200 rounded-xl overflow-hidden">
-              <img src={imagePreview} alt="Food preview" class="w-full h-full object-cover" />
+        </div>
+      {:else}
+        <!-- Upload View (initial state for upload mode) -->
+        <div class="space-y-4">
+          {#if error}
+            <div class="alert alert-error text-sm">
+              <span>{error}</span>
             </div>
+          {/if}
 
-            <!-- Optional Description -->
-            <div class="form-control">
-              <label class="label" for="food-description">
-                <span class="label-text">Description (optional)</span>
-              </label>
-              <input
-                id="food-description"
-                type="text"
-                placeholder="e.g., Lunch salad with grilled chicken"
-                class="input input-bordered w-full"
-                bind:value={description}
-              />
-            </div>
+          <input
+            bind:this={fileInput}
+            type="file"
+            accept="image/*"
+            class="hidden"
+            onchange={handleFileSelect}
+          />
 
-            {#if error}
-              <div class="alert alert-error text-sm">
-                <span>{error}</span>
-              </div>
-            {/if}
-
-            <div class="flex gap-2">
-              <button class="btn btn-ghost flex-1" onclick={retake} disabled={isScanning}>
-                <RotateCcw class="w-4 h-4" />
-                Retake
-              </button>
-              <button class="btn btn-primary flex-1" onclick={scanFood} disabled={isScanning}>
-                {#if isScanning}
-                  <Loader2 class="w-4 h-4 animate-spin" />
-                  Scanning...
-                {:else}
-                  Scan Food
-                {/if}
-              </button>
-            </div>
+          <div
+            class="border-2 border-dashed border-base-300 rounded-xl p-8 text-center hover:border-primary transition-colors cursor-pointer"
+            onclick={triggerFileInput}
+            role="button"
+            tabindex="0"
+            onkeydown={(e) => e.key === "Enter" && triggerFileInput()}
+          >
+            <Upload class="w-12 h-12 mx-auto text-base-content/50 mb-3" />
+            <p class="font-medium">Click to upload an image</p>
+            <p class="text-sm text-base-content/50 mt-1">JPG, PNG up to 10MB</p>
           </div>
-        {:else}
-          <!-- Upload View (initial state for upload mode) -->
-          <div class="space-y-4">
-            {#if error}
-              <div class="alert alert-error text-sm">
-                <span>{error}</span>
-              </div>
-            {/if}
 
-            <input
-              bind:this={fileInput}
-              type="file"
-              accept="image/*"
-              class="hidden"
-              onchange={handleFileSelect}
-            />
-
-            <div
-              class="border-2 border-dashed border-base-300 rounded-xl p-8 text-center hover:border-primary transition-colors cursor-pointer"
-              onclick={triggerFileInput}
-              role="button"
-              tabindex="0"
-              onkeydown={(e) => e.key === "Enter" && triggerFileInput()}
-            >
-              <Upload class="w-12 h-12 mx-auto text-base-content/50 mb-3" />
-              <p class="font-medium">Click to upload an image</p>
-              <p class="text-sm text-base-content/50 mt-1">JPG, PNG up to 10MB</p>
-            </div>
-
-            {#if mode === "upload"}
-              <button class="btn btn-ghost w-full" onclick={() => startCamera()}>
-                <Camera class="w-5 h-5" />
-                Use Camera Instead
-              </button>
-            {/if}
-          </div>
-        {/if}
-      </div>
-
-      <!-- Fixed Footer (only for scan results) -->
-      {#if scanResult}
-        <div class="p-4 border-t border-base-200 flex gap-2 shrink-0">
-          <button class="btn btn-outline flex-1" onclick={handleClose}> Close </button>
-          <button class="btn btn-primary flex-1" disabled> Add to Log </button>
+          {#if mode === "upload"}
+            <button class="btn btn-ghost w-full" onclick={() => startCamera()}>
+              <Camera class="w-5 h-5" />
+              Use Camera Instead
+            </button>
+          {/if}
         </div>
       {/if}
     </div>
+
+    <!-- Fixed Footer (only for scan results) -->
+    {#if scanResult}
+      <div class="p-4 border-t border-base-200 flex gap-2 shrink-0">
+        <form method="dialog" class="flex-1">
+          <button class="btn btn-outline w-full">Close</button>
+        </form>
+        <button class="btn btn-primary flex-1" disabled>Add to Log</button>
+      </div>
+    {/if}
   </div>
-{/if}
+
+  <!-- Backdrop - clicking closes the modal -->
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
