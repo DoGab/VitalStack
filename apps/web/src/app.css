@@ -65,30 +65,30 @@
 */
 [data-theme="biohacker"] {
   color-scheme: dark;
-  --color-primary: #D4FF00;
+  --color-primary: #d4ff00;
   --color-primary-content: #000000;
   /* Black text on neon lime */
-  --color-secondary: #6366F1;
-  --color-secondary-content: #FFFFFF;
-  --color-accent: #FFFFFF;
+  --color-secondary: #6366f1;
+  --color-secondary-content: #ffffff;
+  --color-accent: #ffffff;
   --color-accent-content: #000000;
 
-  --color-neutral: #A1A1AA;
+  --color-neutral: #a1a1aa;
   --color-neutral-content: #121212;
 
   --color-base-100: #121212;
-  --color-base-200: #1E1E1E;
-  --color-base-300: #2D2D2D;
-  --color-base-content: #FFFFFF;
+  --color-base-200: #1e1e1e;
+  --color-base-300: #2d2d2d;
+  --color-base-content: #ffffff;
 
-  --color-info: #38BDF8;
+  --color-info: #38bdf8;
   --color-info-content: #000000;
-  --color-success: #22C55E;
+  --color-success: #22c55e;
   --color-success-content: #000000;
-  --color-warning: #FACC15;
+  --color-warning: #facc15;
   --color-warning-content: #000000;
-  --color-error: #EF4444;
-  --color-error-content: #FFFFFF;
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
 
   --radius-selector: 0px;
   /* Sharp edges for tech/cyber feel */
@@ -100,29 +100,29 @@
 */
 [data-theme="organic"] {
   color-scheme: light;
-  --color-primary: #1B3022;
-  --color-primary-content: #F9F7F2;
-  --color-secondary: #C5A059;
-  --color-secondary-content: #1B3022;
-  --color-accent: #D65A31;
-  --color-accent-content: #F9F7F2;
+  --color-primary: #1b3022;
+  --color-primary-content: #f9f7f2;
+  --color-secondary: #c5a059;
+  --color-secondary-content: #1b3022;
+  --color-accent: #d65a31;
+  --color-accent-content: #f9f7f2;
 
-  --color-neutral: #2C2F2D;
-  --color-neutral-content: #F9F7F2;
+  --color-neutral: #2c2f2d;
+  --color-neutral-content: #f9f7f2;
 
-  --color-base-100: #F9F7F2;
-  --color-base-200: #EBE7DE;
-  --color-base-300: #D8D3C8;
-  --color-base-content: #1B3022;
+  --color-base-100: #f9f7f2;
+  --color-base-200: #ebe7de;
+  --color-base-300: #d8d3c8;
+  --color-base-content: #1b3022;
 
-  --color-info: #5F8D8B;
-  --color-info-content: #F9F7F2;
-  --color-success: #4E8056;
-  --color-success-content: #F9F7F2;
-  --color-warning: #EDB654;
-  --color-warning-content: #1B3022;
-  --color-error: #B93632;
-  --color-error-content: #F9F7F2;
+  --color-info: #5f8d8b;
+  --color-info-content: #f9f7f2;
+  --color-success: #4e8056;
+  --color-success-content: #f9f7f2;
+  --color-warning: #edb654;
+  --color-warning-content: #1b3022;
+  --color-error: #b93632;
+  --color-error-content: #f9f7f2;
 
   --radius-selector: 0.5rem;
   /* Slightly rounded for organic feel */
@@ -134,29 +134,29 @@
 */
 [data-theme="clinical"] {
   color-scheme: light;
-  --color-primary: #0D9488;
-  --color-primary-content: #FFFFFF;
-  --color-secondary: #F472B6;
-  --color-secondary-content: #0F172A;
-  --color-accent: #0F172A;
-  --color-accent-content: #FFFFFF;
+  --color-primary: #0d9488;
+  --color-primary-content: #ffffff;
+  --color-secondary: #f472b6;
+  --color-secondary-content: #0f172a;
+  --color-accent: #0f172a;
+  --color-accent-content: #ffffff;
 
   --color-neutral: #334155;
-  --color-neutral-content: #FFFFFF;
+  --color-neutral-content: #ffffff;
 
-  --color-base-100: #FFFFFF;
-  --color-base-200: #F1F5F9;
-  --color-base-300: #E2E8F0;
-  --color-base-content: #0F172A;
+  --color-base-100: #ffffff;
+  --color-base-200: #f1f5f9;
+  --color-base-300: #e2e8f0;
+  --color-base-content: #0f172a;
 
-  --color-info: #60A5FA;
-  --color-info-content: #0F172A;
-  --color-success: #34D399;
-  --color-success-content: #0F172A;
-  --color-warning: #FBBF24;
-  --color-warning-content: #0F172A;
-  --color-error: #F87171;
-  --color-error-content: #0F172A;
+  --color-info: #60a5fa;
+  --color-info-content: #0f172a;
+  --color-success: #34d399;
+  --color-success-content: #0f172a;
+  --color-warning: #fbbf24;
+  --color-warning-content: #0f172a;
+  --color-error: #f87171;
+  --color-error-content: #0f172a;
 
   --radius-selector: 1rem;
   /* Soft, pill-shaped UI for friendly feel */
@@ -199,31 +199,5 @@ main {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* Upload zone styling */
-.upload-zone {
-  border: 2px dashed oklch(62.8% 0.21 142.5 / 0.5);
-  border-radius: 1rem;
-  transition: all 0.3s ease;
-}
-
-.upload-zone:hover {
-  border-color: oklch(62.8% 0.21 142.5);
-  background: oklch(62.8% 0.21 142.5 / 0.05);
-}
-
-/* Glass effect for cards */
-.glass-card {
-  background: oklch(100% 0 0 / 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid oklch(90% 0 0 / 0.5);
-}
-
-@media (prefers-color-scheme: dark) {
-  .glass-card {
-    background: oklch(25% 0.02 250 / 0.8);
-    border: 1px solid oklch(35% 0 0 / 0.5);
   }
 }

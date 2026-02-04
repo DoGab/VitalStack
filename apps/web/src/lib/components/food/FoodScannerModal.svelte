@@ -178,7 +178,9 @@
   class="modal modal-bottom sm:modal-middle"
   onclose={onDialogClose}
 >
-  <div class="modal-box max-w-md max-h-[90vh] flex flex-col p-0">
+  <div
+    class="modal-box w-full max-w-full sm:max-w-lg max-h-[90vh] flex flex-col p-0 rounded-t-2xl rounded-b-none sm:rounded-2xl"
+  >
     <!-- Header -->
     <div class="flex justify-between items-center p-4 border-b border-base-200 shrink-0">
       <h3 class="text-lg font-bold">

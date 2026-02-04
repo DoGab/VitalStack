@@ -1,34 +1,47 @@
 <script lang="ts">
-  import { Flame, Drumstick, Wheat, Droplet, Apple, Scale, UtensilsCrossed } from "lucide-svelte";
+  import { Scale, UtensilsCrossed } from "lucide-svelte";
   import type { components } from "$lib/api/schema";
+  import { NUTRITION_CONFIG, getMacroDisplayOrder } from "$lib/config/nutrition-config";
 
   type ScanResult = components["schemas"]["ScanOutputBody"];
 
   let { result }: { result: ScanResult } = $props();
 
-  const macroItems = $derived([
-    {
-      icon: Flame,
-      label: "Calories",
-      value: result.macros.calories,
-      unit: "kcal",
-      color: "text-orange-500"
-    },
-    {
-      icon: Drumstick,
-      label: "Protein",
-      value: result.macros.protein,
-      unit: "g",
-      color: "text-red-500"
-    },
-    { icon: Wheat, label: "Carbs", value: result.macros.carbs, unit: "g", color: "text-amber-500" },
-    { icon: Droplet, label: "Fat", value: result.macros.fat, unit: "g", color: "text-blue-500" },
-    { icon: Apple, label: "Fiber", value: result.macros.fiber, unit: "g", color: "text-green-500" }
-  ]);
+  // Build macro items from centralized config
+  const macroItems = $derived(() => {
+    const macroValues: Record<string, number> = {
+      calories: result.macros.calories,
+      protein: result.macros.protein,
+      carbs: result.macros.carbs,
+      fat: result.macros.fat,
+      fiber: result.macros.fiber
+    };
+
+    return getMacroDisplayOrder().map((key) => ({
+      ...NUTRITION_CONFIG[key],
+      value: macroValues[key],
+      key
+    }));
+  });
 
   // Format compact macro display for ingredients
   function formatMacro(value: number): string {
     return value.toFixed(0);
+  }
+
+  // Get ingredient macro items for inline display
+  function getIngredientMacros(macros: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  }) {
+    return [
+      { key: "calories", ...NUTRITION_CONFIG.calories, value: macros.calories },
+      { key: "protein", ...NUTRITION_CONFIG.protein, value: macros.protein },
+      { key: "carbs", ...NUTRITION_CONFIG.carbs, value: macros.carbs },
+      { key: "fat", ...NUTRITION_CONFIG.fat, value: macros.fat }
+    ];
   }
 </script>
 
@@ -51,7 +64,7 @@
 
   <!-- Macro Grid -->
   <div class="grid grid-cols-2 gap-3">
-    {#each macroItems as macro, i (macro.label)}
+    {#each macroItems() as macro, i (macro.key)}
       {@const Icon = macro.icon}
       <div class="stat bg-base-200 rounded-xl p-3 {i === 0 ? 'col-span-2' : ''}">
         <div class="stat-figure {macro.color}">
@@ -80,18 +93,21 @@
             <div class="bg-base-100 rounded-lg p-3">
               <div class="flex justify-between items-start">
                 <div class="flex items-center gap-2">
-                  <span class="text-lg">🍽️</span>
+                  <UtensilsCrossed class="w-4 h-4 text-base-content/50" />
                   <span class="font-medium text-sm">{ingredient.name}</span>
                 </div>
                 <span class="text-xs text-base-content/60 font-medium"
                   >{ingredient.weight_grams}g</span
                 >
               </div>
-              <div class="flex gap-3 mt-2 text-xs text-base-content/70">
-                <span>🔥 {formatMacro(ingredient.macros.calories)}</span>
-                <span>🥩 {formatMacro(ingredient.macros.protein)}g</span>
-                <span>🍞 {formatMacro(ingredient.macros.carbs)}g</span>
-                <span>💧 {formatMacro(ingredient.macros.fat)}g</span>
+              <div class="flex gap-3 mt-2 text-xs">
+                {#each getIngredientMacros(ingredient.macros) as m (m.key)}
+                  {@const Icon = m.icon}
+                  <span class="flex items-center gap-1 {m.color}">
+                    <Icon class="w-3 h-3" />
+                    {formatMacro(m.value)}{m.unit !== "kcal" ? "g" : ""}
+                  </span>
+                {/each}
               </div>
             </div>
           {/each}

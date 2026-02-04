@@ -4,6 +4,9 @@
 
   let { open = $bindable() } = $props();
 
+  // Dialog element ref
+  let dialogElement: HTMLDialogElement | null = $state(null);
+
   // Food scanner state
   let scannerOpen = $state(false);
   let scannerMode: "camera" | "upload" = $state("camera");
@@ -13,6 +16,17 @@
     { icon: Upload, label: "Upload Image", action: "upload" },
     { icon: Zap, label: "Quick Add", action: "quick" }
   ];
+
+  // Sync dialog open state with `open` prop
+  $effect(() => {
+    if (dialogElement) {
+      if (open && !dialogElement.open) {
+        dialogElement.showModal();
+      } else if (!open && dialogElement.open) {
+        dialogElement.close();
+      }
+    }
+  });
 
   function handleAddOption(action: string) {
     if (action === "camera") {
@@ -28,39 +42,50 @@
       open = false;
     }
   }
+
+  // Handle dialog close event (ESC key, backdrop click via form)
+  function onDialogClose() {
+    open = false;
+  }
 </script>
 
 <!-- Food Scanner Modal -->
 <FoodScannerModal bind:open={scannerOpen} mode={scannerMode} />
 
-{#if open}
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div class="fixed inset-0 bg-black/50 z-[60]" onclick={() => (open = false)}>
-    <div
-      class="fixed bottom-24 lg:top-16 lg:bottom-auto lg:right-4 left-1/2 lg:left-auto -translate-x-1/2 lg:translate-x-0 w-64 bg-base-100 rounded-2xl shadow-2xl p-4 z-[70]"
-      onclick={(e) => e.stopPropagation()}
-    >
-      <div class="flex justify-between items-center mb-3">
-        <h3 class="font-semibold">Add Entry</h3>
-        <button class="btn btn-ghost btn-sm btn-circle" onclick={() => (open = false)}>
+<dialog
+  bind:this={dialogElement}
+  class="modal modal-bottom sm:modal-middle"
+  onclose={onDialogClose}
+>
+  <div
+    class="modal-box w-full max-w-full sm:max-w-sm p-4 rounded-t-2xl rounded-b-none sm:rounded-2xl"
+  >
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="font-semibold text-lg">Add Entry</h3>
+      <form method="dialog">
+        <button class="btn btn-ghost btn-sm btn-circle">
           <X class="w-4 h-4" />
         </button>
-      </div>
-      <div class="flex flex-col gap-2">
-        {#each addOptions as option (option.action)}
-          {@const Icon = option.icon}
-          <button
-            class="btn btn-ghost justify-start gap-3 h-14"
-            onclick={() => handleAddOption(option.action)}
-          >
-            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Icon class="w-5 h-5 text-primary" />
-            </div>
-            {option.label}
-          </button>
-        {/each}
-      </div>
+      </form>
+    </div>
+    <div class="flex flex-col gap-2">
+      {#each addOptions as option (option.action)}
+        {@const Icon = option.icon}
+        <button
+          class="btn btn-ghost justify-start gap-3 h-14"
+          onclick={() => handleAddOption(option.action)}
+        >
+          <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <Icon class="w-5 h-5 text-primary" />
+          </div>
+          {option.label}
+        </button>
+      {/each}
     </div>
   </div>
-{/if}
+
+  <!-- Backdrop - clicking closes the modal -->
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
