@@ -168,9 +168,46 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ============================================
+   Font Themes
+   ============================================
+   Two font combinations for comparison:
+   - Classic: Playfair Display (elegant serif) + Inter + JetBrains Mono
+   - Modern: Outfit (geometric sans) + Inter + JetBrains Mono
+   
+   Switch via data-font-theme attribute on html element
+============================================ */
+
+/* Font Theme: Classic (Playfair Display) - Default */
+:root,
+[data-font-theme="classic"] {
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Font Theme: Modern (Outfit) */
+[data-font-theme="modern"] {
+  --font-display: "Outfit", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
 body {
   min-height: 100dvh;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font-body);
+}
+
+/* Display font for headings */
+h1,
+h2,
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Mono font for numbers/stats */
+.font-mono {
+  font-family: var(--font-mono);
 }
 
 /* Thumb-friendly tap targets */

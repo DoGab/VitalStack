@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Home, Clock, MessageCircle, User, Plus } from "lucide-svelte";
   import ThemeSwap from "$lib/components/ui/ThemeSwap.svelte";
+  import FontThemeSwap from "$lib/components/ui/FontThemeSwap.svelte";
   import logoColor from "$lib/assets/logo/logo_text.svg";
 
   let { addMenuOpen = $bindable() } = $props();
@@ -38,7 +39,9 @@
   </div>
 
   <div class="navbar-end gap-2">
-    <!-- Theme Swap -->
+    <!-- Font Theme Swap -->
+    <FontThemeSwap />
+    <!-- Color Theme Swap -->
     <ThemeSwap />
 
     <!-- Desktop: Add button -->

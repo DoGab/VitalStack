@@ -265,3 +265,55 @@ It uses a Teal/Mint approach which is the industry standard for "Digital Health.
 
 - **Pros**: Safe, highly legible, familiar to users of apps like MyFitnessPal or Apple Health.
 - **Cons**: Less unique; might blend in with competitors.
+
+## Fonts
+
+VitalStack supports two font themes that can be switched at runtime via the font theme toggle in the navigation bar.
+
+### Font Theme: Classic (Default)
+
+Elegant, premium feel with a serif display font matching the logo.
+
+| Role    | Font                 | Usage                                  |
+| ------- | -------------------- | -------------------------------------- |
+| Display | **Playfair Display** | Headlines, hero sections, h1/h2        |
+| Body    | **Inter**            | Body text, buttons, labels, navigation |
+| Mono    | **JetBrains Mono**   | Macro numbers, stats, data             |
+
+### Font Theme: Modern
+
+Clean, geometric, modern tech aesthetic.
+
+| Role    | Font               | Usage                                  |
+| ------- | ------------------ | -------------------------------------- |
+| Display | **Outfit**         | Headlines, hero sections, h1/h2        |
+| Body    | **Inter**          | Body text, buttons, labels, navigation |
+| Mono    | **JetBrains Mono** | Macro numbers, stats, data             |
+
+### CSS Custom Properties
+
+```css
+:root {
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+[data-font-theme="modern"] {
+  --font-display: "Outfit", system-ui, sans-serif;
+}
+```
+
+### Usage
+
+- `font-display` class for headlines
+- `font-mono` class for numbers/stats
+- Body text uses `--font-body` by default
+
+### Alternative Pairings (Future Consideration)
+
+| Style          | Display          | Body    | Best For          |
+| -------------- | ---------------- | ------- | ----------------- |
+| Health/Organic | Playfair Display | Lato    | Wellness brands   |
+| Minimalist     | Manrope          | Manrope | Tech-forward apps |
+| Friendly       | Poppins          | Inter   | Consumer apps     |
