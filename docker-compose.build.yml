@@ -1,0 +1,16 @@
+# =====================================
+# VitalStack - Docker Compose BUILD Override
+# =====================================
+# Use for local development to build from source:
+# docker compose -f docker-compose.yml -f docker-compose.build.yml up --build
+
+services:
+  api:
+    build:
+      context: ./apps/api-go
+      dockerfile: Dockerfile
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile

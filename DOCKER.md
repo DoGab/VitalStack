@@ -2,14 +2,16 @@
 
 This document covers how to build and deploy VitalStack using Docker.
 
-## Quick Start
+## Quick Start (Production)
+
+Pull and run pre-built images from GitHub Container Registry:
 
 ```bash
 # Set your API key
-export GOOGLE_API_KEY=your_api_key_here
+export GEMINI_API_KEY=your_api_key_here
 
-# Build and run
-docker compose up --build
+# Pull and run
+docker compose up
 ```
 
 Visit:
@@ -28,7 +30,7 @@ Visit:
 | `LOGGING_ENCODING` | Log format (json/logfmt) | `json` |
 | `SERVER_ADDR` | Server listen address | `0.0.0.0:8080` |
 | `SERVER_ORIGIN` | Allowed CORS origins (comma-separated) | `http://localhost:3000` |
-| `GOOGLE_API_KEY` | Google AI API key for Genkit | *required* |
+| `GEMINI_API_KEY` | Gemini AI API key for Genkit | *required* |
 | `DEV_MODE_ENABLED` | Enable dev mode (allows all CORS origins) | `false` |
 | `DEV_MOCKS_NUTRITION_SERVICE` | Use mock AI service | `false` |
 
@@ -53,7 +55,7 @@ docker build -t vitalstack-api .
 
 # Run
 docker run -p 8080:8080 \
-  -e GOOGLE_API_KEY=your_key \
+  -e GEMINI_API_KEY=your_key \
   -e SERVER_ADDR=0.0.0.0:8080 \
   vitalstack-api
 ```
@@ -81,7 +83,7 @@ For production at `vs.dgit.ch` and `vs-api.dgit.ch`:
 
 ```bash
 # .env
-GOOGLE_API_KEY=your_production_api_key
+GEMINI_API_KEY=your_production_api_key
 ```
 
 ### 2. Update docker-compose.yml
@@ -123,13 +125,13 @@ vs-api.dgit.ch {
 
 ## Local Testing
 
-To build and test the containers locally:
+To build and test the containers locally (from source):
 
 ### Quick Start (Mock Mode)
 
 ```bash
 # Build and run with local settings (no API key needed)
-docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
+docker compose -f docker-compose.yml -f docker-compose.build.yml -f docker-compose.local.yml up --build
 ```
 
 Visit:
@@ -140,17 +142,15 @@ Visit:
 
 ```bash
 # Set your API key
-export GOOGLE_API_KEY=your_key
+export GEMINI_API_KEY=your_key
 
 # Build and run
-docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
+docker compose -f docker-compose.yml -f docker-compose.build.yml -f docker-compose.local.yml up --build
 ```
 
-The `docker-compose.local.yml` override provides:
-- `DEV_MODE_ENABLED=true` — Allows all CORS origins
-- `DEV_MOCKS_NUTRITION_SERVICE=true` — No AI key required
-- `PUBLIC_API_URL=http://localhost:8080` — Points frontend to local API
-- Debug logging enabled
+The override files provide:
+- `docker-compose.build.yml` — Builds from source (not GHCR)
+- `docker-compose.local.yml` — Dev settings: mock AI, debug logging, localhost URLs
 
 ---
 
