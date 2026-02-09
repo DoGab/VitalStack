@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/dogab/vitalstack/api/pkg/types"
+
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/core"
 	"github.com/firebase/genkit/go/genkit"
@@ -51,7 +53,7 @@ func (s *NutritionService) ScanFood(ctx context.Context, input *ScanInput) (*Sca
 
 	// Check if the image contains food
 	if !response.IsFood {
-		return nil, ErrNotFood
+		return nil, types.NewValidationError(ErrNotFood.Error(), "image_base64", "request.body", "<omitted>")
 	}
 
 	return response, nil
