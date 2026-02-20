@@ -2,18 +2,28 @@
 
 ## Overview
 
-The VitalStack web frontend is a **SvelteKit** application with a mobile-first, PWA-ready design. It uses TailwindCSS v4 for styling and DaisyUI v5 for UI components.
+The VitalStack web frontend is a **SvelteKit** application with a mobile-first, PWA-ready design. It uses TailwindCSS v4 for styling and **shadcn-svelte** (Bits UI) for UI components.
 
 ## Tech Stack
 
-| Technology    | Version | Purpose                   |
-| ------------- | ------- | ------------------------- |
-| SvelteKit     | 2.x     | Full-stack framework      |
-| Svelte        | 5.x     | UI framework (Runes mode) |
-| TailwindCSS   | 4.x     | Utility-first CSS         |
-| DaisyUI       | 5.x     | Component library         |
-| Lucide Svelte | -       | Icon library              |
-| Bun           | -       | Package manager           |
+### Tooling
+
+| Tool        | Purpose              | Notes                                        |
+| ----------- | -------------------- | -------------------------------------------- |
+| **pnpm**    | Package manager      | Faster installs, disk-efficient symlinks     |
+| **Vite**    | Build tool / bundler | TailwindCSS v4 via `@tailwindcss/vite`       |
+| **Node.js** | Runtime              | Dev server, SSR, production via adapter-node |
+
+### Libraries
+
+| Technology    | Version | Purpose                     |
+| ------------- | ------- | --------------------------- |
+| SvelteKit     | 2.x     | Full-stack framework        |
+| Svelte        | 5.x     | UI framework (Runes mode)   |
+| TailwindCSS   | 4.x     | Utility-first CSS           |
+| shadcn-svelte | 1.x     | Component library (Bits UI) |
+| Lucide Svelte | -       | Icon library                |
+| adapter-node  | -       | Production Node.js adapter  |
 
 ---
 
@@ -22,7 +32,7 @@ The VitalStack web frontend is a **SvelteKit** application with a mobile-first, 
 ```
 apps/web/
 ├── src/
-│   ├── app.css              # TailwindCSS + DaisyUI + NutriFresh theme
+│   ├── app.css              # TailwindCSS + shadcn CSS variables + VitalStack theme
 │   ├── app.html             # HTML template with PWA meta tags
 │   ├── app.d.ts             # TypeScript declarations
 │   ├── service-worker.ts    # PWA offline support
@@ -45,21 +55,20 @@ apps/web/
 ### Component Structure
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   +layout.svelte                        │
-│   ┌─────────────────────────────────────────────────┐   │
-│   │              Navbar (Desktop)                   │   │
-│   └─────────────────────────────────────────────────┘   │
-│   ┌─────────────────────────────────────────────────┐   │
-│   │                                                 │   │
-│   │              Page Content                       │   │
-│   │              (+page.svelte)                     │   │
-│   │                                                 │   │
-│   └─────────────────────────────────────────────────┘   │
-│   ┌─────────────────────────────────────────────────┐   │
-│   │           Bottom Nav (Mobile only)              │   │
-│   └─────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│              Sidebar.Provider (+layout.svelte)              │
+│ ┌──────────┐  ┌──────────────────────────────────────┐      │
+│ │          │  │  Header (Sidebar.Trigger / Mobile)   │      │
+│ │  App     │  ├──────────────────────────────────────┤      │
+│ │  Sidebar │  │                                      │      │
+│ │ (Desktop)│  │         Page Content                 │      │
+│ │          │  │         (+page.svelte)               │      │
+│ │          │  │                                      │      │
+│ └──────────┘  └──────────────────────────────────────┘      │
+│              ┌──────────────────────────────────────┐       │
+│              │     Mobile Bottom Dock (lg:hidden)   │       │
+│              └──────────────────────────────────────┘       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ### State Management
@@ -76,32 +85,40 @@ Using **Svelte 5 Runes** for reactive state:
 
 ---
 
-## Design System: NutriFresh
+## Design System: VitalStack
 
-### Color Palette
+### Active Themes
 
-| Role      | Color   | OKLCH                     | Usage               |
-| --------- | ------- | ------------------------- | ------------------- |
-| Primary   | Emerald | `oklch(62.8% 0.21 142.5)` | CTAs, active states |
-| Secondary | Orange  | `oklch(70.5% 0.21 41.3)`  | Macros, energy      |
-| Accent    | Cyan    | `oklch(70% 0.15 195)`     | Water, hydration    |
-| Base      | White   | `oklch(100% 0 0)`         | Content background  |
+| Theme           | Role  | Primary | Secondary | Accent  | Base    |
+| --------------- | ----- | ------- | --------- | ------- | ------- |
+| Organic Premium | Light | #1B3022 | #C5A059   | #D65A31 | #F9F7F2 |
+| Dark Organic    | Dark  | #C5A059 | #4E8056   | #D65A31 | #1B3022 |
 
 ### Theme Configuration
 
-Defined in `src/app.css` using TailwindCSS v4 CSS-first approach:
+Defined in `src/app.css` using shadcn CSS variable system with `@theme` (without `inline` for multi-theme support):
 
 ```css
 @import "tailwindcss";
-@plugin "daisyui" {
-  themes:
-    nutrifresh --default,
-    dark --prefersdark;
+@import "tw-animate-css";
+@custom-variant dark (&:is([data-theme="darkorganic"], [data-theme="darkorganic"] *));
+
+:root,
+[data-theme="organic"] {
+  --primary: oklch(0.241 0.034 153.1); /* #1B3022 */
+  --secondary: oklch(0.722 0.107 82.8); /* #C5A059 */
+  --accent: oklch(0.571 0.178 37.7); /* #D65A31 */
+  --background: oklch(0.975 0.005 93.6); /* #F9F7F2 */
+  /* ... */
 }
 
-[data-theme="nutrifresh"] {
-  --color-primary: oklch(62.8% 0.21 142.5);
-  /* ... */
+[data-theme="darkorganic"] {
+  /* dark overrides */
+}
+
+@theme {
+  --color-primary: var(--primary);
+  /* ... mapped to Tailwind */
 }
 ```
 
@@ -165,9 +182,9 @@ npx openapi-typescript http://localhost:8080/openapi.json -o src/lib/api/schema.
 | `/history` | (planned)      | Scan history            |
 | `/profile` | (planned)      | User settings           |
 
-## Color scheme
+## Color Scheme
 
-Required colors based on the design system of DaisyUI and TailwindCSS v4:
+Color tokens used by the shadcn-svelte component system:
 
 | Category | Color Name | Usage                                                                                                                                 |
 | -------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------- |

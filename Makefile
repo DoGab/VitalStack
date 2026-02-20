@@ -29,7 +29,7 @@ gen-openapi-spec:
 # Generate TypeScript API client from OpenAPI spec
 gen-api-client:
 	@echo "🔄 Generating TypeScript API client..."
-	@cd apps/web && bun run generate:api
+	@cd apps/web && pnpm run generate:api
 
 # Start both backend and frontend concurrently
 dev:
@@ -44,7 +44,7 @@ dev-api:
 # Start SvelteKit frontend dev server (network accessible)
 dev-web:
 	@echo "🌐 Starting SvelteKit frontend..."
-	@cd apps/web && bun run dev --host
+	@cd apps/web && pnpm run dev --host
 
 # ─────────────────────────────────────
 # Install
@@ -62,7 +62,7 @@ install-api:
 # Install frontend dependencies
 install-web:
 	@echo "📦 Installing frontend dependencies..."
-	@cd apps/web && bun install
+	@cd apps/web && pnpm install
 
 # ─────────────────────────────────────
 # Lint
@@ -77,10 +77,12 @@ lint-api:
 	@echo "🔍 Linting Go API..."
 	@cd apps/api-go && golangci-lint run
 
-# Lint frontend
+# Lint frontend (ESLint + svelte-check)
 lint-web:
 	@echo "🔍 Linting frontend..."
-	@cd apps/web && bun run lint
+	@cd apps/web && pnpm run lint
+	@echo "🔍 Type-checking frontend..."
+	@cd apps/web && pnpm run check
 
 # ─────────────────────────────────────
 # Format
@@ -98,7 +100,7 @@ format-api:
 # Format frontend
 format-web:
 	@echo "✨ Formatting frontend..."
-	@cd apps/web && bun run format
+	@cd apps/web && pnpm run format
 
 # ─────────────────────────────────────
 # Lint + Format (fix)
@@ -116,7 +118,7 @@ fix-api:
 # Fix frontend issues
 fix-web:
 	@echo "🔧 Fixing frontend..."
-	@cd apps/web && bun run lint:fix && bun run format
+	@cd apps/web && pnpm run lint:fix && pnpm run format
 
 # ─────────────────────────────────────
 # Clean

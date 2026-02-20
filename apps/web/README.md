@@ -8,9 +8,8 @@ SvelteKit frontend for the VitalStack food nutrition scanner.
 
 - **SvelteKit** (Svelte 5 with Runes)
 - **TailwindCSS v4** (CSS-first configuration)
-- **DaisyUI v5** (via `@plugin` directive)
+- **shadcn-svelte** (UI components via Bits UI)
 - **Lucide Svelte** (icons)
-- **Bun** (package manager)
 
 ---
 
@@ -19,7 +18,7 @@ SvelteKit frontend for the VitalStack food nutrition scanner.
 ### 1. Install Dependencies
 
 ```bash
-bun install
+pnpm install
 ```
 
 ### 2. Configure TailwindCSS v4
@@ -35,21 +34,15 @@ export default defineConfig({
 
 ### 3. Theme Configuration
 
-Custom themes are defined in `src/app.css` using CSS variables:
+Custom themes are defined in `src/app.css` using CSS variables with `data-theme` attributes:
 
-```css
-@import "tailwindcss";
-@plugin "daisyui" {
-  themes:
-    nutrifresh --default,
-    dark --prefersdark;
-}
+- `organic` — Light theme (Organic Premium)
+- `darkorganic` — Dark theme (Dark Organic, default)
 
-[data-theme="nutrifresh"] {
-  --color-primary: oklch(62.8% 0.21 142.5);
-  /* ... */
-}
-```
+Font themes are controlled via `data-font-theme`:
+
+- `classic` — Playfair Display + Inter
+- `modern` — Outfit + Inter
 
 > **Note:** TailwindCSS v4 uses OKLCH colors. Convert with [oklch.com](https://oklch.com/).
 
@@ -62,29 +55,29 @@ Custom themes are defined in `src/app.css` using CSS variables:
 make dev-web
 
 # Or from this directory
-bun run dev
+pnpm run dev
 ```
 
 ## Building
 
 ```bash
-bun run build
-bun run preview
+pnpm run build
+pnpm run preview
 ```
 
 ---
 
 ## Key Files
 
-| File                        | Purpose                               |
-| --------------------------- | ------------------------------------- |
-| `vite.config.ts`            | TailwindCSS v4 Vite plugin            |
-| `src/app.css`               | Tailwind + DaisyUI + NutriFresh theme |
-| `src/app.html`              | HTML template with `data-theme`       |
-| `src/routes/+layout.svelte` | App shell (Navbar)                    |
-| `src/routes/+page.svelte`   | Homepage                              |
-| `static/manifest.json`      | PWA manifest                          |
-| `src/service-worker.ts`     | PWA offline support                   |
+| File                        | Purpose                                |
+| --------------------------- | -------------------------------------- |
+| `vite.config.ts`            | TailwindCSS v4 Vite plugin             |
+| `src/app.css`               | Tailwind + VitalStack theme (CSS vars) |
+| `src/app.html`              | HTML template with `data-theme`        |
+| `src/routes/+layout.svelte` | App shell (Sidebar + Mobile Dock)      |
+| `src/routes/+page.svelte`   | Homepage                               |
+| `static/manifest.json`      | PWA manifest                           |
+| `src/service-worker.ts`     | PWA offline support                    |
 
 ---
 

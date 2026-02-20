@@ -28,15 +28,6 @@ func ServerEntryPoint(cmd *cobra.Command, _ []string) error {
 
 	serverAddr := viper.GetString(conf.ServerAddrArg)
 
-	// Initialize Genkit
-	// This is the base initialization block. Add LLM plugins here later:
-	// - Google Gemini: genkit.WithPlugins(googlegenai.NewPlugin(ctx, nil))
-	// - OpenAI: genkit.WithPlugins(openai.NewPlugin(ctx, nil))
-	g := genkit.Init(serverShutdownContext,
-		genkit.WithPlugins(&googlegenai.GoogleAI{}),
-		genkit.WithDefaultModel("googleai/gemini-2.5-flash"),
-	)
-
 	// Get CORS and dev mode configuration
 	allowedOrigins := viper.GetStringSlice(conf.ServerOriginArg)
 	devMode := viper.GetBool(conf.DevModeEnabledArg)
@@ -52,6 +43,14 @@ func ServerEntryPoint(cmd *cobra.Command, _ []string) error {
 		slog.Info("🧪 Using MOCK nutrition controller")
 		api.RegisterAPI(controller.NewNutritionMockController())
 	} else {
+		// Initialize Genkit
+		// This is the base initialization block. Add LLM plugins here later:
+		// - Google Gemini: genkit.WithPlugins(googlegenai.NewPlugin(ctx, nil))
+		// - OpenAI: genkit.WithPlugins(openai.NewPlugin(ctx, nil))
+		g := genkit.Init(serverShutdownContext,
+			genkit.WithPlugins(&googlegenai.GoogleAI{}),
+			genkit.WithDefaultModel("googleai/gemini-2.5-flash"),
+		)
 		svc := service.NewNutritionService(g)
 		api.RegisterAPI(controller.NewNutritionController(svc))
 	}

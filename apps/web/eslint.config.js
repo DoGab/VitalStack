@@ -35,6 +35,16 @@ export default [
     }
   },
   {
+    files: ["**/*.svelte.ts", "**/*.svelte.js"],
+    languageOptions: {
+      parser: ts.parser,
+      parserOptions: {
+        sourceType: "module",
+        ecmaVersion: "latest"
+      }
+    }
+  },
+  {
     ignores: ["build/", ".svelte-kit/", "dist/"]
   }
 ];

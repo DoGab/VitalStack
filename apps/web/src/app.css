@@ -1,264 +1,242 @@
 @import "tailwindcss";
 
-@plugin "daisyui" {
-  themes:
-    darkorganic --default,
-    biohacker,
-    nutrifresh,
-    organic,
-    clinical;
-}
+@import "tw-animate-css";
 
-/* Theme 1: NutriFresh - Original Theme
-  "Emerald & Orange"
-  Best for: Fresh, healthy, approachable
-*/
-[data-theme="nutrifresh"] {
-  color-scheme: light;
-  --color-base-100: oklch(100% 0 0);
-  /* #ffffff - Pure white */
-  --color-base-200: oklch(98.3% 0.003 247.86);
-  /* #f8fafc - Off-white */
-  --color-base-300: oklch(96% 0.006 247.86);
-  /* Slightly darker */
-  --color-base-content: oklch(27.8% 0.02 256);
-  /* Dark text */
+/* Map dark variant to data-theme="darkorganic" for the existing theme switching mechanism */
+@custom-variant dark (&:is([data-theme="darkorganic"], [data-theme="darkorganic"] *));
 
-  --color-primary: oklch(62.8% 0.21 142.5);
-  /* #22c55e - Emerald Green */
-  --color-primary-content: oklch(100% 0 0);
-  /* White text on primary */
-
-  --color-secondary: oklch(70.5% 0.21 41.3);
-  /* #f97316 - Orange */
-  --color-secondary-content: oklch(100% 0 0);
-  /* White text on secondary */
-
-  --color-accent: oklch(70% 0.15 195);
-  /* #06b6d4 - Cyan */
-  --color-accent-content: oklch(100% 0 0);
-  /* White text on accent */
-
-  --color-neutral: oklch(35% 0.02 260);
-  /* #3d4451 */
-  --color-neutral-content: oklch(100% 0 0);
-
-  --color-info: oklch(72% 0.15 220);
-  /* #3abff8 */
-  --color-info-content: oklch(100% 0 0);
-
-  --color-success: oklch(72% 0.18 160);
-  /* #36d399 */
-  --color-success-content: oklch(100% 0 0);
-
-  --color-warning: oklch(80% 0.16 85);
-  /* #fbbd23 */
-  --color-warning-content: oklch(25% 0.02 85);
-
-  --color-error: oklch(65% 0.2 25);
-  /* #f87272 */
-  --color-error-content: oklch(100% 0 0);
-}
-
-/* Theme 2: The Bio-Hacker 
-  "Neon Lime & Obsidian"
-  Best for: Gym, Dark Mode, High Performance
-*/
-[data-theme="biohacker"] {
-  color-scheme: dark;
-  --color-primary: #d4ff00;
-  --color-primary-content: #000000;
-  /* Black text on neon lime */
-  --color-secondary: #6366f1;
-  --color-secondary-content: #ffffff;
-  --color-accent: #ffffff;
-  --color-accent-content: #000000;
-
-  --color-neutral: #a1a1aa;
-  --color-neutral-content: #121212;
-
-  --color-base-100: #121212;
-  --color-base-200: #1e1e1e;
-  --color-base-300: #2d2d2d;
-  --color-base-content: #ffffff;
-
-  --color-info: #38bdf8;
-  --color-info-content: #000000;
-  --color-success: #22c55e;
-  --color-success-content: #000000;
-  --color-warning: #facc15;
-  --color-warning-content: #000000;
-  --color-error: #ef4444;
-  --color-error-content: #ffffff;
-
-  --radius-selector: 0px;
-  /* Sharp edges for tech/cyber feel */
-}
-
-/* Theme 2b: Dark Organic
-  "Forest at Night"
-  Best for: Premium, Wellness, Warm Dark Mode
-  A dark theme with the same DNA as Organic Premium
-*/
-[data-theme="darkorganic"] {
-  color-scheme: dark;
-
-  /* Deep Arboretum background */
-  --color-base-100: #1b3022;
-  --color-base-200: #243b2c;
-  --color-base-300: #2d4a37;
-  --color-base-content: #f9f7f2;
-  /* Cream text */
-
-  /* Burnished Gold primary */
-  --color-primary: #c5a059;
-  --color-primary-content: #1b3022;
-  /* Dark text on gold */
-
-  /* Leaf Green secondary */
-  --color-secondary: #4e8056;
-  --color-secondary-content: #f9f7f2;
-
-  /* Terracotta accent */
-  --color-accent: #d65a31;
-  --color-accent-content: #f9f7f2;
-
-  /* Muted sage for secondary text */
-  --color-neutral: #8b9a8e;
-  --color-neutral-content: #1b3022;
-
-  /* Earthy state colors */
-  --color-info: #5f8d8b;
-  --color-info-content: #f9f7f2;
-  --color-success: #6a9e6e;
-  --color-success-content: #1b3022;
-  --color-warning: #edb654;
-  --color-warning-content: #1b3022;
-  --color-error: #b93632;
-  --color-error-content: #f9f7f2;
-
-  --radius-selector: 0.5rem;
-  /* Slightly rounded for organic feel */
-}
-
-/* Theme 3: The Organic Premium 
-  "Deep Arboretum & Burnished Gold"
-  Best for: Lifestyle, Premium Health, Longevity
-*/
+/* ==========================================================================
+   VitalStack Design Language — "Organic Premium" Light Theme
+   Primary: #1B3022 Deep Arboretum   → oklch(0.241 0.034 153.1)
+   Secondary: #C5A059 Burnished Gold  → oklch(0.722 0.107 82.8)
+   Accent: #D65A31 Terracotta         → oklch(0.571 0.178 37.7)
+   Base: #F9F7F2 Cream                → oklch(0.975 0.005 93.6)
+   ========================================================================== */
+:root,
 [data-theme="organic"] {
-  color-scheme: light;
-  --color-primary: #1b3022;
-  --color-primary-content: #f9f7f2;
-  --color-secondary: #c5a059;
-  --color-secondary-content: #1b3022;
-  --color-accent: #d65a31;
-  --color-accent-content: #f9f7f2;
+  --radius: 0.625rem;
 
-  --color-neutral: #2c2f2d;
-  --color-neutral-content: #f9f7f2;
+  /* Core */
+  --background: oklch(0.975 0.005 93.6); /* #F9F7F2 Cream */
+  --foreground: oklch(0.241 0.034 153.1); /* #1B3022 Deep Arboretum */
 
-  --color-base-100: #f9f7f2;
-  --color-base-200: #ebe7de;
-  --color-base-300: #d8d3c8;
-  --color-base-content: #1b3022;
+  /* Cards */
+  --card: oklch(0.99 0.003 93.6); /* Slightly brighter cream */
+  --card-foreground: oklch(0.241 0.034 153.1); /* Deep Arboretum */
 
-  --color-info: #5f8d8b;
-  --color-info-content: #f9f7f2;
-  --color-success: #4e8056;
-  --color-success-content: #f9f7f2;
-  --color-warning: #edb654;
-  --color-warning-content: #1b3022;
-  --color-error: #b93632;
-  --color-error-content: #f9f7f2;
+  /* Popovers / Dropdowns */
+  --popover: oklch(0.99 0.003 93.6);
+  --popover-foreground: oklch(0.241 0.034 153.1);
 
-  --radius-selector: 0.5rem;
-  /* Slightly rounded for organic feel */
+  /* Primary — Deep Arboretum green */
+  --primary: oklch(0.241 0.034 153.1); /* #1B3022 */
+  --primary-foreground: oklch(0.975 0.005 93.6); /* Cream on green */
+
+  /* Secondary — Burnished Gold */
+  --secondary: oklch(0.722 0.107 82.8); /* #C5A059 */
+  --secondary-foreground: oklch(0.241 0.034 153.1); /* Dark text on gold */
+
+  /* Muted — Soft neutral cream */
+  --muted: oklch(0.94 0.006 93.6); /* Slightly darker cream */
+  --muted-foreground: oklch(0.5 0.02 93.6); /* Muted text */
+
+  /* Accent — Terracotta */
+  --accent: oklch(0.571 0.178 37.7); /* #D65A31 */
+  --accent-foreground: oklch(0.99 0.003 93.6); /* Light text on terracotta */
+
+  /* Destructive */
+  --destructive: oklch(0.577 0.245 27.325);
+
+  /* Borders & Inputs */
+  --border: oklch(0.9 0.01 93.6);
+  --input: oklch(0.9 0.01 93.6);
+  --ring: oklch(0.722 0.107 82.8); /* Gold ring on focus */
+
+  /* Chart colors */
+  --chart-1: oklch(0.241 0.034 153.1);
+  --chart-2: oklch(0.722 0.107 82.8);
+  --chart-3: oklch(0.571 0.178 37.7);
+  --chart-4: oklch(0.45 0.1 153.1);
+  --chart-5: oklch(0.65 0.09 82.8);
+
+  /* Sidebar — slightly darker than page background */
+  --sidebar: oklch(0.96 0.006 93.6);
+  --sidebar-foreground: oklch(0.241 0.034 153.1);
+  --sidebar-primary: oklch(0.241 0.034 153.1);
+  --sidebar-primary-foreground: oklch(0.975 0.005 93.6);
+  --sidebar-accent: oklch(0.94 0.006 93.6);
+  --sidebar-accent-foreground: oklch(0.241 0.034 153.1);
+  --sidebar-border: oklch(0.9 0.01 93.6);
+  --sidebar-ring: oklch(0.722 0.107 82.8);
 }
 
-/* Theme 4: The Clinical Modernist
-  "Teal & Soft Pink"
-  Best for: General Health, Medical tracking, Cleanliness
-*/
-[data-theme="clinical"] {
-  color-scheme: light;
-  --color-primary: #0d9488;
-  --color-primary-content: #ffffff;
-  --color-secondary: #f472b6;
-  --color-secondary-content: #0f172a;
-  --color-accent: #0f172a;
-  --color-accent-content: #ffffff;
+/* ==========================================================================
+   VitalStack Design Language — "Dark Organic" Theme
+   Primary: #C5A059 Gold
+   Base: #1B3022 Arboretum
+   Secondary: #4E8056 Leaf Green       → oklch(0.520 0.085 152.4)
+   Accent: #D65A31 Terracotta
+   ========================================================================== */
+[data-theme="darkorganic"] {
+  /* Core */
+  --background: oklch(0.241 0.034 153.1); /* #1B3022 Arboretum */
+  --foreground: oklch(0.95 0.005 93.6); /* Warm white */
 
-  --color-neutral: #334155;
-  --color-neutral-content: #ffffff;
+  /* Cards — slightly lighter than background */
+  --card: oklch(0.29 0.035 153.1);
+  --card-foreground: oklch(0.95 0.005 93.6);
 
-  --color-base-100: #ffffff;
-  --color-base-200: #f1f5f9;
-  --color-base-300: #e2e8f0;
-  --color-base-content: #0f172a;
+  /* Popovers / Dropdowns */
+  --popover: oklch(0.29 0.035 153.1);
+  --popover-foreground: oklch(0.95 0.005 93.6);
 
-  --color-info: #60a5fa;
-  --color-info-content: #0f172a;
-  --color-success: #34d399;
-  --color-success-content: #0f172a;
-  --color-warning: #fbbf24;
-  --color-warning-content: #0f172a;
-  --color-error: #f87171;
-  --color-error-content: #0f172a;
+  /* Primary — Burnished Gold (elevated in dark mode) */
+  --primary: oklch(0.722 0.107 82.8); /* #C5A059 Gold */
+  --primary-foreground: oklch(0.241 0.034 153.1); /* Dark text on gold */
 
-  --radius-selector: 1rem;
-  /* Soft, pill-shaped UI for friendly feel */
+  /* Secondary — Leaf Green */
+  --secondary: oklch(0.52 0.085 152.4); /* #4E8056 */
+  --secondary-foreground: oklch(0.95 0.005 93.6); /* Light text on green */
+
+  /* Muted — Deep green tones */
+  --muted: oklch(0.31 0.03 153.1);
+  --muted-foreground: oklch(0.65 0.02 93.6);
+
+  /* Accent — Terracotta (same in both modes) */
+  --accent: oklch(0.571 0.178 37.7); /* #D65A31 */
+  --accent-foreground: oklch(0.95 0.005 93.6);
+
+  /* Destructive */
+  --destructive: oklch(0.704 0.191 22.216);
+
+  /* Borders & Inputs */
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.722 0.107 82.8); /* Gold ring */
+
+  /* Chart colors */
+  --chart-1: oklch(0.722 0.107 82.8);
+  --chart-2: oklch(0.52 0.085 152.4);
+  --chart-3: oklch(0.571 0.178 37.7);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  /* Sidebar — slightly lighter than page background */
+  --sidebar: oklch(0.27 0.032 153.1);
+  --sidebar-foreground: oklch(0.95 0.005 93.6);
+  --sidebar-primary: oklch(0.722 0.107 82.8);
+  --sidebar-primary-foreground: oklch(0.95 0.005 93.6);
+  --sidebar-accent: oklch(0.31 0.03 153.1);
+  --sidebar-accent-foreground: oklch(0.95 0.005 93.6);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.722 0.107 82.8);
 }
 
-/* PWA App-like feel */
+/* ==========================================================================
+   Tailwind v4 @theme mapping — use WITHOUT inline for multi-theme support
+   (See tailwind-v4-shadcn skill, Error #6)
+   ========================================================================== */
+@theme {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ==========================================================================
+   Font Theme System (independent of component library)
+   ========================================================================== */
+[data-font-theme="classic"] {
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+[data-font-theme="modern"] {
+  --font-heading: "Outfit", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* ==========================================================================
+   PWA Styles — native app feel
+   ========================================================================== */
 html {
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ============================================
-   Font Themes
-   ============================================
-   Two font combinations for comparison:
-   - Classic: Playfair Display (elegant serif) + Inter + JetBrains Mono
-   - Modern: Outfit (geometric sans) + Inter + JetBrains Mono
-   
-   Switch via data-font-theme attribute on html element
-============================================ */
-
-/* Font Theme: Classic (Playfair Display) - Default */
-:root,
-[data-font-theme="classic"] {
-  --font-display: "Playfair Display", Georgia, serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-}
-
-/* Font Theme: Modern (Outfit) */
-[data-font-theme="modern"] {
-  --font-display: "Outfit", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-}
-
 body {
-  min-height: 100dvh;
-  font-family: var(--font-body);
+  font-family: var(--font-body, "Inter", sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Display font for headings */
 h1,
 h2,
-.font-display {
-  font-family: var(--font-display);
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading, "Playfair Display", serif);
 }
 
-/* Mono font for numbers/stats */
-.font-mono {
-  font-family: var(--font-mono);
+/* Prevent text selection on interactive elements */
+button,
+a,
+[role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-/* Thumb-friendly tap targets */
-.btn {
-  min-height: 48px;
-  min-width: 48px;
+/* 48px minimum tap targets for mobile */
+@media (max-width: 768px) {
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+  }
 }

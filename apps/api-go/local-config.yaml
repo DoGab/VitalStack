@@ -14,4 +14,4 @@ server:
 dev:
   mode.enabled: true
   mocks:
-    nutrition-service: false  # Set to true for mock data
+    nutrition-service: true  # Set to true for mock data

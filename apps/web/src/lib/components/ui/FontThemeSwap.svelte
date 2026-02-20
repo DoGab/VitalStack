@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { Type } from "lucide-svelte";
+  import { Type, Check } from "lucide-svelte";
+  import { Button } from "$lib/components/ui/button";
+  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
 
-  // Font themes available
   const fontThemes = [
     { id: "classic", label: "Classic", description: "Playfair Display" },
     { id: "modern", label: "Modern", description: "Outfit" }
@@ -31,30 +32,29 @@
   });
 </script>
 
-<div class="dropdown dropdown-end">
-  <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-2" aria-label="Font Theme">
-    <Type class="w-4 h-4" />
-    <span class="hidden sm:inline text-xs">{currentFont === "classic" ? "Aa" : "Aa"}</span>
-  </div>
-  <ul
-    tabindex="0"
-    role="menu"
-    class="dropdown-content menu bg-base-200 rounded-box z-50 w-52 p-2 shadow-lg mt-2"
-  >
-    <li class="menu-title">
-      <span>Font Theme</span>
-    </li>
+<DropdownMenu.Root>
+  <DropdownMenu.Trigger>
+    {#snippet child({ props })}
+      <Button {...props} variant="ghost" size="icon" class="rounded-full" aria-label="Font Theme">
+        <Type class="h-4 w-4" />
+      </Button>
+    {/snippet}
+  </DropdownMenu.Trigger>
+  <DropdownMenu.Content align="end" class="w-48">
+    <DropdownMenu.Label>Font Theme</DropdownMenu.Label>
+    <DropdownMenu.Separator />
     {#each fontThemes as theme (theme.id)}
-      <li>
-        <button
-          class="flex justify-between"
-          class:active={currentFont === theme.id}
-          onclick={() => setFontTheme(theme.id)}
-        >
-          <span class="font-medium">{theme.label}</span>
-          <span class="text-xs opacity-60">{theme.description}</span>
-        </button>
-      </li>
+      <DropdownMenu.Item onclick={() => setFontTheme(theme.id)}>
+        <span class="flex items-center justify-between w-full">
+          <span>
+            <span class="font-medium">{theme.label}</span>
+            <span class="text-xs text-muted-foreground ml-2">{theme.description}</span>
+          </span>
+          {#if currentFont === theme.id}
+            <Check class="h-4 w-4 text-primary" />
+          {/if}
+        </span>
+      </DropdownMenu.Item>
     {/each}
-  </ul>
-</div>
+  </DropdownMenu.Content>
+</DropdownMenu.Root>

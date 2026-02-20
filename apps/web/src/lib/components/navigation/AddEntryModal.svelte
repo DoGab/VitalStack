@@ -1,34 +1,41 @@
 <script lang="ts">
-  import { Camera, Upload, Zap, X } from "lucide-svelte";
+  import { Camera, Upload, Zap } from "lucide-svelte";
+  import * as Dialog from "$lib/components/ui/dialog";
+  import * as Drawer from "$lib/components/ui/drawer";
+  import { Button } from "$lib/components/ui/button";
   import FoodScannerModal from "$lib/components/food/FoodScannerModal.svelte";
+  import { IsMobile } from "$lib/hooks/is-mobile.svelte.js";
 
-  let { open = $bindable() } = $props();
+  interface Props {
+    open: boolean;
+  }
 
-  // Dialog element ref
-  let dialogElement: HTMLDialogElement | null = $state(null);
+  let { open = $bindable() }: Props = $props();
+
+  // Detect mobile for Drawer vs Dialog
+  const isMobile = new IsMobile();
 
   // Food scanner state
   let scannerOpen = $state(false);
   let scannerMode: "camera" | "upload" = $state("camera");
 
   const addOptions = [
-    { icon: Camera, label: "Take Photo", action: "camera" },
-    { icon: Upload, label: "Upload Image", action: "upload" },
-    { icon: Zap, label: "Quick Add", action: "quick" }
+    {
+      icon: Camera,
+      label: "Take Photo",
+      description: "Snap a meal photo",
+      action: "camera" as const
+    },
+    {
+      icon: Upload,
+      label: "Upload Image",
+      description: "Choose from gallery",
+      action: "upload" as const
+    },
+    { icon: Zap, label: "Quick Add", description: "Manual macro entry", action: "quick" as const }
   ];
 
-  // Sync dialog open state with `open` prop
-  $effect(() => {
-    if (dialogElement) {
-      if (open && !dialogElement.open) {
-        dialogElement.showModal();
-      } else if (!open && dialogElement.open) {
-        dialogElement.close();
-      }
-    }
-  });
-
-  function handleAddOption(action: string) {
+  function handleAddOption(action: "camera" | "upload" | "quick") {
     if (action === "camera") {
       scannerMode = "camera";
       scannerOpen = true;
@@ -38,54 +45,66 @@
       scannerOpen = true;
       open = false;
     } else {
-      console.log("Add action:", action);
+      console.log("Quick add:", action);
       open = false;
     }
   }
-
-  // Handle dialog close event (ESC key, backdrop click via form)
-  function onDialogClose() {
-    open = false;
-  }
 </script>
+
+{#snippet optionsList()}
+  <div class="flex flex-col gap-2 p-4">
+    {#each addOptions as option (option.action)}
+      {@const Icon = option.icon}
+      <Button
+        variant="ghost"
+        class="justify-start gap-3 h-16 px-4"
+        onclick={() => handleAddOption(option.action)}
+      >
+        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <Icon class="h-5 w-5 text-primary" />
+        </div>
+        <div class="flex flex-col items-start">
+          <span class="font-medium">{option.label}</span>
+          <span class="text-xs text-muted-foreground">{option.description}</span>
+        </div>
+      </Button>
+    {/each}
+  </div>
+{/snippet}
 
 <!-- Food Scanner Modal -->
 <FoodScannerModal bind:open={scannerOpen} mode={scannerMode} />
 
-<dialog
-  bind:this={dialogElement}
-  class="modal modal-bottom sm:modal-middle"
-  onclose={onDialogClose}
->
-  <div
-    class="modal-box w-full max-w-full sm:max-w-sm p-4 rounded-t-2xl rounded-b-none sm:rounded-2xl"
-  >
-    <div class="flex justify-between items-center mb-3">
-      <h3 class="font-semibold text-lg">Add Entry</h3>
-      <form method="dialog">
-        <button class="btn btn-ghost btn-sm btn-circle">
-          <X class="w-4 h-4" />
-        </button>
-      </form>
-    </div>
-    <div class="flex flex-col gap-2">
-      {#each addOptions as option (option.action)}
-        {@const Icon = option.icon}
-        <button
-          class="btn btn-ghost justify-start gap-3 h-14"
-          onclick={() => handleAddOption(option.action)}
-        >
-          <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <Icon class="w-5 h-5 text-primary" />
-          </div>
-          {option.label}
-        </button>
-      {/each}
-    </div>
-  </div>
-
-  <!-- Backdrop - clicking closes the modal -->
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
+{#if isMobile.current}
+  <!-- Mobile: Drawer (slides up from bottom) -->
+  <Drawer.Root bind:open>
+    <Drawer.Content>
+      <Drawer.Header>
+        <Drawer.Title>Add Entry</Drawer.Title>
+        <Drawer.Description>Choose how to log your meal</Drawer.Description>
+      </Drawer.Header>
+      {@render optionsList()}
+      <Drawer.Footer>
+        <Drawer.Close>
+          <Button variant="outline" class="w-full">Cancel</Button>
+        </Drawer.Close>
+      </Drawer.Footer>
+    </Drawer.Content>
+  </Drawer.Root>
+{:else}
+  <!-- Desktop: Centered Dialog -->
+  <Dialog.Root bind:open>
+    <Dialog.Content class="sm:max-w-md">
+      <Dialog.Header>
+        <Dialog.Title>Add Entry</Dialog.Title>
+        <Dialog.Description>Choose how to log your meal</Dialog.Description>
+      </Dialog.Header>
+      {@render optionsList()}
+      <Dialog.Footer>
+        <Dialog.Close>
+          <Button variant="outline" class="w-full">Cancel</Button>
+        </Dialog.Close>
+      </Dialog.Footer>
+    </Dialog.Content>
+  </Dialog.Root>
+{/if}

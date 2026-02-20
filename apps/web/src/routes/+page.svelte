@@ -1,5 +1,7 @@
 <script lang="ts">
   import { Camera, Sparkles, TrendingUp, Zap } from "lucide-svelte";
+  import { Badge } from "$lib/components/ui/badge";
+  import * as Card from "$lib/components/ui/card";
 
   const features = [
     {
@@ -31,20 +33,23 @@
 <div class="container mx-auto px-4 py-8 max-w-4xl">
   <!-- Hero Section -->
   <section class="text-center mb-12">
-    <div class="badge badge-primary badge-outline mb-4 gap-2">
-      <Zap class="w-3 h-3" />
+    <Badge variant="outline" class="mb-4 gap-2">
+      <Zap class="h-3 w-3" />
       AI-Powered Nutrition Tracking
-    </div>
-    <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+    </Badge>
+    <h1
+      class="text-4xl md:text-5xl font-bold mb-4 leading-tight"
+      style="font-family: var(--font-heading);"
+    >
       <span
         class="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent"
       >
         Know Your Macros
       </span>
       <br />
-      <span class="text-base-content">In Seconds</span>
+      <span class="text-foreground">In Seconds</span>
     </h1>
-    <p class="text-base-content/70 text-lg max-w-2xl mx-auto">
+    <p class="text-muted-foreground text-lg max-w-2xl mx-auto">
       Take a photo of any meal and let AI analyze the nutritional content. Track calories, protein,
       carbs, and fat effortlessly.
     </p>
@@ -52,28 +57,28 @@
 
   <!-- Features Grid -->
   <section>
-    <h2 class="text-2xl font-bold text-center mb-8">How It Works</h2>
+    <h2 class="text-2xl font-bold text-center mb-8" style="font-family: var(--font-heading);">
+      How It Works
+    </h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {#each features as feature, i}
+      {#each features as feature, i (feature.title)}
         {@const Icon = feature.icon}
-        <div
-          class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow border border-base-200"
-        >
-          <div class="card-body items-center text-center">
+        <Card.Root class="hover:shadow-lg transition-shadow">
+          <Card.Content class="flex flex-col items-center text-center pt-6">
             <div
               class="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-4"
             >
-              <Icon class="w-7 h-7 text-primary" />
+              <Icon class="h-7 w-7 text-primary" />
             </div>
-            <div class="badge badge-ghost badge-sm mb-2">
+            <Badge variant="secondary" class="mb-2 text-xs">
               Step {i + 1}
-            </div>
-            <h3 class="card-title text-lg">{feature.title}</h3>
-            <p class="text-base-content/60 text-sm">
+            </Badge>
+            <h3 class="text-lg font-semibold mb-1">{feature.title}</h3>
+            <p class="text-muted-foreground text-sm">
               {feature.description}
             </p>
-          </div>
-        </div>
+          </Card.Content>
+        </Card.Root>
       {/each}
     </div>
   </section>
