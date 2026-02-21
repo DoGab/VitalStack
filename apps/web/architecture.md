@@ -91,8 +91,8 @@ Using **Svelte 5 Runes** for reactive state:
 
 | Theme           | Role  | Primary | Secondary | Accent  | Base    |
 | --------------- | ----- | ------- | --------- | ------- | ------- |
-| Organic Premium | Light | #1B3022 | #C5A059   | #D65A31 | #F9F7F2 |
-| Dark Organic    | Dark  | #C5A059 | #4E8056   | #D65A31 | #1B3022 |
+| Organic Premium | Light | #1B3022 | #C5A059   | #7B506F | #F9F7F2 |
+| Dark Organic    | Dark  | #C5A059 | #4E8056   | #D4913D | #1B3022 |
 
 ### Theme Configuration
 
@@ -107,7 +107,7 @@ Defined in `src/app.css` using shadcn CSS variable system with `@theme` (without
 [data-theme="organic"] {
   --primary: oklch(0.241 0.034 153.1); /* #1B3022 */
   --secondary: oklch(0.722 0.107 82.8); /* #C5A059 */
-  --accent: oklch(0.571 0.178 37.7); /* #D65A31 */
+  --accent: oklch(0.49 0.073 337.5); /* #7B506F */
   --background: oklch(0.975 0.005 93.6); /* #F9F7F2 */
   /* ... */
 }
@@ -210,13 +210,13 @@ This is the dark mode companion to the Organic Premium theme. It inverts the col
 - Primary (#C5A059): Burnished Gold. Luxury CTAs with excellent contrast on dark backgrounds.
 - Base (#1B3022): Deep Arboretum. The same anchor green as Organic Premium, now as the background.
 - Secondary (#4E8056): Leaf Green. Natural, calming secondary actions.
-- Accent (#D65A31): Terracotta. Warm highlight color for badges and FABs.
+- Accent (#D4913D): Warm Amber. A honey-toned highlight for badges and FABs.
 
 | Category | Color Name   | Hex Code | Explanation                                                 |
 | -------- | ------------ | -------- | ----------------------------------------------------------- |
 | Brand    | Primary      | #C5A059  | Burnished Gold. Premium CTAs, active states.                |
 |          | Secondary    | #4E8056  | Leaf Green. Natural secondary actions.                      |
-|          | Accent       | #D65A31  | Terracotta. Warm highlights, appetite-stimulating.          |
+|          | Accent       | #D4913D  | Warm Amber. Honey-toned highlights, warm and inviting.      |
 | State    | Info         | #5F8D8B  | Sage Blue. Calm informational states.                       |
 |          | Success      | #6A9E6E  | Soft Green. Natural success indication.                     |
 |          | Warning      | #EDB654  | Harvest Yellow. Warm warning color.                         |
@@ -268,13 +268,13 @@ This palette uses your requested Deep Arboretum and Burnished Gold. It avoids th
 
 - Primary (#1B3022): A deep, forest green. It communicates deep health, vegetables, and nature, but darker—implying stability and seriousness.
 - Secondary (#C5A059): Used for premium features (like "AI Insights" or "Goal Reached"). It adds a touch of luxury.
-- Accent (#D65A31): A burnt orange/terracotta. This triggers appetite (color psychology) and adds warmth to the scan buttons without feeling like a warning signal.
+- Accent (#7B506F): Plum. A sophisticated, premium pop color for badges and highlights.
 
 | Category | Color Name | Hex Code | Explanation                                                                             |
 | -------- | ---------- | -------- | --------------------------------------------------------------------------------------- |
 | Brand    | Primary    | #1B3022  | Deep Arboretum. The core brand anchor. Used for main navigation and ""Scan"" buttons.   |
 |          | Secondary  | #C5A059  | Burnished Gold. Adds a premium feel to progress bars and AI suggestions.                |
-|          | Accent     | #D65A31  | Spiced Terracotta. A warm, appetite-stimulating pop color for badging or FABs.          |
+|          | Accent     | #7B506F  | Plum. A sophisticated, premium pop color for badges and highlights.                     |
 | State    | Info       | #5F8D8B  | Sage Blue. A muted, dusty teal that provides information without looking too ""techy."" |
 |          | Success    | #4E8056  | Leaf Green. Natural and reassuring for ""Meal Logged"" messages.                        |
 |          | Warning    | #EDB654  | Harvest Yellow. A soft yellow that warns without inducing panic.                        |

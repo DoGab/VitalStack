@@ -9,7 +9,7 @@
    VitalStack Design Language — "Organic Premium" Light Theme
    Primary: #1B3022 Deep Arboretum   → oklch(0.241 0.034 153.1)
    Secondary: #C5A059 Burnished Gold  → oklch(0.722 0.107 82.8)
-   Accent: #D65A31 Terracotta         → oklch(0.571 0.178 37.7)
+   Accent: #7B506F Plum                → oklch(0.490 0.073 337.5)
    Base: #F9F7F2 Cream                → oklch(0.975 0.005 93.6)
    ========================================================================== */
 :root,
@@ -40,9 +40,9 @@
   --muted: oklch(0.94 0.006 93.6); /* Slightly darker cream */
   --muted-foreground: oklch(0.5 0.02 93.6); /* Muted text */
 
-  /* Accent — Terracotta */
-  --accent: oklch(0.571 0.178 37.7); /* #D65A31 */
-  --accent-foreground: oklch(0.99 0.003 93.6); /* Light text on terracotta */
+  /* Accent — Plum */
+  --accent: oklch(0.49 0.073 337.5); /* #7B506F */
+  --accent-foreground: oklch(0.99 0.003 93.6); /* Light text on plum */
 
   /* Destructive */
   --destructive: oklch(0.577 0.245 27.325);
@@ -75,7 +75,7 @@
    Primary: #C5A059 Gold
    Base: #1B3022 Arboretum
    Secondary: #4E8056 Leaf Green       → oklch(0.520 0.085 152.4)
-   Accent: #D65A31 Terracotta
+   Accent: #D4913D Warm Amber
    ========================================================================== */
 [data-theme="darkorganic"] {
   /* Core */
@@ -102,8 +102,8 @@
   --muted: oklch(0.31 0.03 153.1);
   --muted-foreground: oklch(0.65 0.02 93.6);
 
-  /* Accent — Terracotta (same in both modes) */
-  --accent: oklch(0.571 0.178 37.7); /* #D65A31 */
+  /* Accent — Warm Amber */
+  --accent: oklch(0.708 0.127 68.9); /* #D4913D */
   --accent-foreground: oklch(0.95 0.005 93.6);
 
   /* Destructive */
