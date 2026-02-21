@@ -120,14 +120,3 @@ VitalStack/
 ├── Makefile                 # Dev orchestration
 └── README.md                # This file links here
 ```
-
----
-
-## Future Enhancements
-
-- [x] Genkit AI integration with Gemini/OpenAI
-- [ ] User authentication
-- [ ] Scan history persistence
-- [x] TypeScript API client generation from OpenAPI
-- [ ] Docker containerization
-- [ ] CI/CD pipeline
