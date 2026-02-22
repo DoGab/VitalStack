@@ -8,6 +8,7 @@
   import * as Card from "$lib/components/ui/card";
   import * as Collapsible from "$lib/components/ui/collapsible";
   import CircularProgress from "$lib/components/ui/circular-progress.svelte";
+  import MacroBars from "$lib/components/ui/macro-bars.svelte";
 
   type ScanResult = components["schemas"]["ScanOutputBody"];
 
@@ -119,46 +120,6 @@
 </script>
 
 <div class="space-y-6 pt-2">
-  {#snippet macroBars()}
-    <div class="space-y-4">
-      {#each macroItems as macro (macro.key)}
-        {@const Icon = macro.icon}
-        {@const currentPercent = Math.min((macro.current / macro.goal) * 100, 100)}
-        {@const addedPercent = Math.min((macro.added / macro.goal) * 100, 100 - currentPercent)}
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <Icon class="size-4 {macro.color}" />
-              <span class="text-sm font-medium">{macro.label}</span>
-            </div>
-            <div class="text-sm">
-              <span class="font-bold text-foreground">+{formatMacro(macro.added)}{macro.unit}</span>
-              <span class="text-muted-foreground ml-1"
-                >({formatMacro(macro.current + macro.added)}{macro.unit} / {macro.goal}{macro.unit})</span
-              >
-            </div>
-          </div>
-          <!-- Custom Split Progress Bar -->
-          <div class="bg-muted relative h-2.5 w-full overflow-hidden rounded-full">
-            <!-- Current Segment -->
-            <div
-              class="absolute top-0 bottom-0 left-0 transition-all duration-500 rounded-full"
-              style="width: {currentPercent}%; background-color: {macro.barColor}"
-            ></div>
-            <!-- Added Segment (Lighter Transparency) -->
-            <div
-              class="absolute top-0 bottom-0 transition-all duration-500 opacity-40 block {currentPercent >
-              0
-                ? 'rounded-r-full'
-                : 'rounded-full'}"
-              style="left: {currentPercent}%; width: {addedPercent}%; background-color: {macro.barColor}"
-            ></div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  {/snippet}
-
   <!-- Meal Macros Breakdown (TodaysSummary Replica Layout) -->
   <Card.Root>
     <Card.Header class="flex flex-row items-center justify-between pb-4">
@@ -188,7 +149,7 @@
     <Card.Content>
       <!-- Mobile Layout -->
       <div class="md:hidden">
-        {@render macroBars()}
+        <MacroBars macros={macroItems} />
       </div>
 
       <!-- Desktop Layout -->
@@ -212,7 +173,7 @@
 
         <!-- Macro progress bars on the right -->
         <div class="flex-1 w-full">
-          {@render macroBars()}
+          <MacroBars macros={macroItems} />
         </div>
       </div>
     </Card.Content>

@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { NUTRITION_CONFIG } from "$lib/config/nutrition-config";
   import * as Card from "$lib/components/ui/card";
-  import * as Progress from "$lib/components/ui/progress";
   import Flame from "lucide-svelte/icons/flame";
   import CircularProgress from "$lib/components/ui/circular-progress.svelte";
+  import MacroBars from "$lib/components/ui/macro-bars.svelte";
 
   interface MacroData {
     key: string;
@@ -36,27 +35,6 @@
     <h2 class="text-lg font-semibold">Today's Summary</h2>
     <a href="/history" class="text-sm text-primary hover:underline">View Details</a>
   </div>
-
-  {#snippet macroBars()}
-    {#each macros as macro (macro.key)}
-      {@const config = NUTRITION_CONFIG[macro.key]}
-      {@const Icon = config.icon}
-      {@const percent = Math.min((macro.current / macro.goal) * 100, 100)}
-      <div class="space-y-1.5">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <Icon class="size-4 {config.color}" />
-            <span class="text-sm font-medium">{config.label}</span>
-          </div>
-          <span class="text-sm">
-            <span class="text-primary">{macro.current}{config.unit}</span>
-            <span class="text-muted-foreground">/ {macro.goal}{config.unit}</span>
-          </span>
-        </div>
-        <Progress.Root value={percent} indicatorColor={config.barColor} aria-label={config.label} />
-      </div>
-    {/each}
-  {/snippet}
 
   <Card.Root>
     <!-- <Card.Header class="flex flex-row items-start justify-between space-y-0"> -->
@@ -95,7 +73,7 @@
       <div class="md:hidden">
         <!-- Macro progress bars -->
         <div class="space-y-4">
-          {@render macroBars()}
+          <MacroBars {macros} />
         </div>
       </div>
 
@@ -126,7 +104,7 @@
 
           <!-- Macro progress bars on the right -->
           <div class="flex-1 w-full space-y-4">
-            {@render macroBars()}
+            <MacroBars {macros} />
           </div>
         </div>
       </div>
