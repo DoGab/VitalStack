@@ -122,7 +122,7 @@
   }
 </script>
 
-<div class="space-y-6 pt-2">
+<div class="space-y-6">
   <!-- Meal Macros Breakdown (TodaysSummary Replica Layout) -->
   <Card.Root>
     <Card.Header class="flex flex-row items-center justify-between pb-4">
@@ -239,8 +239,18 @@
                       <p
                         class="text-[13px] text-muted-foreground font-medium flex items-center gap-1.5"
                       >
-                        {#if ingredient.serving_quantity && ingredient.serving_unit}
+                        {#if ingredient.serving_quantity != null && ingredient.serving_size != null && ingredient.serving_unit != null}
+                          <span
+                            >{ingredient.serving_quantity} &times; {ingredient.serving_size}{ingredient.serving_unit}</span
+                          >
+                        {:else if ingredient.serving_quantity != null && ingredient.serving_unit != null}
                           <span>{ingredient.serving_quantity} {ingredient.serving_unit}</span>
+                        {:else if ingredient.serving_size != null && ingredient.serving_unit != null}
+                          <span>{ingredient.serving_size}{ingredient.serving_unit}</span>
+                        {:else if ingredient.serving_size != null}
+                          <span>{ingredient.serving_size}g</span>
+                        {:else if ingredient.serving_quantity != null}
+                          <span>{ingredient.serving_quantity} serving</span>
                         {:else}
                           <span>Unknown amount</span>
                         {/if}

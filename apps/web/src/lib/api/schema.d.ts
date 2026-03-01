@@ -264,6 +264,12 @@ export interface components {
              */
             calories: number;
             /**
+             * Format: double
+             * @description AI Identification confidence score
+             * @example 0.95
+             */
+            confidence: number;
+            /**
              * @description Visual representation emoji
              * @example 🥗
              */
@@ -274,7 +280,7 @@ export interface components {
              */
             id: string;
             /** @description List of ingredients attached to this meal */
-            ingredients: components["schemas"]["IngredientBody"][] | null;
+            ingredients?: components["schemas"]["IngredientBody"][] | null;
             /** @description Nutritional macro information for the meal */
             macros: components["schemas"]["MacroData"];
             /**
@@ -282,6 +288,11 @@ export interface components {
              * @example Grilled Chicken Salad
              */
             name: string;
+            /**
+             * @description Total estimated weight or serving size
+             * @example 150g
+             */
+            serving_size: string;
             /**
              * @description Optional descriptive tag
              * @example High Protein

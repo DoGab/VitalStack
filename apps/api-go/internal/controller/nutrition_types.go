@@ -77,6 +77,8 @@ type Meal struct {
 	Calories    int              `json:"calories" example:"450" doc:"Total calories in the meal"`
 	Macros      MacroData        `json:"macros" doc:"Nutritional macro information for the meal"`
 	Ingredients []IngredientBody `json:"ingredients,omitempty" doc:"List of ingredients attached to this meal"`
+	Confidence  float64          `json:"confidence" example:"0.95" doc:"AI Identification confidence score"`
+	ServingSize string           `json:"serving_size" example:"150g" doc:"Total estimated weight or serving size"`
 	Emoji       string           `json:"emoji" example:"🥗" doc:"Visual representation emoji"`
 	Tag         string           `json:"tag,omitempty" example:"High Protein" doc:"Optional descriptive tag"`
 }

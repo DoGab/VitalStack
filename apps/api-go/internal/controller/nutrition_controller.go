@@ -201,10 +201,12 @@ func (c *NutritionController) GetDailyIntakeHandler(ctx context.Context, input *
 		}
 
 		meals[i] = Meal{
-			ID:       m.ID,
-			Name:     m.Name,
-			Time:     m.Time,
-			Calories: m.Calories,
+			ID:          m.ID,
+			Name:        m.Name,
+			Time:        m.Time,
+			Calories:    m.Calories,
+			Confidence:  m.Confidence,
+			ServingSize: m.ServingSize,
 			Macros: MacroData{
 				Calories: m.Macros.Calories,
 				Protein:  m.Macros.Protein,

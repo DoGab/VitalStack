@@ -180,38 +180,31 @@ func (s *NutritionService) LogFood(ctx context.Context, input *LogFoodInput) (*L
 		CreatedAt:           time.Now().UTC(),
 	}
 
-	err := s.foodLogRepo.CreateFoodLog(ctx, dbLog)
-	if err != nil {
-		slog.Error("Failed to save food log to Supabase", "error", err)
-		return nil, fmt.Errorf("failed to save food log: %w", err)
+	// Bundle the ingredients directly into a slice
+	var dbIngredients []models.FoodLogIngredient
+	for _, ing := range input.Ingredients {
+		dbIngredients = append(dbIngredients, models.FoodLogIngredient{
+			Name:            ing.Name,
+			ServingSize:     ing.ServingSize,
+			ServingQuantity: ing.ServingQuantity,
+			ServingUnit:     ing.ServingUnit,
+			Calories:        ing.Calories,
+			Protein:         ing.Protein,
+			Carbs:           ing.Carbs,
+			Fat:             ing.Fat,
+			Fiber:           ing.Fiber,
+		})
 	}
 
-	// Persist the ingredients if the log was created successfully
-	if dbLog.ID != 0 {
-		for _, ing := range input.Ingredients {
-			dbIng := &models.FoodLogIngredient{
-				FoodLogID:       dbLog.ID,
-				Name:            ing.Name,
-				ServingSize:     ing.ServingSize,
-				ServingQuantity: ing.ServingQuantity,
-				ServingUnit:     ing.ServingUnit,
-				Calories:        ing.Calories,
-				Protein:         ing.Protein,
-				Carbs:           ing.Carbs,
-				Fat:             ing.Fat,
-				Fiber:           ing.Fiber,
-				CreatedAt:       time.Now().UTC(),
-			}
-			err = s.foodLogRepo.CreateFoodLogIngredient(ctx, dbIng)
-			if err != nil {
-				slog.Error("Failed to save food ingredient to Supabase", "error", err)
-			}
-		}
+	newLogID, err := s.foodLogRepo.CreateFoodLogWithIngredients(ctx, dbLog, dbIngredients)
+	if err != nil {
+		slog.Error("Failed to save food log atomically to Supabase", "error", err)
+		return nil, fmt.Errorf("failed to save food log: %w", err)
 	}
 
 	return &LogFoodOutput{
 		Success: true,
-		ID:      strconv.FormatInt(dbLog.ID, 10),
+		ID:      strconv.FormatInt(newLogID, 10),
 	}, nil
 }
 
@@ -273,11 +266,20 @@ func (s *NutritionService) GetDailyIntake(ctx context.Context, userID string, tz
 		// Calculate local time for the meal display
 		mealLocalTime := log.CreatedAt.UTC().Add(time.Duration(-tzOffsetMins) * time.Minute)
 
+		dummyScan := &ScanOutput{Ingredients: mappedIngredients}
+		calcWeight := dummyScan.TotalWeight()
+		servingStr := "Unknown amount"
+		if calcWeight > 0 {
+			servingStr = fmt.Sprintf("%dg", calcWeight)
+		}
+
 		meals = append(meals, Meal{
-			ID:       strconv.FormatInt(log.ID, 10),
-			Name:     log.FoodName,
-			Time:     mealLocalTime.Format("03:04 PM"),
-			Calories: log.Calories,
+			ID:          strconv.FormatInt(log.ID, 10),
+			Name:        log.FoodName,
+			Time:        mealLocalTime.Format("03:04 PM"),
+			Calories:    log.Calories,
+			Confidence:  log.DetectionConfidence,
+			ServingSize: servingStr,
 			Macros: MacroData{
 				Calories: log.Calories,
 				Protein:  log.Protein,
@@ -318,6 +320,11 @@ func (s *NutritionService) DeleteLoggedFood(ctx context.Context, userID string, 
 	return nil
 }
 
+// ptr is a helper function to create pointers to values
+func ptr[T any](v T) *T {
+	return &v
+}
+
 // generateMockScan returns a randomized mock scan output from 3 predefined meals
 func (s *NutritionService) generateMockScan() *ScanOutput {
 	// 3 hardcoded diverse mock meals
@@ -328,12 +335,12 @@ func (s *NutritionService) generateMockScan() *ScanOutput {
 			FoodName:       "Grilled Chicken Salad",
 			Confidence:     0.95,
 			Ingredients: []Ingredient{
-				{Name: "Grilled Chicken Breast", Calories: 248, Protein: 38, Carbs: 0, Fat: 10, Fiber: 0},
-				{Name: "Mixed Greens", Calories: 20, Protein: 2, Carbs: 3, Fat: 0, Fiber: 2},
-				{Name: "Cherry Tomatoes", Calories: 18, Protein: 1, Carbs: 4, Fat: 0, Fiber: 1},
-				{Name: "Feta Cheese", Calories: 105, Protein: 6, Carbs: 2, Fat: 8, Fiber: 0},
-				{Name: "Olive Oil Dressing", Calories: 80, Protein: 0, Carbs: 1, Fat: 9, Fiber: 0},
-				{Name: "Cucumber", Calories: 5, Protein: 0, Carbs: 1, Fat: 0, Fiber: 0},
+				{Name: "Grilled Chicken Breast", Calories: 248, Protein: 38, Carbs: 0, Fat: 10, Fiber: 0, ServingSize: ptr(150), ServingQuantity: ptr(1.0), ServingUnit: ptr("g")},
+				{Name: "Mixed Greens", Calories: 20, Protein: 2, Carbs: 3, Fat: 0, Fiber: 2, ServingSize: ptr(100), ServingQuantity: ptr(1.0), ServingUnit: ptr("g")},
+				{Name: "Cherry Tomatoes", Calories: 18, Protein: 1, Carbs: 4, Fat: 0, Fiber: 1, ServingSize: ptr(100), ServingQuantity: ptr(0.5), ServingUnit: ptr("cup")},
+				{Name: "Feta Cheese", Calories: 105, Protein: 6, Carbs: 2, Fat: 8, Fiber: 0, ServingSize: ptr(28), ServingQuantity: ptr(1.5), ServingUnit: ptr("g")},
+				{Name: "Olive Oil Dressing", Calories: 80, Protein: 0, Carbs: 1, Fat: 9, Fiber: 0, ServingSize: ptr(15), ServingQuantity: ptr(1.0), ServingUnit: ptr("ml")},
+				{Name: "Cucumber", Calories: 5, Protein: 0, Carbs: 1, Fat: 0, Fiber: 0, ServingSize: ptr(50), ServingQuantity: ptr(0.5), ServingUnit: ptr("cup")},
 			},
 		},
 		{
@@ -342,11 +349,11 @@ func (s *NutritionService) generateMockScan() *ScanOutput {
 			FoodName:       "Blueberry Oatmeal",
 			Confidence:     0.92,
 			Ingredients: []Ingredient{
-				{Name: "Rolled Oats", Calories: 150, Protein: 5, Carbs: 27, Fat: 3, Fiber: 4},
-				{Name: "Almond Milk", Calories: 30, Protein: 1, Carbs: 1, Fat: 2.5, Fiber: 0},
-				{Name: "Blueberries", Calories: 42, Protein: 0.5, Carbs: 11, Fat: 0.2, Fiber: 1.8},
-				{Name: "Chia Seeds", Calories: 60, Protein: 2, Carbs: 5, Fat: 4, Fiber: 4},
-				{Name: "Honey", Calories: 64, Protein: 0, Carbs: 17, Fat: 0, Fiber: 0},
+				{Name: "Rolled Oats", Calories: 150, Protein: 5, Carbs: 27, Fat: 3, Fiber: 4, ServingSize: ptr(40), ServingQuantity: ptr(1.0), ServingUnit: ptr("g")},
+				{Name: "Almond Milk", Calories: 30, Protein: 1, Carbs: 1, Fat: 2.5, Fiber: 0, ServingSize: ptr(240), ServingQuantity: ptr(0.5), ServingUnit: ptr("ml")},
+				{Name: "Blueberries", Calories: 42, Protein: 0.5, Carbs: 11, Fat: 0.2, Fiber: 1.8, ServingSize: ptr(74), ServingQuantity: ptr(1.0), ServingUnit: ptr("cup")},
+				{Name: "Chia Seeds", Calories: 60, Protein: 2, Carbs: 5, Fat: 4, Fiber: 4, ServingSize: ptr(15), ServingQuantity: ptr(1.0), ServingUnit: ptr("tbsp")},
+				{Name: "Honey", Calories: 64, Protein: 0, Carbs: 17, Fat: 0, Fiber: 0, ServingSize: ptr(21), ServingQuantity: ptr(1.0), ServingUnit: ptr("tbsp")},
 			},
 		},
 		{
@@ -355,11 +362,11 @@ func (s *NutritionService) generateMockScan() *ScanOutput {
 			FoodName:       "Salmon Rice Bowl",
 			Confidence:     0.97,
 			Ingredients: []Ingredient{
-				{Name: "Seared Salmon", Calories: 280, Protein: 25, Carbs: 0, Fat: 18, Fiber: 0},
-				{Name: "Jasmine Rice", Calories: 205, Protein: 4, Carbs: 45, Fat: 0.4, Fiber: 0.6},
-				{Name: "Avocado", Calories: 160, Protein: 2, Carbs: 8, Fat: 15, Fiber: 6},
-				{Name: "Sesame Seeds", Calories: 52, Protein: 1.6, Carbs: 2.1, Fat: 4.5, Fiber: 1.1},
-				{Name: "Soy Sauce", Calories: 9, Protein: 1.3, Carbs: 0.8, Fat: 0, Fiber: 0},
+				{Name: "Seared Salmon", Calories: 280, Protein: 25, Carbs: 0, Fat: 18, Fiber: 0, ServingSize: ptr(140), ServingQuantity: ptr(1.0), ServingUnit: ptr("g")},
+				{Name: "Jasmine Rice", Calories: 205, Protein: 4, Carbs: 45, Fat: 0.4, Fiber: 0.6, ServingSize: ptr(158), ServingQuantity: ptr(1.0), ServingUnit: ptr("cup")},
+				{Name: "Avocado", Calories: 160, Protein: 2, Carbs: 8, Fat: 15, Fiber: 6, ServingSize: ptr(100), ServingQuantity: ptr(0.5), ServingUnit: ptr("medium")},
+				{Name: "Sesame Seeds", Calories: 52, Protein: 1.6, Carbs: 2.1, Fat: 4.5, Fiber: 1.1, ServingSize: ptr(9), ServingQuantity: ptr(1.0), ServingUnit: ptr("tbsp")},
+				{Name: "Soy Sauce", Calories: 9, Protein: 1.3, Carbs: 0.8, Fat: 0, Fiber: 0, ServingSize: ptr(15), ServingQuantity: ptr(1.0), ServingUnit: ptr("tbsp")},
 			},
 		},
 	}

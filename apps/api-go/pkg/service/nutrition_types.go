@@ -3,6 +3,7 @@ package service
 import (
 	"log/slog"
 	"math"
+	"strings"
 )
 
 type flowName string
@@ -93,13 +94,26 @@ func (s *ScanOutput) TotalMacros() MacroData {
 
 // TotalWeight computes total weight by summing all ingredient weights
 func (s *ScanOutput) TotalWeight() int {
-	total := 0
+	var total float64
 	for _, ing := range s.Ingredients {
-		// Weight removed from model, could sum serving size if units are standard.
-		// For now, return 0 as weight is not available.
-		_ = ing // Avoid unused variable warning
+		if ing.ServingSize != nil {
+			qty := 1.0
+			if ing.ServingQuantity != nil {
+				qty = *ing.ServingQuantity
+			}
+
+			multiplier := 1.0
+			if ing.ServingUnit != nil {
+				unit := strings.ToLower(*ing.ServingUnit)
+				if unit == "oz" || unit == "oz." || unit == "ounce" || unit == "ounces" {
+					multiplier = 28.3495
+				}
+			}
+
+			total += float64(*ing.ServingSize) * qty * multiplier
+		}
 	}
-	return total
+	return int(math.Round(total))
 }
 
 // LogValue implements slog.LogValuer for structured logging
@@ -157,6 +171,8 @@ type Meal struct {
 	Calories    int          `json:"calories"`
 	Macros      MacroData    `json:"macros"`
 	Ingredients []Ingredient `json:"ingredients,omitempty"`
+	Confidence  float64      `json:"confidence"`
+	ServingSize string       `json:"serving_size"`
 	Emoji       string       `json:"emoji"`
 	Tag         string       `json:"tag"`
 }

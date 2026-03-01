@@ -70,7 +70,10 @@ func (c *NutritionMockController) ScanHandler(ctx context.Context, input *ScanIn
 			ServingSize: "400g",
 			Ingredients: []IngredientBody{
 				{
-					Name: "Grilled Chicken Breast",
+					Name:            "Grilled Chicken Breast",
+					ServingSize:     ptr(150),
+					ServingQuantity: ptr(1.0),
+					ServingUnit:     ptr("g"),
 					Macros: &MacroData{
 						Calories: 248,
 						Protein:  38,
@@ -80,7 +83,10 @@ func (c *NutritionMockController) ScanHandler(ctx context.Context, input *ScanIn
 					},
 				},
 				{
-					Name: "Mixed Greens",
+					Name:            "Mixed Greens",
+					ServingSize:     ptr(100),
+					ServingQuantity: ptr(1.0),
+					ServingUnit:     ptr("g"),
 					Macros: &MacroData{
 						Calories: 20,
 						Protein:  2,
@@ -90,7 +96,10 @@ func (c *NutritionMockController) ScanHandler(ctx context.Context, input *ScanIn
 					},
 				},
 				{
-					Name: "Cherry Tomatoes",
+					Name:            "Cherry Tomatoes",
+					ServingSize:     ptr(100),
+					ServingQuantity: ptr(0.5),
+					ServingUnit:     ptr("cup"),
 					Macros: &MacroData{
 						Calories: 18,
 						Protein:  1,
@@ -100,7 +109,10 @@ func (c *NutritionMockController) ScanHandler(ctx context.Context, input *ScanIn
 					},
 				},
 				{
-					Name: "Feta Cheese",
+					Name:            "Feta Cheese",
+					ServingSize:     ptr(28),
+					ServingQuantity: ptr(1.5),
+					ServingUnit:     ptr("g"),
 					Macros: &MacroData{
 						Calories: 105,
 						Protein:  6,
@@ -110,7 +122,10 @@ func (c *NutritionMockController) ScanHandler(ctx context.Context, input *ScanIn
 					},
 				},
 				{
-					Name: "Olive Oil Dressing",
+					Name:            "Olive Oil Dressing",
+					ServingSize:     ptr(15),
+					ServingQuantity: ptr(1.0),
+					ServingUnit:     ptr("ml"),
 					Macros: &MacroData{
 						Calories: 80,
 						Protein:  0,
@@ -120,7 +135,10 @@ func (c *NutritionMockController) ScanHandler(ctx context.Context, input *ScanIn
 					},
 				},
 				{
-					Name: "Cucumber",
+					Name:            "Cucumber",
+					ServingSize:     ptr(50),
+					ServingQuantity: ptr(0.5),
+					ServingUnit:     ptr("cup"),
 					Macros: &MacroData{
 						Calories: 5,
 						Protein:  0,
@@ -157,20 +175,52 @@ func (c *NutritionMockController) GetDailyIntakeHandler(ctx context.Context, inp
 			},
 			Meals: []Meal{
 				{
-					ID:       "log-1234",
-					Name:     "Grilled Chicken Salad",
-					Time:     "12:30 PM",
-					Calories: 480,
-					Emoji:    "🥗",
-					Tag:      "High Protein",
+					ID:          "log-1234",
+					Name:        "Grilled Chicken Salad",
+					Time:        "12:30 PM",
+					Calories:    480,
+					Confidence:  0.95,
+					ServingSize: "350g",
+					Emoji:       "🥗",
+					Tag:         "High Protein",
+					Ingredients: []IngredientBody{
+						{
+							Name:            "Grilled Chicken Breast",
+							ServingSize:     ptr(150),
+							ServingQuantity: ptr(1.0),
+							ServingUnit:     ptr("g"),
+							Macros: &MacroData{
+								Calories: 248,
+								Protein:  38,
+								Carbs:    0,
+								Fat:      10,
+								Fiber:    0,
+							},
+						},
+						{
+							Name:            "Mixed Greens",
+							ServingSize:     ptr(100),
+							ServingQuantity: ptr(1.0),
+							ServingUnit:     ptr("g"),
+							Macros: &MacroData{
+								Calories: 20,
+								Protein:  2,
+								Carbs:    3,
+								Fat:      0,
+								Fiber:    2,
+							},
+						},
+					},
 				},
 				{
-					ID:       "log-1235",
-					Name:     "Morning Berry Smoothie",
-					Time:     "08:15 AM",
-					Calories: 360,
-					Emoji:    "🫐",
-					Tag:      "Antioxidants",
+					ID:          "log-1235",
+					Name:        "Morning Berry Smoothie",
+					Time:        "08:15 AM",
+					Calories:    360,
+					Confidence:  0.9,
+					ServingSize: "450ml",
+					Emoji:       "🫐",
+					Tag:         "Antioxidants",
 				},
 			},
 		},
@@ -182,4 +232,9 @@ func (c *NutritionMockController) GetDailyIntakeHandler(ctx context.Context, inp
 // DeleteLogHandler handles the mock deletion request
 func (c *NutritionMockController) DeleteLogHandler(ctx context.Context, input *DeleteLogInput) (*DeleteLogOutput, error) {
 	return &DeleteLogOutput{}, nil
+}
+
+// ptr is a helper function to create pointers to values
+func ptr[T any](v T) *T {
+	return &v
 }

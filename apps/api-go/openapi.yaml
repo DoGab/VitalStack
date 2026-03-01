@@ -238,6 +238,12 @@ components:
             - 450
           format: int64
           type: integer
+        confidence:
+          description: AI Identification confidence score
+          examples:
+            - 0.95
+          format: double
+          type: number
         emoji:
           description: Visual representation emoji
           examples:
@@ -263,6 +269,11 @@ components:
           examples:
             - Grilled Chicken Salad
           type: string
+        serving_size:
+          description: Total estimated weight or serving size
+          examples:
+            - 150g
+          type: string
         tag:
           description: Optional descriptive tag
           examples:
@@ -279,7 +290,8 @@ components:
         - time
         - calories
         - macros
-        - ingredients
+        - confidence
+        - serving_size
         - emoji
       type: object
     ScanInputBody:
