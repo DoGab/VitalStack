@@ -10,8 +10,10 @@ import (
 
 	"github.com/dogab/vitalstack/api/internal/conf"
 	"github.com/dogab/vitalstack/api/internal/controller"
+	"github.com/dogab/vitalstack/api/internal/repository"
 	"github.com/dogab/vitalstack/api/internal/server"
 	"github.com/dogab/vitalstack/api/pkg/service"
+	"github.com/supabase-community/supabase-go"
 
 	"github.com/firebase/genkit/go/genkit"
 	"github.com/firebase/genkit/go/plugins/googlegenai"
@@ -38,25 +40,34 @@ func ServerEntryPoint(cmd *cobra.Command, _ []string) error {
 		server.WithDevMode(devMode),
 	)
 
+	supabaseClient, err := supabase.NewClient(viper.GetString(conf.SupabaseURLArg), viper.GetString(conf.SupabaseServiceKeyArg), nil)
+	if err != nil {
+		slog.Warn("Failed to initialize Supabase client", "error", err)
+	}
+	foodLogRepo := repository.NewFoodLogRepository(supabaseClient)
+
+	var ctrl server.Controller
 	// Register nutrition controller (mock or real based on config)
-	if viper.GetBool(conf.DevMocksNutritionServiceArg) {
+	if viper.GetBool(conf.DevModeEnabledArg) && viper.GetBool(conf.DevMocksNutritionServiceArg) {
 		slog.Info("🧪 Using MOCK nutrition controller")
-		api.RegisterAPI(controller.NewNutritionMockController())
+		ctrl = controller.NewNutritionMockController()
 	} else {
 		// Initialize Genkit
-		// This is the base initialization block. Add LLM plugins here later:
-		// - Google Gemini: genkit.WithPlugins(googlegenai.NewPlugin(ctx, nil))
-		// - OpenAI: genkit.WithPlugins(openai.NewPlugin(ctx, nil))
 		g := genkit.Init(serverShutdownContext,
 			genkit.WithPlugins(&googlegenai.GoogleAI{}),
 			genkit.WithDefaultModel("googleai/gemini-2.5-flash"),
 		)
-		svc := service.NewNutritionService(g)
-		api.RegisterAPI(controller.NewNutritionController(svc))
+
+		mockScan := viper.GetBool(conf.DevMocksScanFoodArg)
+		svc := service.NewNutritionService(g, foodLogRepo, service.WithMockScan(mockScan))
+		ctrl = controller.NewNutritionController(svc)
 	}
 
+	// register the endpoints of the controllers
+	api.RegisterAPI(ctrl)
+
 	// start the server
-	err := api.Serve(ctx)
+	err = api.Serve(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to start server: %w", err)
 	}

@@ -11,6 +11,8 @@ import (
 	"github.com/danielgtaylor/huma/v2/adapters/humagin"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	"github.com/dogab/vitalstack/api/internal/middleware"
 )
 
 const (
@@ -99,6 +101,9 @@ func NewServer(addr string, opts ...Option) (*Server, ShutdownFunc) {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
+
+	// Apply Authentication Middleware
+	router.Use(middleware.DevAuthMiddleware(s.devMode))
 
 	s.huma = newHumaAPI(s)
 	s.registerDiagnosticEndpoints()

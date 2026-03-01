@@ -4,46 +4,27 @@
   import Flame from "lucide-svelte/icons/flame";
   import Clock from "lucide-svelte/icons/clock";
   import UtensilsCrossed from "lucide-svelte/icons/utensils-crossed";
+  import type { components } from "$lib/api/schema";
+  import MealDetailsModal from "./MealDetailsModal.svelte";
 
-  interface Meal {
-    name: string;
-    time: string;
-    calories: number;
-    tag?: string;
-    emoji: string;
-  }
+  type Meal = components["schemas"]["Meal"];
 
   interface Props {
     meals?: Meal[];
   }
 
-  let {
-    meals = [
-      {
-        name: "Grilled Chicken Salad",
-        time: "12:30 PM",
-        calories: 480,
-        tag: "High Protein",
-        emoji: "🥗"
-      },
-      {
-        name: "Morning Berry Smoothie",
-        time: "08:15 AM",
-        calories: 320,
-        tag: "Antioxidants",
-        emoji: "🫐"
-      },
-      {
-        name: "Almond Snack Pack",
-        time: "10:45 AM",
-        calories: 188,
-        tag: "Healthy Fats",
-        emoji: "🥜"
-      }
-    ]
-  }: Props = $props();
+  let { meals = [] }: Props = $props();
 
   let hasMeals = $derived(meals.length > 0);
+
+  // Modal State
+  let selectedMeal = $state<Meal | null>(null);
+  let modalOpen = $state(false);
+
+  function openMealDetails(meal: Meal) {
+    selectedMeal = meal;
+    modalOpen = true;
+  }
 </script>
 
 <div class="space-y-3">
@@ -58,10 +39,15 @@
     <!-- Desktop: horizontal cards -->
     <div class="hidden md:grid md:grid-cols-3 gap-4">
       {#each meals as meal (meal.name)}
-        <Card.Root class="overflow-hidden hover:shadow-lg transition-shadow">
+        <Card.Root
+          class="overflow-hidden hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 active:scale-[0.98]"
+          onclick={() => openMealDetails(meal)}
+        >
           <!-- Emoji thumbnail area -->
-          <div class="h-32 bg-muted flex items-center justify-center">
-            <span class="text-5xl">{meal.emoji}</span>
+          <div
+            class="h-32 bg-muted flex items-center justify-center transition-colors group-hover:bg-primary/5"
+          >
+            <span class="text-5xl drop-shadow-sm">{meal.emoji}</span>
           </div>
           <Card.Content class="p-3 space-y-2">
             <div class="flex items-center justify-between">
@@ -88,10 +74,13 @@
     <!-- Mobile: vertical list -->
     <div class="md:hidden space-y-2">
       {#each meals as meal (meal.name)}
-        <Card.Root>
+        <Card.Root
+          class="cursor-pointer hover:bg-muted/50 active:scale-[0.98] transition-transform"
+          onclick={() => openMealDetails(meal)}
+        >
           <Card.Content class="flex items-center gap-3 p-3">
             <div class="size-12 rounded-lg bg-muted flex items-center justify-center shrink-0">
-              <span class="text-2xl">{meal.emoji}</span>
+              <span class="text-2xl drop-shadow-sm">{meal.emoji}</span>
             </div>
             <div class="flex-1 min-w-0">
               <h3 class="text-sm font-semibold truncate">{meal.name}</h3>
@@ -126,3 +115,5 @@
     </Card.Root>
   {/if}
 </div>
+
+<MealDetailsModal bind:open={modalOpen} meal={selectedMeal} />

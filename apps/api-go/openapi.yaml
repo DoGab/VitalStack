@@ -1,5 +1,40 @@
 components:
   schemas:
+    DailyIntakeOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - //schemas/DailyIntakeOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        macros:
+          $ref: "#/components/schemas/MacroData"
+          description: Aggregated nutritional macro information
+        meals:
+          description: List of meals logged today
+          items:
+            $ref: "#/components/schemas/Meal"
+          type:
+            - array
+            - "null"
+      required:
+        - macros
+        - meals
+      type: object
+    DeleteLogOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - //schemas/DeleteLogOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+      type: object
     ErrorDetail:
       additionalProperties: false
       properties:
@@ -70,16 +105,89 @@ components:
           examples:
             - Grilled Chicken Breast
           type: string
-        weight_grams:
-          description: Estimated weight in grams
+        serving_quantity:
+          description: Quantity of the serving
+          examples:
+            - 1.5
+          format: double
+          type: number
+        serving_size:
+          description: Raw serving size generic value
           examples:
             - 150
           format: int64
           type: integer
+        serving_unit:
+          description: Unit of the serving size (e.g., g, ml)
+          examples:
+            - g
+          type: string
       required:
         - name
-        - weight_grams
         - macros
+      type: object
+    LogFoodInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - //schemas/LogFoodInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        confidence:
+          description: Detection confidence score
+          examples:
+            - 0.92
+          format: double
+          type: number
+        food_name:
+          description: Detected food name
+          examples:
+            - Grilled Chicken Salad
+          type: string
+        ingredients:
+          description: Breakdown of individual ingredients with their macros
+          items:
+            $ref: "#/components/schemas/IngredientBody"
+          type:
+            - array
+            - "null"
+        macros:
+          $ref: "#/components/schemas/MacroData"
+          description: Nutritional macro information
+        user_id:
+          description: Optional UUID of the user logging the meal (defaults to auth context if implemented)
+          type: string
+      required:
+        - food_name
+        - confidence
+        - macros
+        - ingredients
+      type: object
+    LogFoodOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - //schemas/LogFoodOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        id:
+          description: Database ID of the created food log
+          examples:
+            - "1"
+          type: string
+        success:
+          description: Indicates whether the log was successfully saved
+          examples:
+            - true
+          type: boolean
+      required:
+        - success
       type: object
     MacroData:
       additionalProperties: false
@@ -120,6 +228,59 @@ components:
         - carbs
         - fat
         - fiber
+      type: object
+    Meal:
+      additionalProperties: false
+      properties:
+        calories:
+          description: Total calories in the meal
+          examples:
+            - 450
+          format: int64
+          type: integer
+        emoji:
+          description: Visual representation emoji
+          examples:
+            - 🥗
+          type: string
+        id:
+          description: Database ID of the meal
+          examples:
+            - "1"
+          type: string
+        ingredients:
+          description: List of ingredients attached to this meal
+          items:
+            $ref: "#/components/schemas/IngredientBody"
+          type:
+            - array
+            - "null"
+        macros:
+          $ref: "#/components/schemas/MacroData"
+          description: Nutritional macro information for the meal
+        name:
+          description: Food name
+          examples:
+            - Grilled Chicken Salad
+          type: string
+        tag:
+          description: Optional descriptive tag
+          examples:
+            - High Protein
+          type: string
+        time:
+          description: Formatted local time of log
+          examples:
+            - 08:15 AM
+          type: string
+      required:
+        - id
+        - name
+        - time
+        - calories
+        - macros
+        - ingredients
+        - emoji
       type: object
     ScanInputBody:
       additionalProperties: false
@@ -188,6 +349,89 @@ info:
   version: 1.0.0
 openapi: 3.1.0
 paths:
+  /api/nutrition/daily:
+    get:
+      description: Fetch the user's aggregated daily macros and logged meals for today.
+      operationId: get-daily-intake
+      parameters:
+        - description: Timezone offset in minutes (UTC - Local Time)
+          explode: false
+          in: query
+          name: tz_offset
+          schema:
+            default: 0
+            description: Timezone offset in minutes (UTC - Local Time)
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyIntakeOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get daily intake
+      tags:
+        - nutrition
+  /api/nutrition/log:
+    post:
+      description: Log a previously scanned food item to the database
+      operationId: log-food
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogFoodInputBody"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogFoodOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Log scanned food
+      tags:
+        - nutrition
+  /api/nutrition/log/{id}:
+    delete:
+      description: Permanently removes a meal and its scanned ingredients from the user's diary.
+      operationId: delete-log
+      parameters:
+        - description: ID of the logged meal to delete
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the logged meal to delete
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteLogOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Delete meal log
+      tags:
+        - nutrition
   /api/nutrition/scan:
     post:
       description: Upload a base64-encoded food image and optionally provide a description. Returns detected food name and macro breakdown.

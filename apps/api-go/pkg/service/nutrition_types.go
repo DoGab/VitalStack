@@ -30,26 +30,37 @@ func (s *ScanInput) LogValue() slog.Value {
 // Ingredient represents a single food component with its nutritional data
 // Note: Macro fields are inlined to avoid Genkit schema bug with repeated types
 type Ingredient struct {
-	Name        string  `json:"name"`
-	WeightGrams int     `json:"weight_grams"`
-	Calories    int     `json:"calories"`
-	Protein     float64 `json:"protein"`
-	Carbs       float64 `json:"carbs"`
-	Fat         float64 `json:"fat"`
-	Fiber       float64 `json:"fiber"`
+	Name            string   `json:"name"`
+	ServingSize     *int     `json:"serving_size,omitempty"`
+	ServingQuantity *float64 `json:"serving_quantity,omitempty"`
+	ServingUnit     *string  `json:"serving_unit,omitempty"`
+	Calories        int      `json:"calories"`
+	Protein         float64  `json:"protein"`
+	Carbs           float64  `json:"carbs"`
+	Fat             float64  `json:"fat"`
+	Fiber           float64  `json:"fiber"`
 }
 
 // LogValue implements slog.LogValuer for structured logging
 func (i *Ingredient) LogValue() slog.Value {
-	return slog.GroupValue(
+	attrs := []slog.Attr{
 		slog.String("name", i.Name),
-		slog.Int("weight_grams", i.WeightGrams),
 		slog.Int("calories", i.Calories),
 		slog.Float64("protein", i.Protein),
 		slog.Float64("carbs", i.Carbs),
 		slog.Float64("fat", i.Fat),
 		slog.Float64("fiber", i.Fiber),
-	)
+	}
+	if i.ServingSize != nil {
+		attrs = append(attrs, slog.Int("serving_size", *i.ServingSize))
+	}
+	if i.ServingQuantity != nil {
+		attrs = append(attrs, slog.Float64("serving_quantity", *i.ServingQuantity))
+	}
+	if i.ServingUnit != nil {
+		attrs = append(attrs, slog.String("serving_unit", *i.ServingUnit))
+	}
+	return slog.GroupValue(attrs...)
 }
 
 // ScanOutput represents the AI scan result with per-ingredient data.
@@ -84,7 +95,9 @@ func (s *ScanOutput) TotalMacros() MacroData {
 func (s *ScanOutput) TotalWeight() int {
 	total := 0
 	for _, ing := range s.Ingredients {
-		total += ing.WeightGrams
+		// Weight removed from model, could sum serving size if units are standard.
+		// For now, return 0 as weight is not available.
+		_ = ing // Avoid unused variable warning
 	}
 	return total
 }
@@ -119,4 +132,42 @@ func (m *MacroData) LogValue() slog.Value {
 		slog.Float64("fat", m.Fat),
 		slog.Float64("fiber", m.Fiber),
 	)
+}
+
+// LogFoodInput represents the request to log a specific food
+type LogFoodInput struct {
+	UserID      *string
+	FoodName    string
+	Confidence  float64
+	Macros      MacroData
+	Ingredients []Ingredient
+}
+
+// LogFoodOutput represents the log response
+type LogFoodOutput struct {
+	Success bool
+	ID      string
+}
+
+// Meal represents a single logged food item
+type Meal struct {
+	ID          string       `json:"id"`
+	Name        string       `json:"name"`
+	Time        string       `json:"time"` // ISO 8601 or formatted time string
+	Calories    int          `json:"calories"`
+	Macros      MacroData    `json:"macros"`
+	Ingredients []Ingredient `json:"ingredients,omitempty"`
+	Emoji       string       `json:"emoji"`
+	Tag         string       `json:"tag"`
+}
+
+// DailyIntakeOutput represents aggregated macros and a list of meals
+type DailyIntakeOutput struct {
+	Macros MacroData `json:"macros"`
+	Meals  []Meal    `json:"meals"`
+}
+
+// DeleteLogInput handles removing a scan
+type DeleteLogInput struct {
+	ID string `path:"id"`
 }

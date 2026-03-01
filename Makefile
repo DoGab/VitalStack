@@ -31,10 +31,26 @@ gen-api-client:
 	@echo "🔄 Generating TypeScript API client..."
 	@cd apps/web && pnpm run generate:api
 
-# Start both backend and frontend concurrently
+# Start both backend and frontend concurrently, preceded by supabase
 dev:
 	@echo "🚀 Starting VitalStack development servers..."
+	@make dev-db
 	@make -j2 dev-api dev-web
+
+# Start Supabase local database
+dev-db:
+	@echo "🗄️ Starting Supabase local database..."
+	@supabase start
+
+# Stop Supabase local database
+stop-db:
+	@echo "🛑 Stopping Supabase local database..."
+	@supabase stop
+
+# Clean and reset Supabase local database
+clean-db:
+	@echo "🧹 Resetting Supabase local database..."
+	@supabase db reset
 
 # Start Go backend with Air hot reload
 dev-api:

@@ -20,6 +20,11 @@
       "source": "google-labs-code/stitch-skills",
       "sourceType": "github",
       "computedHash": "a19e5bd3a534f8b375b3094137585b4f44a964eed2e521e659f828040cca0a4f"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "computedHash": "9c87c315aed143ee3b34bec8117100f5035e0df09e6b23e1ecc772cff434c9ad"
     }
   }
 }

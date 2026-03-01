@@ -4,6 +4,66 @@
  */
 
 export interface paths {
+    "/api/nutrition/daily": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get daily intake
+         * @description Fetch the user's aggregated daily macros and logged meals for today.
+         */
+        get: operations["get-daily-intake"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/nutrition/log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Log scanned food
+         * @description Log a previously scanned food item to the database
+         */
+        post: operations["log-food"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/nutrition/log/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete meal log
+         * @description Permanently removes a meal and its scanned ingredients from the user's diary.
+         */
+        delete: operations["delete-log"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/nutrition/scan": {
         parameters: {
             query?: never;
@@ -28,6 +88,26 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        DailyIntakeOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example //schemas/DailyIntakeOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Aggregated nutritional macro information */
+            macros: components["schemas"]["MacroData"];
+            /** @description List of meals logged today */
+            meals: components["schemas"]["Meal"][] | null;
+        };
+        DeleteLogOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example //schemas/DeleteLogOutputBody.json
+             */
+            readonly $schema?: string;
+        };
         ErrorDetail: {
             /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
             location?: string;
@@ -84,11 +164,65 @@ export interface components {
              */
             name: string;
             /**
+             * Format: double
+             * @description Quantity of the serving
+             * @example 1.5
+             */
+            serving_quantity?: number;
+            /**
              * Format: int64
-             * @description Estimated weight in grams
+             * @description Raw serving size generic value
              * @example 150
              */
-            weight_grams: number;
+            serving_size?: number;
+            /**
+             * @description Unit of the serving size (e.g., g, ml)
+             * @example g
+             */
+            serving_unit?: string;
+        };
+        LogFoodInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example //schemas/LogFoodInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: double
+             * @description Detection confidence score
+             * @example 0.92
+             */
+            confidence: number;
+            /**
+             * @description Detected food name
+             * @example Grilled Chicken Salad
+             */
+            food_name: string;
+            /** @description Breakdown of individual ingredients with their macros */
+            ingredients: components["schemas"]["IngredientBody"][] | null;
+            /** @description Nutritional macro information */
+            macros: components["schemas"]["MacroData"];
+            /** @description Optional UUID of the user logging the meal (defaults to auth context if implemented) */
+            user_id?: string;
+        };
+        LogFoodOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example //schemas/LogFoodOutputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description Database ID of the created food log
+             * @example 1
+             */
+            id?: string;
+            /**
+             * @description Indicates whether the log was successfully saved
+             * @example true
+             */
+            success: boolean;
         };
         MacroData: {
             /**
@@ -121,6 +255,43 @@ export interface components {
              * @example 25.5
              */
             protein: number;
+        };
+        Meal: {
+            /**
+             * Format: int64
+             * @description Total calories in the meal
+             * @example 450
+             */
+            calories: number;
+            /**
+             * @description Visual representation emoji
+             * @example 🥗
+             */
+            emoji: string;
+            /**
+             * @description Database ID of the meal
+             * @example 1
+             */
+            id: string;
+            /** @description List of ingredients attached to this meal */
+            ingredients: components["schemas"]["IngredientBody"][] | null;
+            /** @description Nutritional macro information for the meal */
+            macros: components["schemas"]["MacroData"];
+            /**
+             * @description Food name
+             * @example Grilled Chicken Salad
+             */
+            name: string;
+            /**
+             * @description Optional descriptive tag
+             * @example High Protein
+             */
+            tag?: string;
+            /**
+             * @description Formatted local time of log
+             * @example 08:15 AM
+             */
+            time: string;
         };
         ScanInputBody: {
             /**
@@ -171,6 +342,103 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    "get-daily-intake": {
+        parameters: {
+            query?: {
+                /** @description Timezone offset in minutes (UTC - Local Time) */
+                tz_offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyIntakeOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    "log-food": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["LogFoodInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogFoodOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    "delete-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description ID of the logged meal to delete */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeleteLogOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     "scan-food": {
         parameters: {
             query?: never;

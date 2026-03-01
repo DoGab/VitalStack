@@ -76,6 +76,29 @@ const (
 	DevMocksNutritionServiceDefault = false
 	// DevMocksNutritionServiceHelp is the help message for the mock nutrition service flag
 	DevMocksNutritionServiceHelp = "Enable mock nutrition service for testing"
+
+	// DevMocksScanFoodArg is the flag name for mocking *only* the Genkit scanner
+	DevMocksScanFoodArg = devKey + "mocks.scan-food"
+	// DevMocksScanFoodDefault is the default value for mock scan food
+	DevMocksScanFoodDefault = false
+	// DevMocksScanFoodHelp is the help message for the mock scan food flag
+	DevMocksScanFoodHelp = "Enable mock AI response for image scanning"
+
+	// Supabase
+	supabaseKey = "supabase."
+	// SupabaseURLArg is the flag name for the Supabase URL
+	SupabaseURLArg = supabaseKey + "url"
+	// SupabaseURLDefault is the default value for Supabase URL
+	SupabaseURLDefault = ""
+	// SupabaseURLHelp is the help message for Supabase URL
+	SupabaseURLHelp = "Supabase API URL"
+
+	// SupabaseServiceKeyArg is the flag name for the Supabase Service Key
+	SupabaseServiceKeyArg = supabaseKey + "key"
+	// SupabaseServiceKeyDefault is the default value for Supabase Service Key
+	SupabaseServiceKeyDefault = ""
+	// SupabaseServiceKeyHelp is the help message for Supabase Service Key
+	SupabaseServiceKeyHelp = "Supabase Service Role Key (for backend server access)"
 )
 
 var (
@@ -102,6 +125,11 @@ func RegisterFlags(cmd *cobra.Command) {
 	// Dev Mocks
 	pflags.Bool(DevModeEnabledArg, DevModeEnabledDefault, DevModeEnabledHelp)
 	pflags.Bool(DevMocksNutritionServiceArg, DevMocksNutritionServiceDefault, DevMocksNutritionServiceHelp)
+	pflags.Bool(DevMocksScanFoodArg, DevMocksScanFoodDefault, DevMocksScanFoodHelp)
+
+	// Supabase
+	pflags.String(SupabaseURLArg, SupabaseURLDefault, SupabaseURLHelp)
+	pflags.String(SupabaseServiceKeyArg, SupabaseServiceKeyDefault, SupabaseServiceKeyHelp)
 
 	_ = viper.BindPFlags(pflags)
 }

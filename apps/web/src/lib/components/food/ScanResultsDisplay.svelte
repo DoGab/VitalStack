@@ -9,11 +9,16 @@
   import * as Collapsible from "$lib/components/ui/collapsible";
   import CircularProgress from "$lib/components/ui/circular-progress.svelte";
   import MacroBars from "$lib/components/ui/macro-bars.svelte";
+  import { nutritionState } from "$lib/state/nutrition.svelte";
 
   type ScanResult = components["schemas"]["ScanOutputBody"];
 
-  let { result }: { result: ScanResult } = $props();
-  // Changed from true to false so it fits more cleanly on screen initially
+  interface Props {
+    result: ScanResult;
+    mode?: "preview" | "details"; // Determines how progress bars render against daily totals
+  }
+
+  const { result, mode = "preview" }: Props = $props();
   let ingredientsOpen = $state(false);
 
   // Reference daily goals for progress bars
@@ -24,28 +29,33 @@
     fat: 80
   };
 
-  // Mocking the current daily intake to properly showcase the "newly added" segment of the bar layout requested in design
-  const CURRENT_INTAKE: Record<string, number> = {
-    calories: 840,
-    protein: 65,
-    carbs: 90,
-    fat: 45
-  };
+  // For previews (scanning new food), we show daily macros as solid context and the scan as the transparent preview.
+  // For details (viewing already logged food), we show ONLY the meal's macros as solid and 0 added.
+  const currentIntake = $derived(mode === "preview" ? nutritionState.safeMacros : result.macros);
+
+  const addedMacros = $derived(
+    mode === "preview" ? result.macros : { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
+  );
+
+  // Derive totals for labels
+  const totalCalories = $derived(currentIntake.calories + addedMacros.calories);
+
+  // Derive percentages specifically for CircularProgress
+  const currentCalPercent = $derived(
+    Math.min((currentIntake.calories / NUTRITION_GOALS.calories) * 100, 100)
+  );
+
+  const addedCalPercent = $derived(
+    Math.min((addedMacros.calories / NUTRITION_GOALS.calories) * 100, 100 - currentCalPercent)
+  );
 
   const macroItems = $derived.by(() => {
-    const macroValues: Record<string, number> = {
-      calories: result.macros.calories,
-      protein: result.macros.protein,
-      carbs: result.macros.carbs,
-      fat: result.macros.fat
-    };
-
     return getMacroDisplayOrder()
       .filter((k) => k !== "fiber" && k !== "calories")
       .map((key) => ({
         ...NUTRITION_CONFIG[key],
-        current: CURRENT_INTAKE[key],
-        added: macroValues[key],
+        current: currentIntake[key as keyof typeof currentIntake],
+        added: addedMacros[key as keyof typeof addedMacros],
         goal: NUTRITION_GOALS[key],
         key
       })) as Array<{
@@ -110,13 +120,6 @@
     if (lower.includes("apple")) return "🍎";
     return "🍽️";
   }
-
-  let currentCalPercent = $derived(
-    Math.min((CURRENT_INTAKE.calories / NUTRITION_GOALS.calories) * 100, 100)
-  );
-  let addedCalPercent = $derived(
-    Math.min((result.macros.calories / NUTRITION_GOALS.calories) * 100, 100 - currentCalPercent)
-  );
 </script>
 
 <div class="space-y-6 pt-2">
@@ -128,9 +131,14 @@
           >Nutrient Contribution</Card.Title
         >
         <Card.Description>
-          <span class="font-bold text-foreground">+{formatMacro(result.macros.calories)}kcal</span>
-          ({(CURRENT_INTAKE.calories + result.macros.calories).toLocaleString()} / {NUTRITION_GOALS.calories}
-          kcal)
+          {#if mode === "preview"}
+            <span class="font-bold text-foreground">+{formatMacro(result.macros.calories)}kcal</span
+            >
+            ({totalCalories.toLocaleString()} / {NUTRITION_GOALS.calories} kcal)
+          {:else}
+            <span class="font-bold text-foreground">{formatMacro(result.macros.calories)}kcal</span>
+            <span class="text-muted-foreground font-normal">contribution</span>
+          {/if}
         </Card.Description>
       </div>
 
@@ -166,7 +174,7 @@
           >
             <Flame class="size-6 text-primary mb-1" />
             <span class="text-2xl font-bold text-foreground" style="font-family: var(--font-mono);">
-              +{formatMacro(result.macros.calories)}
+              {#if mode === "preview"}+{/if}{formatMacro(result.macros.calories)}
             </span>
           </CircularProgress>
         </div>
@@ -228,8 +236,14 @@
                       <h4 class="text-sm font-semibold truncate text-foreground">
                         {ingredient.name}
                       </h4>
-                      <p class="text-[13px] text-muted-foreground font-medium">
-                        {ingredient.weight_grams}g
+                      <p
+                        class="text-[13px] text-muted-foreground font-medium flex items-center gap-1.5"
+                      >
+                        {#if ingredient.serving_quantity && ingredient.serving_unit}
+                          <span>{ingredient.serving_quantity} {ingredient.serving_unit}</span>
+                        {:else}
+                          <span>Unknown amount</span>
+                        {/if}
                       </p>
                     </div>
                     <!-- Right: KCAL -->

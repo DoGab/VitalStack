@@ -17,12 +17,12 @@
   }
 
   let {
-    caloriesConsumed = 840,
+    caloriesConsumed = 0,
     caloriesGoal = 2200,
     macros = [
-      { key: "protein", current: 65, goal: 150 },
-      { key: "carbs", current: 90, goal: 200 },
-      { key: "fat", current: 45, goal: 80 }
+      { key: "protein", current: 0, goal: 150 },
+      { key: "carbs", current: 0, goal: 200 },
+      { key: "fat", current: 0, goal: 80 }
     ]
   }: Props = $props();
 

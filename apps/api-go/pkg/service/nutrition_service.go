@@ -2,10 +2,16 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"log/slog"
+	"math/big"
+	"strconv"
+	"time"
 
+	"github.com/dogab/vitalstack/api/internal/models"
+	"github.com/dogab/vitalstack/api/internal/repository"
 	"github.com/dogab/vitalstack/api/pkg/types"
 
 	"github.com/firebase/genkit/go/ai"
@@ -18,16 +24,34 @@ var ErrNotFood = errors.New("that doesn't look like food. Please try again with 
 
 // NutritionService is a service for nutritional information
 type NutritionService struct {
-	genkit *genkit.Genkit
-	flows  map[flowName]*core.Flow[*ScanInput, *ScanOutput, struct{}]
+	genkit      *genkit.Genkit
+	flows       map[flowName]*core.Flow[*ScanInput, *ScanOutput, struct{}]
+	foodLogRepo repository.FoodLogRepository
+	mockScan    bool // If true, ScanFood returns diverse dummy data
+}
+
+// NutritionServiceOption defines a functional option for configuring the service
+type NutritionServiceOption func(*NutritionService)
+
+// WithMockScan sets whether the Genkit flow should be bypassed to return mock meal responses
+func WithMockScan(mock bool) NutritionServiceOption {
+	return func(s *NutritionService) {
+		s.mockScan = mock
+	}
 }
 
 // NewNutritionService creates a new nutrition service
-func NewNutritionService(genkit *genkit.Genkit) *NutritionService {
+func NewNutritionService(genkit *genkit.Genkit, foodLogRepo repository.FoodLogRepository, opts ...NutritionServiceOption) *NutritionService {
 	svc := &NutritionService{
-		genkit: genkit,
-		flows:  map[flowName]*core.Flow[*ScanInput, *ScanOutput, struct{}]{},
+		genkit:      genkit,
+		flows:       map[flowName]*core.Flow[*ScanInput, *ScanOutput, struct{}]{},
+		foodLogRepo: foodLogRepo,
 	}
+
+	for _, opt := range opts {
+		opt(svc)
+	}
+
 	svc.initializeFlows()
 	return svc
 }
@@ -42,6 +66,11 @@ func (s *NutritionService) initializeFlows() {
 // ScanFood scans the food in the image and returns the nutritional information
 func (s *NutritionService) ScanFood(ctx context.Context, input *ScanInput) (*ScanOutput, error) {
 	slog.Info("received food scan request", "input", input)
+
+	if s.mockScan {
+		slog.Info("returning dynamically mocked scan data (bypassing Genkit)")
+		return s.generateMockScan(), nil
+	}
 
 	flow := s.flows[FoodScanFlow]
 	response, err := flow.Run(ctx, input)
@@ -85,14 +114,16 @@ OUTPUT REQUIREMENTS:
 - confidence: How clearly the food is identifiable (0.0-1.0, or 0.0 if not food)
 - ingredients: Array of each component with:
   - name: Ingredient name (e.g., "Grilled Chicken Breast")
-  - weight_grams: Estimated weight in grams
+  - serving_size: Integer representing the raw unit size or standardized amount (e.g. 100)
+  - serving_quantity: Float representing how many servings are present (e.g., 1.5)
+  - serving_unit: String representing the unit (e.g., "g", "slice", "cup", "oz")
   - calories: Calories for this ingredient at the estimated weight
   - protein: Protein in grams
   - carbs: Carbohydrates in grams
   - fat: Fat in grams
   - fiber: Fiber in grams
 
-IMPORTANT: Do NOT return total macros or serving size. Only return per-ingredient data.
+IMPORTANT: Do NOT return total macros. Only return per-ingredient data.
 Total macros will be computed by summing all ingredients.
 
 IF THE IMAGE DOES NOT CONTAIN FOOD (is_food = false):
@@ -128,4 +159,211 @@ GUIDELINES:
 	}
 
 	return result, nil
+}
+
+// LogFood handles saving an accepted scan to the database
+func (s *NutritionService) LogFood(ctx context.Context, input *LogFoodInput) (*LogFoodOutput, error) {
+	if s.foodLogRepo == nil {
+		return nil, errors.New("database repository is not configured")
+	}
+
+	// Create the FoodLog database model
+	dbLog := &models.FoodLog{
+		FoodName:            input.FoodName,
+		DetectionConfidence: input.Confidence,
+		UserID:              input.UserID,
+		Calories:            input.Macros.Calories,
+		Protein:             input.Macros.Protein,
+		Carbs:               input.Macros.Carbs,
+		Fat:                 input.Macros.Fat,
+		Fiber:               input.Macros.Fiber,
+		CreatedAt:           time.Now().UTC(),
+	}
+
+	err := s.foodLogRepo.CreateFoodLog(ctx, dbLog)
+	if err != nil {
+		slog.Error("Failed to save food log to Supabase", "error", err)
+		return nil, fmt.Errorf("failed to save food log: %w", err)
+	}
+
+	// Persist the ingredients if the log was created successfully
+	if dbLog.ID != 0 {
+		for _, ing := range input.Ingredients {
+			dbIng := &models.FoodLogIngredient{
+				FoodLogID:       dbLog.ID,
+				Name:            ing.Name,
+				ServingSize:     ing.ServingSize,
+				ServingQuantity: ing.ServingQuantity,
+				ServingUnit:     ing.ServingUnit,
+				Calories:        ing.Calories,
+				Protein:         ing.Protein,
+				Carbs:           ing.Carbs,
+				Fat:             ing.Fat,
+				Fiber:           ing.Fiber,
+				CreatedAt:       time.Now().UTC(),
+			}
+			err = s.foodLogRepo.CreateFoodLogIngredient(ctx, dbIng)
+			if err != nil {
+				slog.Error("Failed to save food ingredient to Supabase", "error", err)
+			}
+		}
+	}
+
+	return &LogFoodOutput{
+		Success: true,
+		ID:      strconv.FormatInt(dbLog.ID, 10),
+	}, nil
+}
+
+// GetDailyIntake retrieves aggregated daily macro data and a list of meals
+func (s *NutritionService) GetDailyIntake(ctx context.Context, userID string, tzOffsetMins int) (*DailyIntakeOutput, error) {
+	if s.foodLogRepo == nil {
+		return nil, errors.New("database repository is not configured")
+	}
+
+	// Calculate bounds based on tzOffset
+	// tzOffsetMins is the number of minutes to add to UTC to get local time (e.g. +120 for GMT+2).
+	// Wait, timezoneOffset in JS is UTC - Local in minutes.
+	// We'll assume the frontend sends the timezone offset in minutes: localTime = UTC - tzOffsetMins
+	nowUTC := time.Now().UTC()
+	// To get local time of the user:
+	localTimeOrigin := nowUTC.Add(time.Duration(-tzOffsetMins) * time.Minute)
+
+	// Start of local day
+	localStartOfDay := time.Date(localTimeOrigin.Year(), localTimeOrigin.Month(), localTimeOrigin.Day(), 0, 0, 0, 0, time.UTC)
+	// End of local day
+	localEndOfDay := localStartOfDay.Add(24 * time.Hour).Add(-time.Nanosecond)
+
+	// Shift bounds back to UTC for database querying
+	utcStartOfDay := localStartOfDay.Add(time.Duration(tzOffsetMins) * time.Minute)
+	utcEndOfDay := localEndOfDay.Add(time.Duration(tzOffsetMins) * time.Minute)
+
+	logs, err := s.foodLogRepo.GetDailyFoodLogs(ctx, userID, utcStartOfDay, utcEndOfDay)
+	if err != nil {
+		slog.Error("Failed to get daily food logs from Supabase", "error", err)
+		return nil, fmt.Errorf("failed to get daily food logs: %w", err)
+	}
+
+	var totalMacros MacroData
+	var meals []Meal
+
+	for _, log := range logs {
+		totalMacros.Calories += log.Calories
+		totalMacros.Protein += log.Protein
+		totalMacros.Carbs += log.Carbs
+		totalMacros.Fat += log.Fat
+		totalMacros.Fiber += log.Fiber
+
+		// Map deeply nested DB ingredients back to business logic ingredients
+		var mappedIngredients []Ingredient
+		for _, ing := range log.Ingredients {
+			mappedIngredients = append(mappedIngredients, Ingredient{
+				Name:            ing.Name,
+				ServingSize:     ing.ServingSize,
+				ServingQuantity: ing.ServingQuantity,
+				ServingUnit:     ing.ServingUnit,
+				Calories:        ing.Calories,
+				Protein:         ing.Protein,
+				Carbs:           ing.Carbs,
+				Fat:             ing.Fat,
+				Fiber:           ing.Fiber,
+			})
+		}
+
+		// Calculate local time for the meal display
+		mealLocalTime := log.CreatedAt.UTC().Add(time.Duration(-tzOffsetMins) * time.Minute)
+
+		meals = append(meals, Meal{
+			ID:       strconv.FormatInt(log.ID, 10),
+			Name:     log.FoodName,
+			Time:     mealLocalTime.Format("03:04 PM"),
+			Calories: log.Calories,
+			Macros: MacroData{
+				Calories: log.Calories,
+				Protein:  log.Protein,
+				Carbs:    log.Carbs,
+				Fat:      log.Fat,
+				Fiber:    log.Fiber,
+			},
+			Ingredients: mappedIngredients,
+			Emoji:       "🍽️",
+			Tag:         "",
+		})
+	}
+
+	// Reverse meals array so newest is first (since we removed database ordering)
+	for i, j := 0, len(meals)-1; i < j; i, j = i+1, j-1 {
+		meals[i], meals[j] = meals[j], meals[i]
+	}
+
+	return &DailyIntakeOutput{
+		Macros: totalMacros,
+		Meals:  meals,
+	}, nil
+}
+
+// DeleteLoggedFood deletes a logged food entry by ID
+func (s *NutritionService) DeleteLoggedFood(ctx context.Context, userID string, logID int64) error {
+	if s.foodLogRepo == nil {
+		return errors.New("database repository is not configured")
+	}
+
+	err := s.foodLogRepo.DeleteFoodLog(ctx, userID, logID)
+	if err != nil {
+		slog.Error("Failed to delete food log from Supabase", "error", err, "logID", logID)
+		return fmt.Errorf("failed to delete food log: %w", err)
+	}
+
+	slog.Info("Successfully deleted food log", "logID", logID, "userID", userID)
+	return nil
+}
+
+// generateMockScan returns a randomized mock scan output from 3 predefined meals
+func (s *NutritionService) generateMockScan() *ScanOutput {
+	// 3 hardcoded diverse mock meals
+	meals := []ScanOutput{
+		{
+			IsFood:         true,
+			DetectedObject: "A salad bowl with grilled chicken",
+			FoodName:       "Grilled Chicken Salad",
+			Confidence:     0.95,
+			Ingredients: []Ingredient{
+				{Name: "Grilled Chicken Breast", Calories: 248, Protein: 38, Carbs: 0, Fat: 10, Fiber: 0},
+				{Name: "Mixed Greens", Calories: 20, Protein: 2, Carbs: 3, Fat: 0, Fiber: 2},
+				{Name: "Cherry Tomatoes", Calories: 18, Protein: 1, Carbs: 4, Fat: 0, Fiber: 1},
+				{Name: "Feta Cheese", Calories: 105, Protein: 6, Carbs: 2, Fat: 8, Fiber: 0},
+				{Name: "Olive Oil Dressing", Calories: 80, Protein: 0, Carbs: 1, Fat: 9, Fiber: 0},
+				{Name: "Cucumber", Calories: 5, Protein: 0, Carbs: 1, Fat: 0, Fiber: 0},
+			},
+		},
+		{
+			IsFood:         true,
+			DetectedObject: "A bowl of oatmeal topped with fresh berries",
+			FoodName:       "Blueberry Oatmeal",
+			Confidence:     0.92,
+			Ingredients: []Ingredient{
+				{Name: "Rolled Oats", Calories: 150, Protein: 5, Carbs: 27, Fat: 3, Fiber: 4},
+				{Name: "Almond Milk", Calories: 30, Protein: 1, Carbs: 1, Fat: 2.5, Fiber: 0},
+				{Name: "Blueberries", Calories: 42, Protein: 0.5, Carbs: 11, Fat: 0.2, Fiber: 1.8},
+				{Name: "Chia Seeds", Calories: 60, Protein: 2, Carbs: 5, Fat: 4, Fiber: 4},
+				{Name: "Honey", Calories: 64, Protein: 0, Carbs: 17, Fat: 0, Fiber: 0},
+			},
+		},
+		{
+			IsFood:         true,
+			DetectedObject: "A bowl of rice with pan-seared salmon",
+			FoodName:       "Salmon Rice Bowl",
+			Confidence:     0.97,
+			Ingredients: []Ingredient{
+				{Name: "Seared Salmon", Calories: 280, Protein: 25, Carbs: 0, Fat: 18, Fiber: 0},
+				{Name: "Jasmine Rice", Calories: 205, Protein: 4, Carbs: 45, Fat: 0.4, Fiber: 0.6},
+				{Name: "Avocado", Calories: 160, Protein: 2, Carbs: 8, Fat: 15, Fiber: 6},
+				{Name: "Sesame Seeds", Calories: 52, Protein: 1.6, Carbs: 2.1, Fat: 4.5, Fiber: 1.1},
+				{Name: "Soy Sauce", Calories: 9, Protein: 1.3, Carbs: 0.8, Fat: 0, Fiber: 0},
+			},
+		},
+	}
+
+	n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(meals))))
+	return &meals[n.Int64()]
 }

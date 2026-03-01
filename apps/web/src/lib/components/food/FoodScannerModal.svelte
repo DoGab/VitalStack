@@ -35,6 +35,11 @@
   let scanResult: ScanResult | null = $state(null);
   let error: string | null = $state(null);
 
+  // States for 'Log to Diary' action
+  let isLogging = $state(false);
+  let hasLogged = $state(false);
+  let logError = $state<string | null>(null);
+
   // Camera state
   const camera = useCamera();
   let videoElement: HTMLVideoElement | null = $state(null);
@@ -76,7 +81,10 @@
     description = "";
     scanResult = null;
     error = null;
+    logError = null;
     showCamera = false;
+    isLogging = false;
+    hasLogged = false;
   }
 
   async function startCamera() {
@@ -175,6 +183,43 @@
     error = null;
     if (mode === "camera") {
       startCamera();
+    }
+  }
+
+  async function handleLogFood() {
+    if (!scanResult) return;
+    isLogging = true;
+    logError = null;
+
+    try {
+      const { data, error: logApiError } = await api.POST("/api/nutrition/log", {
+        body: {
+          food_name: scanResult.food_name,
+          confidence: scanResult.confidence,
+          macros: scanResult.macros,
+          ingredients: scanResult.ingredients || []
+          // user_id will be handled by auth layer later or hardcoded
+        }
+      });
+
+      if (logApiError) {
+        logError = "Failed to log food. Please try again.";
+        console.error("Log error", logApiError);
+      } else if (data?.success) {
+        hasLogged = true;
+        window.dispatchEvent(new CustomEvent("app:food-logged"));
+        // Optionally auto-close the modal after a short delay
+        setTimeout(() => {
+          open = false;
+        }, 1500);
+      } else {
+        logError = "Unexpected response from server.";
+      }
+    } catch (e) {
+      logError = "A network error occurred.";
+      console.error(e);
+    } finally {
+      isLogging = false;
     }
   }
 </script>
@@ -283,12 +328,31 @@
 <!-- Shared footer for scan results -->
 {#snippet modalFooter()}
   {#if scanResult}
-    <div class="flex w-full gap-2">
-      <Button variant="outline" class="flex-1 px-2 sm:px-4" onclick={() => (open = false)}
-        >Close</Button
-      >
-      <Button variant="outline" class="flex-1 px-2 sm:px-4" onclick={retake}>Rescan</Button>
-      <Button class="flex-1 px-2 sm:px-4" disabled>Add to Log</Button>
+    <div class="flex flex-col w-full gap-2 pt-2">
+      {#if logError}
+        <p class="text-sm text-destructive font-medium text-center">{logError}</p>
+      {/if}
+      <div class="flex w-full gap-2">
+        <Button variant="outline" class="flex-1 px-2 sm:px-4" onclick={() => (open = false)}
+          >Close</Button
+        >
+        <Button variant="outline" class="flex-1 px-2 sm:px-4" onclick={retake}>Rescan</Button>
+        <Button
+          class="flex-1 px-2 sm:px-4"
+          disabled={isLogging || hasLogged}
+          onclick={handleLogFood}
+        >
+          {#if isLogging}
+            <Loader2 class="mr-2 h-4 w-4 animate-spin" />
+            Saving...
+          {:else if hasLogged}
+            <Check class="mr-2 h-4 w-4" />
+            Done
+          {:else}
+            Add to Log
+          {/if}
+        </Button>
+      </div>
     </div>
   {/if}
 {/snippet}
