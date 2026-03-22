@@ -15,7 +15,8 @@ import (
 type NutritionServicer interface {
 	ScanFood(ctx context.Context, input *service.ScanInput) (*service.ScanOutput, error)
 	LogFood(ctx context.Context, input *service.LogFoodInput) (*service.LogFoodOutput, error)
-	GetDailyIntake(ctx context.Context, userID string, tzOffsetMins int) (*service.DailyIntakeOutput, error)
+	GetDailyIntake(ctx context.Context, userID string, tzOffsetMins int, targetDateStr string) (*service.DailyIntakeOutput, error)
+	GetHistory(ctx context.Context, userID string, tzOffsetMins int, days int) (*service.HistoryOutput, error)
 	DeleteLoggedFood(ctx context.Context, userID string, logID int64) error
 }
 
@@ -65,6 +66,15 @@ func (c *NutritionController) Register(api huma.API) {
 		Description: "Permanently removes a meal and its scanned ingredients from the user's diary.",
 		Tags:        []string{"nutrition"},
 	}, c.DeleteLogHandler)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/api/nutrition/history",
+		Method:      http.MethodGet,
+		OperationID: "get-history",
+		Summary:     "Get historical aggregated intake",
+		Description: "Fetch the user's aggregated macros over the past X days.",
+		Tags:        []string{"nutrition"},
+	}, c.GetHistoryHandler)
 }
 
 // ScanHandler handles the scan request
@@ -174,7 +184,7 @@ func (c *NutritionController) GetDailyIntakeHandler(ctx context.Context, input *
 		return nil, huma.Error401Unauthorized("Unauthorized")
 	}
 
-	resp, err := c.Service.GetDailyIntake(ctx, userID, input.TzOffset)
+	resp, err := c.Service.GetDailyIntake(ctx, userID, input.TzOffset, input.Date)
 	if err != nil {
 		return nil, convertServiceErrorToHTTPError(err)
 	}
@@ -254,4 +264,44 @@ func (c *NutritionController) DeleteLogHandler(ctx context.Context, input *Delet
 	}
 
 	return &DeleteLogOutput{}, nil
+}
+
+// GetHistoryHandler fetches historical aggregated macros over X days
+func (c *NutritionController) GetHistoryHandler(ctx context.Context, input *HistoryInput) (*HistoryOutput, error) {
+	userID, ok := middleware.GetUserFromContext(ctx)
+	if !ok {
+		return nil, huma.Error401Unauthorized("Unauthorized")
+	}
+
+	resp, err := c.Service.GetHistory(ctx, userID, input.TzOffset, input.Days)
+	if err != nil {
+		return nil, convertServiceErrorToHTTPError(err)
+	}
+
+	daysList := make([]DailySummary, len(resp.Days))
+	for i, day := range resp.Days {
+		daysList[i] = DailySummary{
+			Date: day.Date,
+			Macros: MacroData{
+				Calories: day.Macros.Calories,
+				Protein:  day.Macros.Protein,
+				Carbs:    day.Macros.Carbs,
+				Fat:      day.Macros.Fat,
+				Fiber:    day.Macros.Fiber,
+			},
+		}
+	}
+
+	return &HistoryOutput{
+		Body: &HistoryOutputBody{
+			Averages: MacroData{
+				Calories: resp.Averages.Calories,
+				Protein:  resp.Averages.Protein,
+				Carbs:    resp.Averages.Carbs,
+				Fat:      resp.Averages.Fat,
+				Fiber:    resp.Averages.Fiber,
+			},
+			Days: daysList,
+		},
+	}, nil
 }

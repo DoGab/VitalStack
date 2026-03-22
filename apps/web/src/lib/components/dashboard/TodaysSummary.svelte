@@ -3,6 +3,7 @@
   import Flame from "lucide-svelte/icons/flame";
   import CircularProgress from "$lib/components/ui/circular-progress.svelte";
   import MacroBars from "$lib/components/ui/macro-bars.svelte";
+  import SectionHeader from "$lib/components/ui/section-header.svelte";
 
   interface MacroData {
     key: string;
@@ -31,10 +32,7 @@
 </script>
 
 <div class="space-y-3">
-  <div class="flex items-center justify-between">
-    <h2 class="text-lg font-semibold">Today's Summary</h2>
-    <a href="/history" class="text-sm text-primary hover:underline">View Details</a>
-  </div>
+  <SectionHeader title="Today's Summary" actionLabel="View Details" href="/history" />
 
   <Card.Root>
     <!-- <Card.Header class="flex flex-row items-start justify-between space-y-0"> -->

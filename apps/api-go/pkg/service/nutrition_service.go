@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"math/big"
 	"strconv"
 	"time"
@@ -209,7 +210,7 @@ func (s *NutritionService) LogFood(ctx context.Context, input *LogFoodInput) (*L
 }
 
 // GetDailyIntake retrieves aggregated daily macro data and a list of meals
-func (s *NutritionService) GetDailyIntake(ctx context.Context, userID string, tzOffsetMins int) (*DailyIntakeOutput, error) {
+func (s *NutritionService) GetDailyIntake(ctx context.Context, userID string, tzOffsetMins int, targetDateStr string) (*DailyIntakeOutput, error) {
 	if s.foodLogRepo == nil {
 		return nil, errors.New("database repository is not configured")
 	}
@@ -221,6 +222,14 @@ func (s *NutritionService) GetDailyIntake(ctx context.Context, userID string, tz
 	nowUTC := time.Now().UTC()
 	// To get local time of the user:
 	localTimeOrigin := nowUTC.Add(time.Duration(-tzOffsetMins) * time.Minute)
+
+	if targetDateStr != "" {
+		parsedDate, err := time.Parse("2006-01-02", targetDateStr)
+		if err == nil {
+			// Set the local time origin to the requested date (keeping the time at 00:00:00)
+			localTimeOrigin = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 0, 0, 0, 0, time.UTC)
+		}
+	}
 
 	// Start of local day
 	localStartOfDay := time.Date(localTimeOrigin.Year(), localTimeOrigin.Month(), localTimeOrigin.Day(), 0, 0, 0, 0, time.UTC)
@@ -318,6 +327,98 @@ func (s *NutritionService) DeleteLoggedFood(ctx context.Context, userID string, 
 
 	slog.Info("Successfully deleted food log", "logID", logID, "userID", userID)
 	return nil
+}
+
+// GetHistory retrieves aggregated daily macro data over a specified number of past days
+func (s *NutritionService) GetHistory(ctx context.Context, userID string, tzOffsetMins int, days int) (*HistoryOutput, error) {
+	if s.foodLogRepo == nil {
+		return nil, errors.New("database repository is not configured")
+	}
+
+	nowUTC := time.Now().UTC()
+	localTimeOrigin := nowUTC.Add(time.Duration(-tzOffsetMins) * time.Minute)
+
+	// End is the end of today
+	localEndOfToday := time.Date(localTimeOrigin.Year(), localTimeOrigin.Month(), localTimeOrigin.Day(), 23, 59, 59, 999999999, time.UTC)
+	// Start is X days ago (including today as one of the days)
+	localStartOfRange := time.Date(localTimeOrigin.Year(), localTimeOrigin.Month(), localTimeOrigin.Day(), 0, 0, 0, 0, time.UTC).AddDate(0, 0, -(days - 1))
+
+	utcStartOfRange := localStartOfRange.Add(time.Duration(tzOffsetMins) * time.Minute)
+	utcEndOfRange := localEndOfToday.Add(time.Duration(tzOffsetMins) * time.Minute)
+
+	logs, err := s.foodLogRepo.GetDailyFoodLogs(ctx, userID, utcStartOfRange, utcEndOfRange)
+	if err != nil {
+		slog.Error("Failed to get historical food logs from Supabase", "error", err)
+		return nil, fmt.Errorf("failed to get historical food logs: %w", err)
+	}
+
+	// Initialize days map/slice
+	dailySummariesMap := make(map[string]*DailySummary)
+
+	// Pre-fill last X days to ensure we have all days even if no logs exist
+	var orderedDates []string
+	for i := days - 1; i >= 0; i-- {
+		d := localEndOfToday.AddDate(0, 0, -i).Format("2006-01-02")
+		orderedDates = append(orderedDates, d)
+		dailySummariesMap[d] = &DailySummary{
+			Date:   d,
+			Macros: MacroData{},
+		}
+	}
+
+	var overallTotals MacroData
+
+	for _, log := range logs {
+		// Calculate local time for the meal to put it in the correct bucket
+		mealLocalTime := log.CreatedAt.UTC().Add(time.Duration(-tzOffsetMins) * time.Minute)
+		dateStr := mealLocalTime.Format("2006-01-02")
+
+		if summary, exists := dailySummariesMap[dateStr]; exists {
+			summary.Macros.Calories += log.Calories
+			summary.Macros.Protein += log.Protein
+			summary.Macros.Carbs += log.Carbs
+			summary.Macros.Fat += log.Fat
+			summary.Macros.Fiber += log.Fiber
+		}
+
+		overallTotals.Calories += log.Calories
+		overallTotals.Protein += log.Protein
+		overallTotals.Carbs += log.Carbs
+		overallTotals.Fat += log.Fat
+		overallTotals.Fiber += log.Fiber
+	}
+
+	// Compute averages
+	var averages MacroData
+	if days > 0 {
+		averages.Calories = int(math.Round(float64(overallTotals.Calories) / float64(days)))
+		averages.Protein = overallTotals.Protein / float64(days)
+		averages.Carbs = overallTotals.Carbs / float64(days)
+		averages.Fat = overallTotals.Fat / float64(days)
+		averages.Fiber = overallTotals.Fiber / float64(days)
+	}
+
+	// Format averages
+	averages.Protein = math.Round(averages.Protein*10) / 10
+	averages.Carbs = math.Round(averages.Carbs*10) / 10
+	averages.Fat = math.Round(averages.Fat*10) / 10
+	averages.Fiber = math.Round(averages.Fiber*10) / 10
+
+	var daysList []DailySummary
+	for _, dateStr := range orderedDates {
+		summary := dailySummariesMap[dateStr]
+		// Round the daily macros
+		summary.Macros.Protein = math.Round(summary.Macros.Protein*10) / 10
+		summary.Macros.Carbs = math.Round(summary.Macros.Carbs*10) / 10
+		summary.Macros.Fat = math.Round(summary.Macros.Fat*10) / 10
+		summary.Macros.Fiber = math.Round(summary.Macros.Fiber*10) / 10
+		daysList = append(daysList, *summary)
+	}
+
+	return &HistoryOutput{
+		Averages: averages,
+		Days:     daysList,
+	}, nil
 }
 
 // ptr is a helper function to create pointers to values

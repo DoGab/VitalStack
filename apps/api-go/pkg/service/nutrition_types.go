@@ -187,3 +187,15 @@ type DailyIntakeOutput struct {
 type DeleteLogInput struct {
 	ID string `path:"id"`
 }
+
+// DailySummary represents a single day's aggregate
+type DailySummary struct {
+	Date   string    `json:"date"`
+	Macros MacroData `json:"macros"`
+}
+
+// HistoryOutput represents the historical aggregated macros
+type HistoryOutput struct {
+	Averages MacroData      `json:"averages"`
+	Days     []DailySummary `json:"days"`
+}

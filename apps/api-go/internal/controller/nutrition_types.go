@@ -66,7 +66,8 @@ type LogFoodOutputBody struct {
 
 // DailyIntakeInput represents the request to get daily food logs
 type DailyIntakeInput struct {
-	TzOffset int `query:"tz_offset" default:"0" doc:"Timezone offset in minutes (UTC - Local Time)"`
+	TzOffset int    `query:"tz_offset" default:"0" doc:"Timezone offset in minutes (UTC - Local Time)"`
+	Date     string `query:"date,omitempty" doc:"Optional past date to fetch logs for (YYYY-MM-DD)"`
 }
 
 // Meal represents a single logged food item
@@ -101,4 +102,26 @@ type DeleteLogInput struct {
 // DeleteLogOutput represents a successful deletion
 type DeleteLogOutput struct {
 	Body *struct{}
+}
+
+// HistoryInput represents the request to get aggregated historical data
+type HistoryInput struct {
+	Days     int `query:"days" default:"7" doc:"Number of days to fetch history for"`
+	TzOffset int `query:"tz_offset" default:"0" doc:"Timezone offset in minutes (UTC - Local Time)"`
+}
+
+// DailySummary represents a single day's aggregate
+type DailySummary struct {
+	Date   string    `json:"date" example:"2024-10-24" doc:"Date of the summary (YYYY-MM-DD)"`
+	Macros MacroData `json:"macros" doc:"Aggregated nutritional macro information for the day"`
+}
+
+// HistoryOutput represents the history response
+type HistoryOutput struct {
+	Body *HistoryOutputBody `json:"body"`
+}
+
+type HistoryOutputBody struct {
+	Averages MacroData      `json:"averages" doc:"Average daily macros over the period"`
+	Days     []DailySummary `json:"days" doc:"List of daily summaries"`
 }

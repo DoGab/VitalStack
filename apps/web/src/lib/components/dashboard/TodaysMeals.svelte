@@ -6,6 +6,7 @@
   import UtensilsCrossed from "lucide-svelte/icons/utensils-crossed";
   import type { components } from "$lib/api/schema";
   import MealDetailsModal from "./MealDetailsModal.svelte";
+  import SectionHeader from "$lib/components/ui/section-header.svelte";
 
   type Meal = components["schemas"]["Meal"];
 
@@ -28,12 +29,7 @@
 </script>
 
 <div class="space-y-3">
-  <div class="flex items-center justify-between">
-    <h2 class="text-lg font-semibold">Today's Meals</h2>
-    {#if hasMeals}
-      <a href="/history" class="text-sm text-primary hover:underline">View All</a>
-    {/if}
-  </div>
+  <SectionHeader title="Today's Meals" actionLabel={hasMeals ? "View All" : undefined} href={hasMeals ? "/history" : undefined} />
 
   {#if hasMeals}
     <!-- Desktop: horizontal cards -->

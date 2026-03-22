@@ -24,6 +24,21 @@ components:
         - macros
         - meals
       type: object
+    DailySummary:
+      additionalProperties: false
+      properties:
+        date:
+          description: Date of the summary (YYYY-MM-DD)
+          examples:
+            - "2024-10-24"
+          type: string
+        macros:
+          $ref: "#/components/schemas/MacroData"
+          description: Aggregated nutritional macro information for the day
+      required:
+        - date
+        - macros
+      type: object
     DeleteLogOutputBody:
       additionalProperties: false
       properties:
@@ -93,6 +108,30 @@ components:
             - https://example.com/errors/example
           format: uri
           type: string
+      type: object
+    HistoryOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - //schemas/HistoryOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        averages:
+          $ref: "#/components/schemas/MacroData"
+          description: Average daily macros over the period
+        days:
+          description: List of daily summaries
+          items:
+            $ref: "#/components/schemas/DailySummary"
+          type:
+            - array
+            - "null"
+      required:
+        - averages
+        - days
       type: object
     IngredientBody:
       additionalProperties: false
@@ -375,6 +414,13 @@ paths:
             description: Timezone offset in minutes (UTC - Local Time)
             format: int64
             type: integer
+        - description: Optional past date to fetch logs for (YYYY-MM-DD)
+          explode: false
+          in: query
+          name: date
+          schema:
+            description: Optional past date to fetch logs for (YYYY-MM-DD)
+            type: string
       responses:
         "200":
           content:
@@ -389,6 +435,45 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Get daily intake
+      tags:
+        - nutrition
+  /api/nutrition/history:
+    get:
+      description: Fetch the user's aggregated macros over the past X days.
+      operationId: get-history
+      parameters:
+        - description: Number of days to fetch history for
+          explode: false
+          in: query
+          name: days
+          schema:
+            default: 7
+            description: Number of days to fetch history for
+            format: int64
+            type: integer
+        - description: Timezone offset in minutes (UTC - Local Time)
+          explode: false
+          in: query
+          name: tz_offset
+          schema:
+            default: 0
+            description: Timezone offset in minutes (UTC - Local Time)
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HistoryOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get historical aggregated intake
       tags:
         - nutrition
   /api/nutrition/log:

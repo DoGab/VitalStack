@@ -16,8 +16,8 @@ export interface NutritionConfig {
 export const NUTRITION_CONFIG: Record<string, NutritionConfig> = {
   calories: {
     icon: Flame,
-    color: "text-orange-500",
-    barColor: "oklch(70.5% 0.213 47.604)",
+    color: "text-[#D65A31]",
+    barColor: "#D65A31",
     label: "Calories",
     unit: "kcal"
   },

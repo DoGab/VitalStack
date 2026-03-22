@@ -52,6 +52,15 @@ func (c *NutritionMockController) Register(api huma.API) {
 		Description: "Permanently removes a meal and its scanned ingredients from the user's diary.",
 		Tags:        []string{"nutrition"},
 	}, c.DeleteLogHandler)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/api/nutrition/history",
+		Method:      http.MethodGet,
+		OperationID: "get-history",
+		Summary:     "Get historical aggregated intake",
+		Description: "Fetch the user's aggregated macros over the past X days.",
+		Tags:        []string{"nutrition"},
+	}, c.GetHistoryHandler)
 }
 
 // ScanHandler handles the scan request
@@ -232,6 +241,87 @@ func (c *NutritionMockController) GetDailyIntakeHandler(ctx context.Context, inp
 // DeleteLogHandler handles the mock deletion request
 func (c *NutritionMockController) DeleteLogHandler(ctx context.Context, input *DeleteLogInput) (*DeleteLogOutput, error) {
 	return &DeleteLogOutput{}, nil
+}
+
+// GetHistoryHandler returns mock historical intake
+func (c *NutritionMockController) GetHistoryHandler(ctx context.Context, input *HistoryInput) (*HistoryOutput, error) {
+	out := &HistoryOutput{
+		Body: &HistoryOutputBody{
+			Averages: MacroData{
+				Calories: 2150,
+				Protein:  145,
+				Carbs:    180,
+				Fat:      70,
+				Fiber:    25,
+			},
+			Days: []DailySummary{
+				{
+					Date: "2024-10-20",
+					Macros: MacroData{
+						Calories: 2100,
+						Protein:  140,
+						Carbs:    170,
+						Fat:      65,
+					},
+				},
+				{
+					Date: "2024-10-21",
+					Macros: MacroData{
+						Calories: 2300,
+						Protein:  155,
+						Carbs:    190,
+						Fat:      75,
+					},
+				},
+				{
+					Date: "2024-10-22",
+					Macros: MacroData{
+						Calories: 1950,
+						Protein:  130,
+						Carbs:    160,
+						Fat:      60,
+					},
+				},
+				{
+					Date: "2024-10-23",
+					Macros: MacroData{
+						Calories: 2250,
+						Protein:  150,
+						Carbs:    185,
+						Fat:      72,
+					},
+				},
+				{
+					Date: "2024-10-24",
+					Macros: MacroData{
+						Calories: 2150,
+						Protein:  145,
+						Carbs:    180,
+						Fat:      70,
+					},
+				},
+				{
+					Date: "2024-10-25",
+					Macros: MacroData{
+						Calories: 2000,
+						Protein:  135,
+						Carbs:    165,
+						Fat:      65,
+					},
+				},
+				{
+					Date: "2024-10-26",
+					Macros: MacroData{
+						Calories: 2300,
+						Protein:  160,
+						Carbs:    190,
+						Fat:      80,
+					},
+				},
+			},
+		},
+	}
+	return out, nil
 }
 
 // ptr is a helper function to create pointers to values

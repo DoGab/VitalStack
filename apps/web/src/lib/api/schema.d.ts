@@ -24,6 +24,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/nutrition/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get historical aggregated intake
+         * @description Fetch the user's aggregated macros over the past X days.
+         */
+        get: operations["get-history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/nutrition/log": {
         parameters: {
             query?: never;
@@ -100,6 +120,15 @@ export interface components {
             /** @description List of meals logged today */
             meals: components["schemas"]["Meal"][] | null;
         };
+        DailySummary: {
+            /**
+             * @description Date of the summary (YYYY-MM-DD)
+             * @example 2024-10-24
+             */
+            date: string;
+            /** @description Aggregated nutritional macro information for the day */
+            macros: components["schemas"]["MacroData"];
+        };
         DeleteLogOutputBody: {
             /**
              * Format: uri
@@ -154,6 +183,18 @@ export interface components {
              * @example https://example.com/errors/example
              */
             type: string;
+        };
+        HistoryOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example //schemas/HistoryOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Average daily macros over the period */
+            averages: components["schemas"]["MacroData"];
+            /** @description List of daily summaries */
+            days: components["schemas"]["DailySummary"][] | null;
         };
         IngredientBody: {
             /** @description Nutritional macro information for this ingredient */
@@ -358,6 +399,8 @@ export interface operations {
             query?: {
                 /** @description Timezone offset in minutes (UTC - Local Time) */
                 tz_offset?: number;
+                /** @description Optional past date to fetch logs for (YYYY-MM-DD) */
+                date?: string;
             };
             header?: never;
             path?: never;
@@ -372,6 +415,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DailyIntakeOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    "get-history": {
+        parameters: {
+            query?: {
+                /** @description Number of days to fetch history for */
+                days?: number;
+                /** @description Timezone offset in minutes (UTC - Local Time) */
+                tz_offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryOutputBody"];
                 };
             };
             /** @description Error */
