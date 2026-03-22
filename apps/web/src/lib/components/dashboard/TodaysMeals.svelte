@@ -29,7 +29,11 @@
 </script>
 
 <div class="space-y-3">
-  <SectionHeader title="Today's Meals" actionLabel={hasMeals ? "View All" : undefined} href={hasMeals ? "/history" : undefined} />
+  <SectionHeader
+    title="Today's Meals"
+    actionLabel={hasMeals ? "View All" : undefined}
+    href={hasMeals ? "/history" : undefined}
+  />
 
   {#if hasMeals}
     <!-- Desktop: horizontal cards -->
