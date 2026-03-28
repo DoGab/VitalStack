@@ -28,7 +28,7 @@
   }
 </script>
 
-<div class="space-y-3">
+<div>
   <SectionHeader
     title="Today's Meals"
     actionLabel={hasMeals ? "View All" : undefined}

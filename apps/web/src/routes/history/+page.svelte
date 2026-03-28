@@ -3,11 +3,11 @@
   import type { components } from "$lib/api/schema";
   import { Button } from "$lib/components/ui/button/index.js";
   import * as ButtonGroup from "$lib/components/ui/button-group/index.js";
-  import * as Card from "$lib/components/ui/card/index.js";
   import * as Chart from "$lib/components/ui/chart/index.js";
   import { NUTRITION_CONFIG } from "$lib/config/nutrition-config";
   import HistoryChart from "./history-chart.svelte";
   import SectionHeader from "$lib/components/ui/section-header.svelte";
+  import StatCard from "$lib/components/ui/stat-card.svelte";
 
   type HistoryData = components["schemas"]["HistoryOutputBody"];
 
@@ -44,6 +44,18 @@
       };
     }) || []
   );
+
+  const sharedYDomain = $derived.by(() => {
+    if (chartData.length === 0) return undefined;
+    const maxVal = Math.max(
+      ...chartData.map((d) => Math.max(d.calories, d.protein + d.carbs + d.fat))
+    );
+    const paddedVal = maxVal * 1.1;
+    let maxY = Math.ceil(paddedVal / 50) * 50;
+    if (paddedVal > 500) maxY = Math.ceil(paddedVal / 100) * 100;
+    if (paddedVal > 1000) maxY = Math.ceil(paddedVal / 500) * 500;
+    return [0, maxY] as [number, number];
+  });
 
   const caloriesSeries = [
     {
@@ -146,63 +158,45 @@
     </div>
   {:else if historyData}
     <!-- Averages Section -->
-    <div class="space-y-3">
+    <div>
       <SectionHeader title="Daily Averages" />
 
       <div class="flex flex-wrap items-center gap-3">
         <!-- Calories -->
-        <Card.Root class="flex-1 min-w-[70px]">
-          <Card.Content class="p-3 flex flex-col items-center justify-center space-y-1 text-center">
-            <p class="text-xl font-bold font-mono tracking-tight text-[var(--theme-primary)]">
-              {historyData.averages.calories}
-            </p>
-            <p class="text-[10px] text-muted-foreground uppercase font-semibold">kcal</p>
-          </Card.Content>
-        </Card.Root>
+        <StatCard
+          value={historyData.averages.calories}
+          label="kcal"
+          colorValue={NUTRITION_CONFIG.calories.barColor}
+        />
 
         <!-- Protein -->
-        <Card.Root class="flex-1 min-w-[70px]">
-          <Card.Content class="p-3 flex flex-col items-center justify-center space-y-1 text-center">
-            <p
-              class="text-xl font-bold font-mono tracking-tight"
-              style="color: var(--theme-primary)"
-            >
-              {historyData.averages.protein}g
-            </p>
-            <p class="text-[10px] text-muted-foreground uppercase font-semibold">Protein</p>
-          </Card.Content>
-        </Card.Root>
+        <StatCard
+          value={historyData.averages.protein}
+          valueSuffix="g"
+          label="Protein"
+          colorValue={NUTRITION_CONFIG.protein.barColor}
+        />
 
         <!-- Carbs -->
-        <Card.Root class="flex-1 min-w-[70px]">
-          <Card.Content class="p-3 flex flex-col items-center justify-center space-y-1 text-center">
-            <p
-              class="text-xl font-bold font-mono tracking-tight"
-              style="color: var(--theme-secondary)"
-            >
-              {historyData.averages.carbs}g
-            </p>
-            <p class="text-[10px] text-muted-foreground uppercase font-semibold">Carbs</p>
-          </Card.Content>
-        </Card.Root>
+        <StatCard
+          value={historyData.averages.carbs}
+          valueSuffix="g"
+          label="Carbs"
+          colorValue={NUTRITION_CONFIG.carbs.barColor}
+        />
 
         <!-- Fat -->
-        <Card.Root class="flex-1 min-w-[70px]">
-          <Card.Content class="p-3 flex flex-col items-center justify-center space-y-1 text-center">
-            <p
-              class="text-xl font-bold font-mono tracking-tight"
-              style="color: var(--theme-accent)"
-            >
-              {historyData.averages.fat}g
-            </p>
-            <p class="text-[10px] text-muted-foreground uppercase font-semibold">Fat</p>
-          </Card.Content>
-        </Card.Root>
+        <StatCard
+          value={historyData.averages.fat}
+          valueSuffix="g"
+          label="Fat"
+          colorValue={NUTRITION_CONFIG.fat.barColor}
+        />
       </div>
     </div>
 
     <!-- Chart Section -->
-    <div class="space-y-6 pt-4">
+    <div>
       <SectionHeader title="Weekly Trends" subtitle="Macro distribution over time" />
 
       <div class="space-y-4">
@@ -211,6 +205,7 @@
           config={caloriesChartConfig}
           data={chartData}
           series={caloriesSeries}
+          yDomain={sharedYDomain}
           {timeRange}
         />
 
@@ -219,6 +214,7 @@
           config={macrosChartConfig}
           data={chartData}
           series={macrosSeries}
+          yDomain={sharedYDomain}
           {timeRange}
         />
       </div>

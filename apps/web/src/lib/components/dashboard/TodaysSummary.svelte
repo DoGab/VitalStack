@@ -31,7 +31,7 @@
   let caloriesPercent = $derived(Math.min((caloriesConsumed / caloriesGoal) * 100, 100));
 </script>
 
-<div class="space-y-3">
+<div>
   <SectionHeader title="Today's Summary" actionLabel="View Details" href="/history" />
 
   <Card.Root>

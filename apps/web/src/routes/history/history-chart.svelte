@@ -12,6 +12,7 @@
     data,
     series,
     timeRange,
+    yDomain,
     yAxisFormatter = (d: number) => {
       if (d >= 1000) return (d / 1000).toFixed(1) + "k";
       return d.toString();
@@ -25,6 +26,7 @@
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     series: any[];
     timeRange: 7 | 14 | 30 | 90;
+    yDomain?: [number, number];
     yAxisFormatter?: (d: number) => string;
   } = $props();
 
@@ -44,6 +46,7 @@
         <BarChart
           bind:context={chartContext}
           {data}
+          {yDomain}
           xScale={scaleBand().padding(0.25)}
           x="displayDate"
           axis={true}
