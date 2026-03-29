@@ -123,6 +123,7 @@ Structure the enhanced prompt in this order:
 **DESIGN SYSTEM (REQUIRED):**
 - Platform: [Web/Mobile], [Desktop/Mobile]-first
 - Theme: [Light/Dark], [style descriptors]
+- Visual Components: shadcn-svelte visual aesthetics (Tailwind classes, minimal/clean)
 - Background: [Color description] (#hex)
 - Primary Accent: [Color description] (#hex) for [role]
 - Text Primary: [Color description] (#hex)

@@ -180,6 +180,6 @@ help:
 	@printf "  make gen-api-client $(ARROW) Generate TypeScript client only\n"
 	@printf "\n"
 	@printf "Endpoints:\n"
-	@printf "  Frontend:  ${CYAN}http://localhost:5173${RESET}\n"
+	@printf "  Frontend:  ${CYAN}https://localhost:5173${RESET}\n"
 	@printf "  API:       ${CYAN}http://localhost:8080${RESET}\n"
 	@printf "  API Docs:  ${CYAN}http://localhost:8080/docs${RESET}\n"

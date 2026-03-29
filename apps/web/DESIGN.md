@@ -84,4 +84,4 @@ Use these colors when generating any VitalStack screen:
 - Carbs: Amber (#F59E0B)
 - Fat: Blue (#3B82F6)
 
-All components should look like they come from the shadcn/ui library. Use Tailwind utility classes. Rounded corners on all cards and inputs. Soft shadows. Inter font for body text. JetBrains Mono for numerical values.
+Visually mimic the shadcn-svelte component library. All buttons, inputs, dialogs, and cards should visually follow shadcn-svelte aesthetics (Tailwind styling, rounded-md, soft shadows). Do not attempt to output Svelte 5 logic; simply generate the precise visual layout matching the shadcn-svelte appearance. Your goal is to create a high-fidelity visual mockup. Inter font for body text. JetBrains Mono for numerical values.
