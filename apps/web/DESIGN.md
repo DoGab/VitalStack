@@ -14,14 +14,19 @@ The app is a mobile-first progressive web app. All components use shadcn-svelte 
 
 ### Light Theme (Organic Premium)
 
-- **Deep Arboretum** (#1B3022) — Primary brand color. Used for main navigation, primary buttons, and headings. Communicates depth, nature, and stability.
-- **Burnished Gold** (#C5A059) — Secondary color. Used for progress bars, AI suggestions, and premium feature highlights. Adds a touch of luxury.
-- **Regal Plum** (#7B506F) — Accent color. Used sparingly for badges, special highlights, and call-to-action elements.
-- **Cream Paper** (#F9F7F2) — Base background. A warm off-white that makes the app feel like a physical journal.
-- **Warm Beige** (#EBE7DE) — Card backgrounds. Slightly darker than base for layered surfaces.
-- **Soft Taupe** (#D8D3C8) — Input fields and borders.
-- **Charcoal** (#2C2F2D) — Primary text. A soft, warm off-black for body text.
-- **Terracotta** (#D65A31) — Calories indicator color. Warm orange for calorie-related displays.
+| Category | Color Name | Hex Code | Explanation                                                                             |
+| -------- | ---------- | -------- | --------------------------------------------------------------------------------------- |
+| Brand    | Primary    | #1B3022  | Deep Arboretum. The core brand anchor. Used for main navigation and ""Scan"" buttons.   |
+|          | Secondary  | #C5A059  | Burnished Gold. Adds a premium feel to progress bars and AI suggestions.                |
+|          | Accent     | #7B506F  | Plum. A sophisticated, premium pop color for badges and highlights.                     |
+| State    | Info       | #5F8D8B  | Sage Blue. A muted, dusty teal that provides information without looking too ""techy."" |
+|          | Success    | #4E8056  | Leaf Green. Natural and reassuring for ""Meal Logged"" messages.                        |
+|          | Warning    | #EDB654  | Harvest Yellow. A soft yellow that warns without inducing panic.                        |
+|          | Error      | #B93632  | Brick Red. Earthy rather than neon; used for ""Unknown Barcode"" or critical errors.    |
+| Surface  | Neutral    | #2C2F2D  | Charcoal. A soft, warm off-black for text. Less harsh than pure black.                  |
+|          | Base-100   | #F9F7F2  | Cream Paper. A warm off-white. Makes the app feel like a physical journal.              |
+|          | Base-200   | #EBE7DE  | Beige. Slightly darker for card backgrounds.                                            |
+|          | Base-300   | #D8D3C8  | Taupe. Used for inputs and borders.                                                     |
 
 ### Macro-Specific Colors
 
@@ -29,13 +34,24 @@ The app is a mobile-first progressive web app. All components use shadcn-svelte 
 - Protein: Warm Red (oklch 63.7% — red-500)
 - Carbs: Golden Amber (oklch 76.9% — amber-500)
 - Fat: Ocean Blue (oklch 62.3% — blue-500)
+- Fiber: Lively Green (oklch 72.3% — green-500)
 
 ### Dark Theme (Dark Organic)
 
-- **Burnished Gold** (#C5A059) — Primary. Premium CTAs with excellent contrast.
-- **Deep Arboretum** (#1B3022) — Base background. The same anchor green as light theme.
-- **Leaf Green** (#4E8056) — Secondary actions.
-- **Warm Amber** (#D4913D) — Accent highlights.
+| Category | Color Name   | Hex Code | Explanation                                                 |
+| -------- | ------------ | -------- | ----------------------------------------------------------- |
+| Brand    | Primary      | #C5A059  | Burnished Gold. Premium CTAs, active states.                |
+|          | Secondary    | #4E8056  | Leaf Green. Natural secondary actions.                      |
+|          | Accent       | #D4913D  | Warm Amber. Honey-toned highlights, warm and inviting.      |
+| State    | Info         | #5F8D8B  | Sage Blue. Calm informational states.                       |
+|          | Success      | #6A9E6E  | Soft Green. Natural success indication.                     |
+|          | Warning      | #EDB654  | Harvest Yellow. Warm warning color.                         |
+|          | Error        | #B93632  | Brick Red. Earthy, attention-grabbing.                      |
+| Surface  | Neutral      | #8B9A8E  | Muted Sage. Secondary text, inactive icons.                 |
+|          | Base-100     | #1B3022  | Deep Arboretum. Main background.                            |
+|          | Base-200     | #243B2C  | Darker Forest. Card backgrounds.                            |
+|          | Base-300     | #2D4A37  | Muted Evergreen. Input fields.                              |
+|          | Base-Content | #F9F7F2  | Cream. Warm off-white text, easier on eyes than pure white. |
 
 ## 3. Typography Rules
 
@@ -83,5 +99,6 @@ Use these colors when generating any VitalStack screen:
 - Protein: Red (#EF4444)
 - Carbs: Amber (#F59E0B)
 - Fat: Blue (#3B82F6)
+- Fiber: Green (#22C55E)
 
 Visually mimic the shadcn-svelte component library. All buttons, inputs, dialogs, and cards should visually follow shadcn-svelte aesthetics (Tailwind styling, rounded-md, soft shadows). Do not attempt to output Svelte 5 logic; simply generate the precise visual layout matching the shadcn-svelte appearance. Your goal is to create a high-fidelity visual mockup. Inter font for body text. JetBrains Mono for numerical values.
