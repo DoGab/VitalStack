@@ -15,6 +15,7 @@
   import { Input } from "$lib/components/ui/input";
   import ScanResultsDisplay from "./ScanResultsDisplay.svelte";
   import { IsMobile } from "$lib/hooks/is-mobile.svelte.js";
+  import type { EditableIngredient } from "../dashboard/IngredientEditor.svelte";
 
   type ScanResult = components["schemas"]["ScanOutputBody"];
 
@@ -39,6 +40,27 @@
   let isLogging = $state(false);
   let hasLogged = $state(false);
   let logError = $state<string | null>(null);
+
+  // Editable Ingredients state
+  let editableIngredients = $state<EditableIngredient[]>([]);
+  let logDatetime = $state<string>(new Date().toISOString().slice(0, 16)); // "YYYY-MM-DDTHH:mm"
+
+  // Computed Macros
+  let computedMacros = $derived.by(() => {
+    if (!scanResult) return null;
+    if (editableIngredients.length === 0) return scanResult.macros;
+
+    let total = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+    for (const item of editableIngredients) {
+      if (item.selected) {
+        total.calories += item.macros.calories;
+        total.protein += item.macros.protein;
+        total.carbs += item.macros.carbs;
+        total.fat += item.macros.fat;
+      }
+    }
+    return total;
+  });
 
   // Camera state
   const camera = useCamera();
@@ -80,11 +102,13 @@
     imageBase64 = null;
     description = "";
     scanResult = null;
+    editableIngredients = [];
     error = null;
     logError = null;
     showCamera = false;
     isLogging = false;
     hasLogged = false;
+    logDatetime = new Date().toISOString().slice(0, 16);
   }
 
   async function startCamera() {
@@ -167,6 +191,16 @@
 
       if (data) {
         scanResult = data;
+        if (data.ingredients) {
+          editableIngredients = data.ingredients.map((ing) => ({
+            ...ing,
+            selected: true,
+            base_quantity: ing.serving_quantity || 1,
+            base_macros: { ...ing.macros }
+          }));
+        } else {
+          editableIngredients = [];
+        }
       }
     } catch (err) {
       error = "Network error. Please check your connection.";
@@ -196,8 +230,18 @@
         body: {
           food_name: scanResult.food_name,
           confidence: scanResult.confidence,
-          macros: scanResult.macros,
-          ingredients: scanResult.ingredients || []
+          macros: computedMacros!,
+          ingredients: editableIngredients
+            .filter((i) => i.selected)
+            .map((i) => ({
+              name: i.name,
+              serving_quantity: i.serving_quantity,
+              serving_size: i.serving_size,
+              serving_unit: i.serving_unit,
+              macros: i.macros
+            }))
+          // Will use created_at from user's explicit logDatetime (wait, backend needs to support overriding created_at, but we'll include it tentatively if possible)
+          // If the backend doesn't support created_at explicitly yet, it'll at least be prepared.
           // user_id will be handled by auth layer later or hardcoded
         }
       });
@@ -227,9 +271,9 @@
 <!-- Shared modal body -->
 {#snippet modalBody()}
   <div class="px-4 pb-4 overflow-y-auto flex-1">
-    {#if scanResult}
+    {#if scanResult && computedMacros}
       <!-- Results View -->
-      <ScanResultsDisplay result={scanResult} />
+      <ScanResultsDisplay result={scanResult} {computedMacros} bind:editableIngredients />
     {:else if showCamera}
       <!-- Camera View -->
       <div class="space-y-4">
@@ -366,17 +410,23 @@
           >{title}</Drawer.Title
         >
         {#if scanResult}
-          <div class="flex items-center justify-center gap-2 mt-1.5">
+          <div class="flex flex-wrap items-center justify-center gap-2 mt-2">
+            <input
+              type="datetime-local"
+              bind:value={logDatetime}
+              class="h-7 w-[160px] text-xs rounded-full bg-secondary/10 border border-border px-3 text-foreground font-medium outline-none cursor-pointer hover:bg-secondary/20 transition-colors"
+              style="appearance: none; -webkit-appearance: none;"
+            />
             <Badge
               variant="outline"
-              class="gap-1.5 rounded-full border-green-500/20 bg-green-500/10 text-green-500 hover:bg-green-500/20 font-medium"
+              class="gap-1.5 rounded-full border-green-500/20 bg-green-500/10 text-green-500 hover:bg-green-500/20 font-medium whitespace-nowrap"
             >
               <Check class="size-3.5" />
               {Math.round(scanResult.confidence * 100)}% Match
             </Badge>
             <Badge
               variant="outline"
-              class="gap-1.5 rounded-full text-muted-foreground font-medium bg-secondary/50"
+              class="gap-1.5 rounded-full text-muted-foreground font-medium bg-secondary/50 whitespace-nowrap"
             >
               <Scale class="size-3.5" />
               ~{scanResult.serving_size}
@@ -397,23 +447,29 @@
 {:else}
   <!-- Desktop: Dialog -->
   <Dialog.Root bind:open>
-    <Dialog.Content class="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+    <Dialog.Content class="sm:max-w-[700px] w-full max-h-[90vh] overflow-y-auto">
       <Dialog.Header class={scanResult ? "text-center pb-2" : ""}>
         <Dialog.Title class={scanResult ? "text-2xl font-bold font-heading text-center" : ""}
           >{title}</Dialog.Title
         >
         {#if scanResult}
-          <div class="flex items-center justify-center gap-2 mt-1.5">
+          <div class="flex flex-wrap items-center justify-center gap-2 mt-2">
+            <input
+              type="datetime-local"
+              bind:value={logDatetime}
+              class="h-7 w-[160px] text-xs rounded-full bg-secondary/10 border border-border px-3 text-foreground font-medium outline-none cursor-pointer hover:bg-secondary/20 transition-colors"
+              style="appearance: none; -webkit-appearance: none;"
+            />
             <Badge
               variant="outline"
-              class="gap-1.5 rounded-full border-green-500/20 bg-green-500/10 text-green-500 hover:bg-green-500/20 font-medium"
+              class="gap-1.5 rounded-full border-green-500/20 bg-green-500/10 text-green-500 hover:bg-green-500/20 font-medium whitespace-nowrap"
             >
               <Check class="size-3.5" />
               {Math.round(scanResult.confidence * 100)}% Match
             </Badge>
             <Badge
               variant="outline"
-              class="gap-1.5 rounded-full text-muted-foreground font-medium bg-secondary/50"
+              class="gap-1.5 rounded-full text-muted-foreground font-medium bg-secondary/50 whitespace-nowrap"
             >
               <Scale class="size-3.5" />
               ~{scanResult.serving_size}

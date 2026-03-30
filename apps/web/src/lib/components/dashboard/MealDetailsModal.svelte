@@ -54,6 +54,22 @@
     };
   });
 
+  let editableIngredients = $derived.by(() => {
+    if (!meal?.ingredients) return [];
+    return meal.ingredients.map((ing) => ({
+      ...ing,
+      selected: true,
+      base_quantity: ing.serving_quantity || 1,
+      base_macros: {
+        calories: ing.macros.calories,
+        protein: ing.macros.protein,
+        carbs: ing.macros.carbs,
+        fat: ing.macros.fat,
+        fiber: ing.macros.fiber
+      }
+    }));
+  });
+
   async function handleDelete() {
     if (!meal) return;
 
@@ -90,10 +106,15 @@
 </script>
 
 {#snippet content()}
-  <div class="px-4 pb-2 pt-0 space-y-4">
+  <div class="px-4 pb-1 pt-0 space-y-4">
     {#if displayResult}
       <!-- We reuse the beautiful layout from ScanResultsDisplay! -->
-      <ScanResultsDisplay mode="details" result={displayResult} />
+      <ScanResultsDisplay
+        mode="details"
+        result={displayResult}
+        {editableIngredients}
+        readonly={true}
+      />
     {/if}
 
     {#if deleteError}
@@ -105,7 +126,7 @@
     {/if}
 
     <!-- Action Buttons -->
-    <div class="flex items-center gap-2 pt-4 border-t border-border mt-auto">
+    <div class="flex items-center gap-2 pt-2 border-t border-border mt-auto">
       <Button variant="outline" class="flex-1" onclick={() => (open = false)}>Close</Button>
       <Button variant="outline" class="flex-1 gap-2" onclick={handleEdit}>
         <Edit3 class="size-4" />
@@ -165,7 +186,7 @@
   </Drawer.Root>
 {:else}
   <Dialog.Root bind:open>
-    <Dialog.Content class="sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">
+    <Dialog.Content class="sm:max-w-[700px] w-full max-h-[85vh] overflow-hidden flex flex-col p-0">
       <Dialog.Header class="p-6 pb-0 shrink-0 text-center flex flex-col items-center">
         <Dialog.Title class="text-xl text-center w-full">{meal?.name}</Dialog.Title>
         <Dialog.Description class="flex items-center justify-center gap-2 mt-1">
