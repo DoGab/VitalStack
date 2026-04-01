@@ -9,7 +9,7 @@ description: |
 
 # GitHub Issue Research Protocol
 
-You are in **Phase 1 (Research)**. Your goal is to document the current state of the codebase regarding a specific GitHub Issue. **Do NOT write or modify any application code.**
+You are in **Phase 1 (Research)**. Your primary role is to act as a **documentarian**. Your goal is to map the loosely defined GitHub Issue to the current state of the codebase. **Do NOT write or modify any application code, and do NOT suggest improvements, evaluate architecture, or prescribe solutions.** Map the "what is" cleanly to inform the planning phase.
 
 ## Inputs
 
@@ -18,33 +18,35 @@ You are in **Phase 1 (Research)**. Your goal is to document the current state of
 
 ## Steps
 
-### 1. Fetch the Issue
+### 1. Fetch & Analyze the Issue
 
 Use the GitHub MCP tools to read the issue from `DoGab/VitalStack`:
-- Title, body, labels
-- Extract: **Objective**, **Scope**, **Definition of Done (DoD)**, **UI Description**, **Technical Notes**
-- Note the `scope` field — it determines which steps below are relevant
+- Read the body of the issue and understand the unstructured feature description.
+- Extract the core intent to formulate an **Objective**.
+- Based on your knowledge of the stack, infer the **Scope** (Frontend, Backend, Database, Design).
+- Derive a specific **Definition of Done (DoD)** based on what the user wants to achieve.
 
 ### 2. Codebase Discovery
 
-Use file search and grep tools to locate the relevant files:
+Act as an investigative documentarian using file search and grep tools to locate relevant files:
 
 - **If scope includes "Backend (Go API)":**
-  - Read `apps/api-go/architecture.md` for layered architecture context
-  - Find relevant controllers, services, models in `apps/api-go/`
-  - Trace the data flow from route → controller → service
+  - Find relevant controllers, services, router registrations, and models in `apps/api-go/`.
+  - Trace the data flow from route → controller → service. Document exactly how they are structured right now.
+  - Read `apps/api-go/architecture.md` for context on layered architecture patterns.
 
 - **If scope includes "Frontend (SvelteKit)":**
-  - Read `apps/web/architecture.md` for VitalStack design language
-  - Find relevant pages, components, stores in `apps/web/src/`
-  - Check `apps/web/src/lib/config/nutrition-config.ts` if macros are involved
-  - List installed shadcn-svelte components: `ls apps/web/src/lib/components/ui/`
+  - Find relevant pages (`+page.svelte`), components (`.svelte`), and stores.
+  - Document their current implementation and state.
+  - Read `apps/web/architecture.md` for VitalStack design language context.
+  - Check `apps/web/src/lib/config/nutrition-config.ts` if macros are involved.
+  - List installed shadcn-svelte components: `ls apps/web/src/lib/components/ui/`.
 
 ### 3. Fetch Design Context (If scope includes Frontend or Design)
 
 - Read `apps/web/architecture.md` for VitalStack design tokens
 - Check if existing custom components (`CircularProgress`, `MacroBars`, `SectionHeader`, `StatCard`) are relevant
-- Read the `shadcn-svelte-catalog` skill to identify any uninstalled components that could help
+- Read the `shadcn-svelte-catalog` skill to identify any uninstalled components that could help natively.
 - If Stitch MCP is available, query for relevant design system context
 
 ### 4. Visual Baseline (If scope includes Frontend)
@@ -62,21 +64,22 @@ Create a new file at `thoughts/research/research_issue_<number>.md` with this **
 # Research: Issue #<number> — <title>
 
 ## 🎯 Objective
-<Summary of what the issue asks for>
+<Synthesized objective based on the issue description>
 
 ## 📋 Scope
 <List: Frontend / Backend / Database / Design>
 
-## ✅ Definition of Done
-<Copy the DoD checkboxes from the issue>
+## ✅ Derived Definition of Done
+- [ ] <Derived testable acceptance criteria based on issue description>
+- [ ] <More criteria>
 
-## 🗺️ Discovered Files
+## 🗺️ Discovered Codebase State
 
 ### Backend (if applicable)
-- `apps/api-go/...` — <role of this file>
+- `apps/api-go/...:line` — <Detailed, neutral description of how this file functions currently>
 
 ### Frontend (if applicable)
-- `apps/web/src/...` — <role of this file>
+- `apps/web/src/...:line` — <Detailed, neutral description of how this component functions currently>
 
 ## 🎨 Design Context (if applicable)
 - Relevant VitalStack tokens: <colors, fonts, themes>
@@ -85,7 +88,7 @@ Create a new file at `thoughts/research/research_issue_<number>.md` with this **
 
 ## 📸 Visual Baseline (if applicable)
 ![Baseline UI](../assets/baseline_issue_<number>.png)
-<1-sentence visual analysis of the current state>
+<1-sentence neutral visual description of the current state>
 
 ## 🔗 Architecture References
 - Backend: `apps/api-go/architecture.md`
@@ -97,10 +100,10 @@ Create a new file at `thoughts/research/research_issue_<number>.md` with this **
 End the file with:
 > **Research complete. Ready for Planning phase.**
 
-Then tell the user: "Research is saved at `thoughts/research/research_issue_<number>.md`. Start a new conversation and ask me to plan this issue."
+Then tell the user: "Research is saved at `thoughts/research/research_issue_<number>.md`. Ask me to plan this issue."
 
 ## Context Size Notes
 
 - This skill runs as its own conversation — do NOT carry over into planning
-- Keep the research file concise — summarize, don't paste entire file contents
+- Keep the research file concise but precise — include specific file:line references.
 - The research file is the ONLY artifact passed to the next phase

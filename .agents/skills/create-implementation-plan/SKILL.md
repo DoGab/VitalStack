@@ -19,8 +19,8 @@ You are in **Phase 2 (Planning)**. Your goal is to write a highly specific, atom
 
 ### 1. Ingest Research
 
-- Read the specified file from `thoughts/research/`
-- Extract: Objective, Scope, DoD, Discovered Files, Design Context
+- Read the specified file from `thoughts/research/` COMPLETELY.
+- Extract: Objective, Scope, DoD, Discovered Codebase State, Design Context.
 
 ### 2. Read Project Rules
 
@@ -31,18 +31,21 @@ Since this phase doesn't edit application files directly, the project rules won'
 
 These rules define testing requirements, architectural constraints, component usage, and verification steps that your plan must account for.
 
-### 3. Draft the Plan
+### 3. Analyze and Verify Understanding
 
-Break the required changes into a **numbered checklist** of atomic steps. Each step should:
-- Modify at most 1-2 files
-- Be independently verifiable
-- Include the exact file path(s) being changed
-- Have a clear success criterion
-- Comply with the rules read in Step 2
+- Cross-reference the research findings with the actual codebase reality.
+- If you encounter ambiguities, missing details, or open questions, **STOP AND ASK THE USER**.
+- **CRITICAL**: Do NOT write the plan with unresolved questions. Every technical decision must be made before finalizing the plan. The implementation plan must be complete and actionable.
 
-Ensure the plan includes steps for all mandatory activities from the rules (e.g., tests, linting, OpenAPI sync, visual verification, architecture docs updates).
+### 4. Draft the Plan
 
-### 4. Output
+Break the required changes into **Phases** (rather than long monolithic steps). Each phase should:
+- Group related file changes (e.g., Schema -> API -> UI).
+- Define explicitly what we're NOT doing (to prevent scope creep).
+- Separate the success criteria into **Automated Verification** (e.g., `make test`, `npm run lint`) and **Manual Verification** (e.g., UI checks on the browser).
+- Include a note for the execution agent to pause for manual verification when needed.
+
+### 5. Output
 
 Create a new file at `thoughts/plan/plan_<name>.md` with this **exact structure**:
 
@@ -54,32 +57,42 @@ Create a new file at `thoughts/plan/plan_<name>.md` with this **exact structure*
 ## 🎯 Objective
 <Copy from research>
 
+## 🚫 What We're NOT Doing
+<Explicitly list out-of-scope items to prevent scope creep>
+
 ## ✅ Definition of Done
 <Copy the DoD checkboxes from research>
 
-## 📝 Implementation Steps
+## 📝 Implementation Phases
 
-### Step 1: <Short description>
-**Files:** `path/to/file`
-**Action:** <What to do>
-**Success:** <How to verify this step worked>
-- [ ] Done
+### Phase 1: <Descriptive Name>
 
-### Step 2: <Short description>
-**Files:** `path/to/file`
-**Action:** <What to do>
-**Success:** <How to verify this step worked>
-- [ ] Done
+**Overview:** <What this phase accomplishes>
 
-... (continue for all steps)
+**Changes Required:**
+- `path/to/file` — <What to do>
 
-### Step N: Verify & Clean Up
-**Action:** Run linting, tests, and visual verification
-**Success:** All tests pass, no lint errors, screenshots look correct
-- [ ] Done
+**Success Criteria:**
+
+#### Automated Verification:
+- [ ] <e.g., Unit tests pass: `go test ./...`>
+- [ ] <e.g., Linting passes: `make lint`>
+
+#### Manual Verification:
+- [ ] <e.g., UI behaves correctly when clicking X>
+
+**Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation from the human that the manual testing was successful before proceeding to the next phase.
+
+---
+
+### Phase 2: <Descriptive Name>
+...
+
+### Phase N: Final Clean Up
+**Overview:** Final overall project verification (OpenAPI sync, architectural doc updates, etc.)
 ```
 
-### 5. Pause for Review
+### 6. Pause for Review
 
 After saving the file, explicitly ask the user:
 

@@ -3,56 +3,10 @@ description: "Request a new feature for VitalStack"
 labels: ["enhancement", "agent-ready"]
 body:
   - type: textarea
-    id: objective
+    id: description
     attributes:
-      label: "Objective"
-      description: "What should this feature do? Be specific about the user-facing behavior."
-      placeholder: "Users should be able to..."
+      label: "Feature Description"
+      description: "Describe the feature you want to implement. Provide as much context, user-facing behavior, and ideas as needed. Our research agent will map this loosely written request to the actual codebase."
+      placeholder: "I want to implement a feature that..."
     validations:
       required: true
-
-  - type: dropdown
-    id: scope
-    attributes:
-      label: "Scope"
-      description: "Which parts of the stack are affected?"
-      multiple: true
-      options:
-        - "Frontend (SvelteKit)"
-        - "Backend (Go API)"
-        - "Database (Supabase)"
-        - "Design (Stitch)"
-    validations:
-      required: true
-
-  - type: textarea
-    id: definition-of-done
-    attributes:
-      label: "Definition of Done"
-      description: "List the acceptance criteria as checkboxes. Be specific and testable."
-      placeholder: |
-        - [ ] API endpoint exists at POST /api/...
-        - [ ] Frontend displays the new component
-        - [ ] Tests pass for all new code
-        - [ ] OpenAPI spec is regenerated
-    validations:
-      required: true
-
-  - type: textarea
-    id: ui-description
-    attributes:
-      label: "UI Description (if applicable)"
-      description: "Describe the visual design. Reference existing components (StatCard, MacroBars, CircularProgress, SectionHeader) or VitalStack design tokens when possible."
-      placeholder: |
-        Use a Card with MacroBars showing protein/carbs/fat breakdown.
-        Follow the Organic Premium light theme colors.
-        Use NUTRITION_CONFIG for all macro colors.
-
-  - type: textarea
-    id: technical-notes
-    attributes:
-      label: "Technical Notes (optional)"
-      description: "Implementation hints, API contracts, constraints, or references to existing patterns."
-      placeholder: |
-        Follow the existing layered architecture (controller → service).
-        Reuse the NutritionService pattern from pkg/service/.
