@@ -99,6 +99,54 @@ const (
 	SupabaseServiceKeyDefault = ""
 	// SupabaseServiceKeyHelp is the help message for Supabase Service Key
 	SupabaseServiceKeyHelp = "Supabase Service Role Key (for backend server access)"
+
+	// Meilisearch
+	meilisearchKey = "meilisearch."
+	// MeilisearchURLArg is the flag name for the Meilisearch URL
+	MeilisearchURLArg = meilisearchKey + "url"
+	// MeilisearchURLDefault is the default value for Meilisearch URL
+	MeilisearchURLDefault = "http://localhost:7700"
+	// MeilisearchURLHelp is the help message for Meilisearch URL
+	MeilisearchURLHelp = "Meilisearch server URL"
+
+	// MeilisearchAPIKeyArg is the flag name for the Meilisearch API key
+	MeilisearchAPIKeyArg = meilisearchKey + "api-key"
+	// MeilisearchAPIKeyDefault is the default value for Meilisearch API key
+	MeilisearchAPIKeyDefault = ""
+	// MeilisearchAPIKeyHelp is the help message for Meilisearch API key
+	MeilisearchAPIKeyHelp = "Meilisearch API key (derived from master key in production)"
+
+	// USDA FoodData Central
+	usdaKey = "usda."
+	// USDAAPIKeyArg is the flag name for the USDA API key
+	USDAAPIKeyArg = usdaKey + "api-key"
+	// USDAAPIKeyDefault is the default value for the USDA API key
+	USDAAPIKeyDefault = ""
+	// USDAAPIKeyHelp is the help message for the USDA API key
+	USDAAPIKeyHelp = "USDA FoodData Central API key (free at https://api.data.gov/signup/)" //nolint:gosec // Not a credential, just a help string
+
+	// Open Food Facts
+	offKey = "openfoodfacts."
+	// OFFBaseURLArg is the flag name for the OFF Base URL
+	OFFBaseURLArg = offKey + "base-url"
+	// OFFBaseURLDefault is the default value for the OFF Base URL
+	OFFBaseURLDefault = "https://ch.openfoodfacts.org"
+	// OFFBaseURLHelp is the help message for the OFF Base URL
+	OFFBaseURLHelp = "Open Food Facts server Base URL"
+
+	// OFFLanguageArg is the flag name for the OFF language
+	OFFLanguageArg = offKey + "language"
+	// OFFLanguageDefault is the default value for the OFF language
+	OFFLanguageDefault = "en"
+	// OFFLanguageHelp is the help message for the OFF language
+	OFFLanguageHelp = "Open Food Facts response language code (e.g. en, fr, de)"
+
+	// OFFSortByArg is the flag name for the OFF sort-by
+	OFFSortByArg = offKey + "sort-by"
+	// OFFSortByDefault is the default value for the OFF sort-by
+	OFFSortByDefault = "popularity"
+	// OFFSortByHelp is the help message for the OFF sort-by
+	OFFSortByHelp = "Open Food Facts default sorting (e.g. popularity)"
 )
 
 var (
@@ -130,6 +178,18 @@ func RegisterFlags(cmd *cobra.Command) {
 	// Supabase
 	pflags.String(SupabaseURLArg, SupabaseURLDefault, SupabaseURLHelp)
 	pflags.String(SupabaseServiceKeyArg, SupabaseServiceKeyDefault, SupabaseServiceKeyHelp)
+
+	// Meilisearch
+	pflags.String(MeilisearchURLArg, MeilisearchURLDefault, MeilisearchURLHelp)
+	pflags.String(MeilisearchAPIKeyArg, MeilisearchAPIKeyDefault, MeilisearchAPIKeyHelp)
+
+	// USDA
+	pflags.String(USDAAPIKeyArg, USDAAPIKeyDefault, USDAAPIKeyHelp)
+
+	// Open Food Facts
+	pflags.String(OFFBaseURLArg, OFFBaseURLDefault, OFFBaseURLHelp)
+	pflags.String(OFFLanguageArg, OFFLanguageDefault, OFFLanguageHelp)
+	pflags.String(OFFSortByArg, OFFSortByDefault, OFFSortByHelp)
 
 	_ = viper.BindPFlags(pflags)
 }

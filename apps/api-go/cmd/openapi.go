@@ -17,10 +17,11 @@ var openAPICmd = &cobra.Command{
 
 func openapiEntryPoint(cmd *cobra.Command, _ []string) error {
 	nutritionController := controller.NewNutritionMockController()
+	productController := controller.NewProductController(nil) // nil service — only route metadata is needed
 	api, _ := server.NewServer(":8080")
 
 	// register API endpoints
-	api.RegisterAPI(nutritionController)
+	api.RegisterAPI(nutritionController, productController)
 
 	return api.OpenAPI(viper.GetString(conf.OpenAPIPathArg), server.SpecFormat(viper.GetString(conf.OpenAPIFormatArg)))
 }

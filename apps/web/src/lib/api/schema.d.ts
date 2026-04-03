@@ -104,6 +104,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/products/barcode/{ean}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Look up product by barcode
+         * @description Look up a food product by its EAN/UPC barcode. First checks the local cache, then queries Open Food Facts and USDA FoodData Central.
+         */
+        get: operations["lookup-product-barcode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search products
+         * @description Full-text search across cached and external food product databases. Results are deduplicated and cached for future queries.
+         */
+        get: operations["search-products"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -297,6 +337,38 @@ export interface components {
              */
             protein: number;
         };
+        MacrosPer100gBody: {
+            /**
+             * Format: double
+             * @description Calories per 100g
+             * @example 56
+             */
+            calories: number;
+            /**
+             * Format: double
+             * @description Carbohydrates per 100g (grams)
+             * @example 5.1
+             */
+            carbs: number;
+            /**
+             * Format: double
+             * @description Fat per 100g (grams)
+             * @example 1.8
+             */
+            fat: number;
+            /**
+             * Format: double
+             * @description Fiber per 100g (grams)
+             * @example 0
+             */
+            fiber: number;
+            /**
+             * Format: double
+             * @description Protein per 100g (grams)
+             * @example 3.2
+             */
+            protein: number;
+        };
         Meal: {
             /**
              * Format: int64
@@ -345,6 +417,48 @@ export interface components {
              */
             time: string;
         };
+        ProductBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example //schemas/ProductBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description EAN/UPC barcode
+             * @example 0049000000443
+             */
+            barcode: string;
+            /**
+             * @description Brand name
+             * @example Emmi
+             */
+            brand: string;
+            /**
+             * @description Product identifier
+             * @example off-0049000000443
+             */
+            id: string;
+            /** @description Product image URL */
+            image_url?: string;
+            /** @description Nutritional values per 100g */
+            macros: components["schemas"]["MacrosPer100gBody"];
+            /**
+             * @description Product name
+             * @example Caffè Latte
+             */
+            name: string;
+            /**
+             * @description Nutri-Score grade (A-E)
+             * @example C
+             */
+            nutri_score?: string;
+            /**
+             * @description Data source
+             * @example openfoodfacts
+             */
+            source: string;
+        };
         ScanInputBody: {
             /**
              * Format: uri
@@ -384,6 +498,18 @@ export interface components {
              * @example 1 plate (350g)
              */
             serving_size: string;
+        };
+        SearchProductsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example //schemas/SearchProductsOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Data attribution notice */
+            attribution?: string;
+            /** @description List of matching products */
+            products: components["schemas"]["ProductBody"][] | null;
         };
     };
     responses: never;
@@ -547,6 +673,81 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScanOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    "lookup-product-barcode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description EAN/UPC barcode
+                 * @example 0049000000443
+                 */
+                ean: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    "search-products": {
+        parameters: {
+            query: {
+                /**
+                 * @description Search query
+                 * @example yogurt
+                 */
+                query: string;
+                /**
+                 * @description Max results to return
+                 * @example 10
+                 */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchProductsOutputBody"];
                 };
             };
             /** @description Error */

@@ -1,0 +1,34 @@
+{
+  "products": [
+    {
+      "code": "3017620422003",
+      "product_name": "Nutella",
+      "brands": "Ferrero",
+      "categories_tags": ["en:spreads", "en:chocolate-spreads"],
+      "image_url": "https://images.openfoodfacts.org/images/products/301/762/042/2003/front_en.100.jpg",
+      "nutriscore_grade": "e",
+      "nutriments": {
+        "energy-kcal_100g": 539,
+        "proteins_100g": 6.3,
+        "carbohydrates_100g": 57.5,
+        "fat_100g": 30.9,
+        "fiber_100g": 0
+      }
+    },
+    {
+      "code": "8000500037560",
+      "product_name": "Nutella B-ready",
+      "brands": "Ferrero",
+      "categories_tags": ["en:snacks", "en:biscuits"],
+      "image_url": "",
+      "nutriscore_grade": "e",
+      "nutriments": {
+        "energy-kcal_100g": 530,
+        "proteins_100g": 7.1,
+        "carbohydrates_100g": 56,
+        "fat_100g": 29.7,
+        "fiber_100g": 2.4
+      }
+    }
+  ]
+}

@@ -268,6 +268,46 @@ components:
         - fat
         - fiber
       type: object
+    MacrosPer100gBody:
+      additionalProperties: false
+      properties:
+        calories:
+          description: Calories per 100g
+          examples:
+            - 56
+          format: double
+          type: number
+        carbs:
+          description: Carbohydrates per 100g (grams)
+          examples:
+            - 5.1
+          format: double
+          type: number
+        fat:
+          description: Fat per 100g (grams)
+          examples:
+            - 1.8
+          format: double
+          type: number
+        fiber:
+          description: Fiber per 100g (grams)
+          examples:
+            - 0
+          format: double
+          type: number
+        protein:
+          description: Protein per 100g (grams)
+          examples:
+            - 3.2
+          format: double
+          type: number
+      required:
+        - calories
+        - protein
+        - carbs
+        - fat
+        - fiber
+      type: object
     Meal:
       additionalProperties: false
       properties:
@@ -333,6 +373,60 @@ components:
         - serving_size
         - emoji
       type: object
+    ProductBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - //schemas/ProductBody.json
+          format: uri
+          readOnly: true
+          type: string
+        barcode:
+          description: EAN/UPC barcode
+          examples:
+            - "0049000000443"
+          type: string
+        brand:
+          description: Brand name
+          examples:
+            - Emmi
+          type: string
+        id:
+          description: Product identifier
+          examples:
+            - off-0049000000443
+          type: string
+        image_url:
+          description: Product image URL
+          type: string
+        macros:
+          $ref: "#/components/schemas/MacrosPer100gBody"
+          description: Nutritional values per 100g
+        name:
+          description: Product name
+          examples:
+            - Caffè Latte
+          type: string
+        nutri_score:
+          description: Nutri-Score grade (A-E)
+          examples:
+            - C
+          type: string
+        source:
+          description: Data source
+          examples:
+            - openfoodfacts
+          type: string
+      required:
+        - id
+        - barcode
+        - name
+        - brand
+        - source
+        - macros
+      type: object
     ScanInputBody:
       additionalProperties: false
       properties:
@@ -394,6 +488,29 @@ components:
         - macros
         - serving_size
         - ingredients
+      type: object
+    SearchProductsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - //schemas/SearchProductsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        attribution:
+          description: Data attribution notice
+          type: string
+        products:
+          description: List of matching products
+          items:
+            $ref: "#/components/schemas/ProductBody"
+          type:
+            - array
+            - "null"
+      required:
+        - products
       type: object
 info:
   title: VitalStack API
@@ -554,5 +671,80 @@ paths:
       summary: Scan food image for nutritional information
       tags:
         - nutrition
+  /api/products/barcode/{ean}:
+    get:
+      description: Look up a food product by its EAN/UPC barcode. First checks the local cache, then queries Open Food Facts and USDA FoodData Central.
+      operationId: lookup-product-barcode
+      parameters:
+        - description: EAN/UPC barcode
+          example: "0049000000443"
+          in: path
+          name: ean
+          required: true
+          schema:
+            description: EAN/UPC barcode
+            examples:
+              - "0049000000443"
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Look up product by barcode
+      tags:
+        - products
+  /api/products/search:
+    get:
+      description: Full-text search across cached and external food product databases. Results are deduplicated and cached for future queries.
+      operationId: search-products
+      parameters:
+        - description: Search query
+          example: yogurt
+          explode: false
+          in: query
+          name: query
+          required: true
+          schema:
+            description: Search query
+            examples:
+              - yogurt
+            type: string
+        - description: Max results to return
+          example: 10
+          explode: false
+          in: query
+          name: limit
+          schema:
+            default: 10
+            description: Max results to return
+            examples:
+              - 10
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchProductsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Search products
+      tags:
+        - products
 servers:
   - url: /

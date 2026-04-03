@@ -72,13 +72,13 @@ Enable VitalStack users to look up food products by **barcode** and **free-text 
 **Success Criteria:**
 
 #### Automated Verification:
-- [ ] `cd apps/api-go && go build ./...` compiles without errors
-- [ ] `docker compose -f docker-compose.yml config` validates without errors
-- [ ] `cd apps/api-go && golangci-lint run ./...` passes
+- [x] `cd apps/api-go && go build ./...` compiles without errors
+- [x] `docker compose -f docker-compose.yml config` validates without errors
+- [x] `cd apps/api-go && golangci-lint run ./...` passes
 
 #### Manual Verification:
-- [ ] `docker compose up meilisearch -d` starts successfully
-- [ ] `curl http://localhost:7700/health` returns `{"status":"available"}`
+- [x] `docker compose up meilisearch -d` starts successfully
+- [x] `curl http://localhost:7700/health` returns `{"status":"available"}`
 
 > **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation that Meilisearch is reachable before proceeding.
 
@@ -163,9 +163,9 @@ Enable VitalStack users to look up food products by **barcode** and **free-text 
 **Success Criteria:**
 
 #### Automated Verification:
-- [ ] `cd apps/api-go && go test ./pkg/types/... ./pkg/datasource/...` — all tests pass
-- [ ] `cd apps/api-go && golangci-lint run ./...` passes
-- [ ] `cd apps/api-go && go vet ./...` passes
+- [x] `cd apps/api-go && go test ./pkg/types/... ./pkg/datasource/...` — all tests pass
+- [x] `cd apps/api-go && golangci-lint run ./...` passes
+- [x] `cd apps/api-go && go vet ./...` passes
 
 #### Manual Verification:
 - [ ] N/A — pure library code
@@ -209,9 +209,9 @@ Enable VitalStack users to look up food products by **barcode** and **free-text 
 **Success Criteria:**
 
 #### Automated Verification:
-- [ ] `cd apps/api-go && go build ./...` compiles
-- [ ] `cd apps/api-go && go test ./pkg/search/...` — unit tests pass
-- [ ] `cd apps/api-go && golangci-lint run ./...` passes
+- [x] `cd apps/api-go && go build ./...` compiles
+- [x] `cd apps/api-go && go test ./pkg/search/...` — unit tests pass
+- [x] `cd apps/api-go && golangci-lint run ./...` passes
 
 #### Manual Verification:
 - [ ] N/A — integration tested in Phase 4
@@ -347,10 +347,10 @@ Enable VitalStack users to look up food products by **barcode** and **free-text 
 **Success Criteria:**
 
 #### Automated Verification:
-- [ ] `cd apps/api-go && go test ./...` — all tests pass (existing + new)
-- [ ] `cd apps/api-go && golangci-lint run ./...` passes
-- [ ] `cd apps/api-go && go build ./...` compiles
-- [ ] `make openapi` succeeds — OpenAPI spec includes new product endpoints
+- [x] `cd apps/api-go && go test ./...` — all tests pass (existing + new)
+- [x] `cd apps/api-go && golangci-lint run ./...` passes
+- [x] `cd apps/api-go && go build ./...` compiles
+- [x] `make openapi` succeeds — OpenAPI spec includes new product endpoints
 
 #### Manual Verification:
 - [ ] Start Meilisearch: `docker compose up meilisearch -d`

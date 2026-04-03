@@ -6,22 +6,52 @@ This document provides a high-level overview of the VitalStack system architectu
 
 VitalStack is a **monorepo** containing a Go backend API and a SvelteKit frontend, designed to analyze food images and return nutritional macro information using AI.
 
+```mermaid
+C4Context
+  title System Context diagram for VitalStack
+
+  Person(user, "User", "A user of the VitalStack app tracking their food intake.")
+  
+  System(vitalstack, "VitalStack", "Allows users to log food, analyze nutrition via AI, and track macros.")
+  
+  System_Ext(supabase, "Supabase", "Stores user data, authentication, and food logs.")
+  System_Ext(llm, "LLM Provider", "Gemini/OpenAI for image analysis and macro estimation.")
+  System_Ext(off, "Open Food Facts", "Primary open food database.")
+  System_Ext(usda, "USDA FoodData Central", "Secondary authoritative food database.")
+
+  Rel(user, vitalstack, "Uses")
+  Rel(vitalstack, supabase, "Reads from and writes to")
+  Rel(vitalstack, llm, "Analyzes food images using")
+  Rel(vitalstack, off, "Searches product barcodes")
+  Rel(vitalstack, usda, "Falls back for product data")
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                           VitalStack                                │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌──────────────────────┐         ┌──────────────────────┐          │
-│  │    apps/web          │  HTTP   │    apps/api-go       │          │
-│  │    (SvelteKit)       │────────▶│    (Go + Gin)        │          │
-│  │                      │◀────────│                      │          │
-│  │  • TailwindCSS v4    │  JSON   │  • Huma (OpenAPI)    │          │
-│  │  • Shadcn-svelte     │         │  • Genkit (AI)       │          │
-│  │  • PWA               │         │  • Cobra CLI         │          │
-│  └──────────────────────┘         └──────────────────────┘          │
-│         :5173                            :8080                      │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+
+### Container Level Overview
+
+```mermaid
+C4Container
+  title Container diagram for VitalStack
+
+  Person(user, "User", "A user of the VitalStack app tracking their food intake.")
+
+  System_Boundary(c1, "VitalStack") {
+    Container(web, "Web Application", "SvelteKit", "Delivers the PWA, handles UI and client-side logic.")
+    Container(api, "API Application", "Go, Gin, Huma", "Provides REST APIs, orchestrates AI and datasources.")
+    ContainerDb(meili, "Local Cache", "Meilisearch", "Typo-tolerant product cache for fast search.")
+  }
+
+  System_Ext(supabase, "Supabase", "Stores user data, authentication, and food logs.")
+  System_Ext(llm, "LLM Provider", "Gemini/OpenAI for image analysis.")
+  System_Ext(off, "Open Food Facts", "Primary open food database.")
+  System_Ext(usda, "USDA FoodData Central", "Secondary authoritative food database.")
+
+  Rel(user, web, "Uses", "HTTPS")
+  Rel(web, api, "Makes API calls to", "JSON/HTTPS")
+  Rel(api, supabase, "Reads/Writes user data", "pgx")
+  Rel(api, meili, "Reads/Writes product cache", "HTTP")
+  Rel(api, llm, "Analyzes images", "gRPC/HTTP")
+  Rel(api, off, "Fetches product data", "HTTPS")
+  Rel(api, usda, "Fetches product data", "HTTPS")
 ```
 
 ---
@@ -58,23 +88,19 @@ VitalStack is a **monorepo** containing a Go backend API and a SvelteKit fronten
 
 ## Request Flow
 
-```
-┌──────────┐     ┌──────────────┐     ┌────────────────┐     ┌─────────────┐
-│  User    │────▶│  SvelteKit   │────▶│   Go API       │────▶│   Genkit    │
-│  Browser │     │  Frontend    │     │   Controller   │     │   (AI/LLM)  │
-└──────────┘     └──────────────┘     └────────────────┘     └─────────────┘
-     │                  │                     │                     │
-     │   Upload Image   │                     │                     │
-     │─────────────────▶│                     │                     │
-     │                  │  POST /api/scan     │                     │
-     │                  │────────────────────▶│                     │
-     │                  │                     │  Analyze Image      │
-     │                  │                     │────────────────────▶│
-     │                  │                     │◀────────────────────│
-     │                  │     JSON Response   │  Macro Data         │
-     │                  │◀────────────────────│                     │
-     │   Display Macros │                     │                     │
-     │◀─────────────────│                     │                     │
+```mermaid
+sequenceDiagram
+    participant U as User (Browser)
+    participant S as SvelteKit (Frontend)
+    participant A as Go API (Controller)
+    participant G as Genkit (AI/LLM)
+    
+    U->>S: Upload Image
+    S->>A: POST /api/nutrition/scan
+    A->>G: Analyze Image
+    G-->>A: Macro Data
+    A-->>S: JSON Response
+    S-->>U: Display Macros
 ```
 
 ---

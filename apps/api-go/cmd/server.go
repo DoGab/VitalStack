@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os/signal"
 	"syscall"
 	"time"
@@ -12,6 +13,8 @@ import (
 	"github.com/dogab/vitalstack/api/internal/controller"
 	"github.com/dogab/vitalstack/api/internal/repository"
 	"github.com/dogab/vitalstack/api/internal/server"
+	"github.com/dogab/vitalstack/api/pkg/datasource"
+	"github.com/dogab/vitalstack/api/pkg/search"
 	"github.com/dogab/vitalstack/api/pkg/service"
 	"github.com/supabase-community/supabase-go"
 
@@ -63,8 +66,34 @@ func ServerEntryPoint(cmd *cobra.Command, _ []string) error {
 		ctrl = controller.NewNutritionController(svc)
 	}
 
+	// --- Product search & barcode wiring ---
+	var productCtrl *controller.ProductController
+
+	meiliClient, meiliErr := search.NewMeilisearchClient(
+		viper.GetString(conf.MeilisearchURLArg),
+		viper.GetString(conf.MeilisearchAPIKeyArg),
+	)
+	if meiliErr != nil {
+		slog.Warn("Product search unavailable: Meilisearch init failed", "error", meiliErr)
+	} else {
+		offClient := datasource.NewOFFClient(
+			http.DefaultClient,
+			datasource.WithBaseURL(viper.GetString(conf.OFFBaseURLArg)),
+			datasource.WithLanguage(viper.GetString(conf.OFFLanguageArg)),
+			datasource.WithSortBy(viper.GetString(conf.OFFSortByArg)),
+		)
+		usdaClient := datasource.NewUSDAClient(http.DefaultClient, viper.GetString(conf.USDAAPIKeyArg))
+		productSvc := service.NewProductService(meiliClient, offClient, usdaClient)
+		productCtrl = controller.NewProductController(productSvc)
+		slog.Info("🔍 Product search enabled")
+	}
+
 	// register the endpoints of the controllers
-	api.RegisterAPI(ctrl)
+	if productCtrl != nil {
+		api.RegisterAPI(ctrl, productCtrl)
+	} else {
+		api.RegisterAPI(ctrl)
+	}
 
 	// start the server
 	err = api.Serve(ctx)

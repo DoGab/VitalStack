@@ -1,0 +1,34 @@
+{
+  "foods": [
+    {
+      "fdcId": 2344382,
+      "description": "Greek Yogurt, Vanilla",
+      "brandOwner": "Chobani",
+      "brandName": "",
+      "gtinUpc": "0894700010045",
+      "foodCategory": "Yogurt",
+      "foodNutrients": [
+        {"nutrientId": 1008, "nutrientName": "Energy", "value": 97, "unitName": "KCAL"},
+        {"nutrientId": 1003, "nutrientName": "Protein", "value": 12.5, "unitName": "G"},
+        {"nutrientId": 1005, "nutrientName": "Carbohydrate, by difference", "value": 12, "unitName": "G"},
+        {"nutrientId": 1004, "nutrientName": "Total lipid (fat)", "value": 0, "unitName": "G"},
+        {"nutrientId": 1079, "nutrientName": "Fiber, total dietary", "value": 0, "unitName": "G"}
+      ]
+    },
+    {
+      "fdcId": 2344400,
+      "description": "Greek Yogurt, Strawberry",
+      "brandOwner": "Chobani",
+      "brandName": "",
+      "gtinUpc": "0894700010052",
+      "foodCategory": "Yogurt",
+      "foodNutrients": [
+        {"nutrientId": 1008, "nutrientName": "Energy", "value": 110, "unitName": "KCAL"},
+        {"nutrientId": 1003, "nutrientName": "Protein", "value": 10, "unitName": "G"},
+        {"nutrientId": 1005, "nutrientName": "Carbohydrate, by difference", "value": 15, "unitName": "G"},
+        {"nutrientId": 1004, "nutrientName": "Total lipid (fat)", "value": 2.5, "unitName": "G"},
+        {"nutrientId": 1079, "nutrientName": "Fiber, total dietary", "value": 0.5, "unitName": "G"}
+      ]
+    }
+  ]
+}

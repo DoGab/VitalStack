@@ -21,9 +21,12 @@ apps/api-go/
 │   └── server/                # Server setup
 │       └── server.go          # Gin + Huma + CORS configuration
 ├── pkg/                       # Public/shared packages
+│   ├── datasource/            # External API clients (OFF, USDA)
+│   ├── search/                # Local cache/search engines (Meilisearch)
+│   ├── types/                 # Shared domain types
 │   └── service/               # Business logic layer
 │       ├── nutrition_service.go
-│       └── nutrition_types.go # Domain types
+│       └── product_service.go # Waterfall caching and product lookup
 └── local-config.yaml          # Local development config
 ```
 
@@ -31,34 +34,48 @@ apps/api-go/
 
 ## Layered Architecture
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                      HTTP Request                       │
-└─────────────────────────┬───────────────────────────────┘
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│                   Gin Router + CORS                     │
-│                  (internal/server)                      │
-└─────────────────────────┬───────────────────────────────┘
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│                  Huma API (OpenAPI 3.1)                 │
-│              Type-safe request/response                 │
-└─────────────────────────┬───────────────────────────────┘
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│                     Controller                          │
-│                (internal/controller)                    │
-│   • Handles HTTP concerns (validation, response codes)  │
-│   • Converts HTTP DTOs ↔ Service types                  │
-└─────────────────────────┬───────────────────────────────┘
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│                      Service                            │
-│                   (pkg/service)                         │
-│   • Business logic (AI/Genkit integration here)         │
-│   • Domain types                                        │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    Client[HTTP Request] --> Router
+    
+    subgraph "internal/server"
+        Router[Gin Router + CORS]
+    end
+    
+    Router --> Huma
+    
+    subgraph "Huma API"
+        Huma[OpenAPI 3.1<br>Type-safe request/response]
+    end
+    
+    Huma --> Controller
+    
+    subgraph "internal/controller"
+        Controller[Controller<br>• Handles HTTP concerns<br>• Converts HTTP DTOs ↔ Service types]
+    end
+    
+    Controller --> Service
+    
+    subgraph "pkg/service"
+        Service[Service<br>• Business logic / AI / Genkit<br>• Orchestrates datasources / fallback]
+    end
+    
+    Service --> Infrastructure
+    
+    subgraph "pkg/datasource, pkg/search"
+        Infrastructure[Datasources & Search Engine<br>• Meilisearch Local Cache<br>• Open Food Facts<br>• USDA FoodData Central]
+    end
+    
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px;
+    classDef router fill:#e1f5fe,stroke:#03a9f4,stroke-width:2px;
+    classDef controller fill:#e8f5e9,stroke:#4caf50,stroke-width:2px;
+    classDef service fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
+    classDef infra fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px;
+    
+    class Router,Huma router;
+    class Controller controller;
+    class Service service;
+    class Infrastructure infra;
 ```
 
 ---
@@ -111,10 +128,20 @@ HTTP DTOs include `doc`, `example` tags for OpenAPI. Service types are clean dom
 ### 5. Service (`pkg/service/`)
 
 Business logic layer:
-- **Currently:** Returns placeholder macro data
-- **Future:** Genkit AI flows for food image analysis
+- **Nutrition Service:** Handles AI flows and macro estimations.
+- **Product Service:** Implements a multi-layer waterfall architecture:
+  1. **Cache:** Local Meilisearch index (fast, typo-tolerant).
+  2. **Primary:** Open Food Facts HTTP API.
+  3. **Secondary:** USDA FoodData Central HTTP API.
 
 Located in `pkg/` because it may be shared across multiple commands or exposed as a library.
+
+### 6. Datasource & Search (`pkg/datasource/`, `pkg/search/`)
+
+Infrastructure integrations logic:
+- Standardized `FoodDatasource` interface.
+- Meilisearch integration for product snapshot caching.
+- Option pattern implementations for configuring HTTP clients cleanly.
 
 ---
 
@@ -124,6 +151,8 @@ Located in `pkg/` because it may be shared across multiple commands or exposed a
 |--------|------|-------------|
 | `GET` | `/api/health` | Health check |
 | `POST` | `/api/nutrition/scan` | Scan food image for macros |
+| `GET` | `/api/products/search` | Full-text product search (waterfall) |
+| `GET` | `/api/products/barcode/{ean}` | Lookup product by barcode |
 | `GET` | `/docs` | OpenAPI documentation UI |
 | `GET` | `/openapi.json` | OpenAPI 3.1 spec |
 

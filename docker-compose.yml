@@ -52,6 +52,28 @@ services:
       retries: 3
       start_period: 10s
 
+  # ----- Meilisearch (Product Search) -----
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: vitalstack-meilisearch
+    restart: unless-stopped
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-vitalstack-dev-meili-key-not-for-prod}
+      MEILI_ENV: ${MEILI_ENV:-development}
+    volumes:
+      - meilisearch_data:/meili_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  meilisearch_data:
+
 networks:
   default:
     name: vitalstack-network

@@ -1,0 +1,18 @@
+{
+  "status": 1,
+  "product": {
+    "code": "7613035466432",
+    "product_name": "Caffè Latte",
+    "brands": "Emmi",
+    "categories_tags": ["en:beverages", "en:dairy-drinks", "en:coffee-beverages"],
+    "image_url": "https://images.openfoodfacts.org/images/products/761/303/546/6432/front_en.4.400.jpg",
+    "nutriscore_grade": "c",
+    "nutriments": {
+      "energy-kcal_100g": 56,
+      "proteins_100g": 3.2,
+      "carbohydrates_100g": 5.1,
+      "fat_100g": 1.8,
+      "fiber_100g": 0
+    }
+  }
+}
