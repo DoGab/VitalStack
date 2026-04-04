@@ -7,9 +7,9 @@ description: |
   Keywords: implement, execute, phase 3, code, build
 ---
 
-# Implementation Protocol
+# Implement Plan
 
-You are in **Phase 3 (Implementation)**. Your goal is to safely and systematically execute an approved plan.
+You are in **Phase 3 (Implementation)**. You are tasked with implementing an approved technical plan from `thoughts/plan/`. These plans contain phases with specific changes and success criteria.
 
 ## Inputs
 
@@ -19,34 +19,76 @@ You are in **Phase 3 (Implementation)**. Your goal is to safely and systematical
 
 ### 1. Ingest Plan
 
-- Read the approved plan from `thoughts/plan/`.
-- Note the total number of phases and the Definition of Done.
-- Confirm with the user that the plan is approved before starting.
+When given a plan path:
+
+- Read the plan completely and check for any existing checkmarks (- [x])
+- Read the original ticket and all files mentioned in the plan
+- Read files fully - never use limit/offset parameters, you need complete context
+- Think deeply about how the pieces fit together
+- Create a todo list to track your progress
+- Start implementing if you understand what needs to be done
+
+If no plan path provided, ask for one.
 
 ### 2. Execute Phase-by-Phase
 
-**Do not rush.** You must execute the plan **Phase by Phase**. Do not attempt to complete the entire plan in a single prompt response.
+**Do not rush.** You must execute the plan **Phase by Phase**. Do not attempt to complete the entire plan in a single prompt response. Plans are carefully designed, but reality can be messy. Your job is to:
 
 For each phase in the plan:
 
 1. **Announce Intent**: Tell the user which phase you are starting.
 2. **Execute**: Make the changes specified in the phase (write code, create files). Do NOT make changes outside the scope of the current phase.
 3. **Automated Verification**: Run the automated checks defined in the phase (e.g., `make lint`, `go test`, `npm run check`).
-4. **Update the Plan**: Once automated verification passes, edit the `thoughts/plan/plan_<name>.md` file to check off `[x]` the Automated Verification tasks for that phase.
+  - Fix any issues before proceeding
+
+4. **Update the Plan**: Once automated verification passes, edit the `thoughts/plan/plan_<name>.md` file to check off `[x]` the Automated Verification tasks for that phase. Also update the tasks in the tasks list `tasks.md`.
 5. **Pause for Manual Verification**: If the phase includes "Manual Verification" criteria (like testing a UI flow in the browser), you **MUST STOP**.
-   - Ask the user to perform the manual verification steps.
-   - Example: *"I have completed Phase 1 and automated tests pass. Please verify the UI changes in your browser. Let me know when you approve so I can mark the manual verification as complete and proceed to Phase 2."*
+   - After completing all automated verification for a phase, pause and inform the human that the phase is ready for manual testing. Use this format:
+    ```
+    Phase [N] Complete - Ready for Manual Verification
+
+    Automated verification passed:
+    - [List automated checks that passed]
+
+    Please perform the manual verification steps listed in the plan:
+    - [List manual verification items from the plan]
+
+    Let me know when manual testing is complete so I can proceed to Phase [N+1].
+    ```
 6. **Complete Phase**: Upon human approval, check off `[x]` the Manual Verification tasks in the plan document.
 
 ### 3. Handling Deviations
 
 If a phase cannot be implemented as planned (e.g., unforeseen constraints or a complex bug):
-- **Stop executing.**
-- Explain the blocker to the user.
-- Propose an adjustment to the plan.
+- **STOP and think deeply about why the plan can't be followed**
+- Present the issue clearly:
+  ```
+  Issue in Phase [N]:
+  Expected: [what the plan says]
+  Found: [actual situation]
+  Why this matters: [explanation]
+
+  How should I proceed?
+  ```
 - **Do NOT proceed further** until the user approves the adjusted plan.
 
-### 4. Final Verification
+### 4. If You Get Stuck
+When something isn't working as expected:
+
+- First, make sure you've read and understood all the relevant code
+- Consider if the codebase has evolved since the plan was written
+- Present the mismatch clearly and ask for guidance
+- Use sub-tasks sparingly - mainly for targeted debugging or exploring unfamiliar territory.
+
+### 5. Resuming Work
+If the plan has existing checkmarks:
+
+- Trust that completed work is done
+- Pick up from the first unchecked item
+- Verify previous work only if something seems off
+- Remember: You're implementing a solution, not just checking boxes. Keep the end goal in mind and maintain forward momentum.
+
+### 6. Final Verification
 
 After all phases are complete:
 
@@ -56,7 +98,7 @@ After all phases are complete:
 4. **Architecture docs:** If architectural changes were made, confirm the relevant `architecture.md` was updated.
 5. **DoD Check:** Go through the Definition of Done checkboxes and verify each one.
 
-### 5. Report
+### 7. Report
 
 When all phases are complete, report to the user:
 
