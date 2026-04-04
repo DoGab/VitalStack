@@ -210,11 +210,10 @@ After structure approval:
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Migration applies cleanly: `make migrate`
-- [ ] Unit tests pass: `make test-component`
-- [ ] Type checking passes: `npm run typecheck`
-- [ ] Linting passes: `make lint`
-- [ ] Integration tests pass: `make test-integration`
+- [ ] Go tests pass: `cd apps/api-go && go test ./...`
+- [ ] Linting and type-checking pass: `make lint`
+- [ ] Formatting is correct: `make format`
+- [ ] OpenAPI types are synced (if API changed): `make openapi`
 
 #### Manual Verification:
 - [ ] Feature works as expected when tested via UI
@@ -373,10 +372,10 @@ Final overall project verification and architectural doc updates.
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Database migration runs successfully: `make migrate`
-- [ ] All unit tests pass: `go test -cover ./...`
+- [ ] Database migration runs successfully (if applicable)
+- [ ] All unit tests pass: `cd apps/api-go && go test -cover ./...`
 - [ ] No linting errors: `make lint`
-- [ ] API endpoint returns 200: `curl localhost:8080/api/new-endpoint`
+- [ ] API endpoint returns 200: `curl http://localhost:8080/api/new-endpoint`
 
 #### Manual Verification:
 - [ ] New feature appears correctly in the UI

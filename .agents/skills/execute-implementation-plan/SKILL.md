@@ -38,7 +38,7 @@ For each phase in the plan:
 
 1. **Announce Intent**: Tell the user which phase you are starting.
 2. **Execute**: Make the changes specified in the phase (write code, create files). Do NOT make changes outside the scope of the current phase.
-3. **Automated Verification**: Run the automated checks defined in the phase (e.g., `make lint`, `go test`, `npm run check`).
+3. **Automated Verification**: Run the automated checks defined in the phase (e.g., `make lint`, `cd apps/api-go && go test ./...`, `make openapi`).
   - Fix any issues before proceeding
 
 4. **Update the Plan**: Once automated verification passes, edit the `thoughts/plan/plan_<name>.md` file to check off `[x]` the Automated Verification tasks for that phase. Also update the tasks in the tasks list `tasks.md`.
@@ -92,7 +92,7 @@ If the plan has existing checkmarks:
 
 After all phases are complete:
 
-1. **Backend (if applicable):** Run `golangci-lint` and all tests.
+1. **Backend (if applicable):** Run `make lint-api` and `cd apps/api-go && go test ./...`.
 2. **Frontend (if applicable):** Run the `/verify-frontend` workflow to capture final screenshots.
 3. **OpenAPI:** If any controllers changed, confirm `make openapi` was run.
 4. **Architecture docs:** If architectural changes were made, confirm the relevant `architecture.md` was updated.
