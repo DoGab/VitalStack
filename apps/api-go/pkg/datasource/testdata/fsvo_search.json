@@ -1,0 +1,20 @@
+[
+  {
+    "id": 349687,
+    "foodName": "Broccoli, raw",
+    "generic": true,
+    "categoryNames": "Fresh vegetables",
+    "amount": 0.0,
+    "foodid": 351,
+    "valueTypeCode": ""
+  },
+  {
+    "id": 350098,
+    "foodName": "Broccoli, steamed (without addition of salt)",
+    "generic": true,
+    "categoryNames": "Cooked vegetables (incl. cans)",
+    "amount": 0.0,
+    "foodid": 1005,
+    "valueTypeCode": ""
+  }
+]

@@ -125,6 +125,22 @@ const (
 	// USDAAPIKeyHelp is the help message for the USDA API key
 	USDAAPIKeyHelp = "USDA FoodData Central API key (free at https://api.data.gov/signup/)" //nolint:gosec // Not a credential, just a help string
 
+	// Swiss FSVO (naehrwertdaten.ch)
+	fsvoKey = "fsvo."
+	// FSVOBaseURLArg is the flag name for the FSVO base URL
+	FSVOBaseURLArg = fsvoKey + "base-url"
+	// FSVOBaseURLDefault is the default value for the FSVO base URL
+	FSVOBaseURLDefault = "https://api.webapp.prod.blv.foodcase-services.com/BLV_WebApp_WS/webresources/BLV-api"
+	// FSVOBaseURLHelp is the help message for the FSVO base URL
+	FSVOBaseURLHelp = "Swiss FSVO food composition database base URL"
+
+	// FSVOLanguageArg is the flag name for the FSVO language
+	FSVOLanguageArg = fsvoKey + "language"
+	// FSVOLanguageDefault is the default value for the FSVO language
+	FSVOLanguageDefault = "de"
+	// FSVOLanguageHelp is the help message for the FSVO language
+	FSVOLanguageHelp = "FSVO response language code (de, en, fr, it)"
+
 	// Open Food Facts
 	offKey = "openfoodfacts."
 	// OFFBaseURLArg is the flag name for the OFF Base URL
@@ -185,6 +201,10 @@ func RegisterFlags(cmd *cobra.Command) {
 
 	// USDA
 	pflags.String(USDAAPIKeyArg, USDAAPIKeyDefault, USDAAPIKeyHelp)
+
+	// FSVO
+	pflags.String(FSVOBaseURLArg, FSVOBaseURLDefault, FSVOBaseURLHelp)
+	pflags.String(FSVOLanguageArg, FSVOLanguageDefault, FSVOLanguageHelp)
 
 	// Open Food Facts
 	pflags.String(OFFBaseURLArg, OFFBaseURLDefault, OFFBaseURLHelp)

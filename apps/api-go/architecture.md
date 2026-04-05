@@ -21,7 +21,7 @@ apps/api-go/
 │   └── server/                # Server setup
 │       └── server.go          # Gin + Huma + CORS configuration
 ├── pkg/                       # Public/shared packages
-│   ├── datasource/            # External API clients (OFF, USDA)
+│   ├── datasource/            # External API clients (OFF, FSVO, USDA)
 │   ├── search/                # Local cache/search engines (Meilisearch)
 │   ├── types/                 # Shared domain types
 │   └── service/               # Business logic layer
@@ -63,7 +63,7 @@ graph TD
     Service --> Infrastructure
     
     subgraph "pkg/datasource, pkg/search"
-        Infrastructure[Datasources & Search Engine<br>• Meilisearch Local Cache<br>• Open Food Facts<br>• USDA FoodData Central]
+        Infrastructure[Datasources & Search Engine<br>• Meilisearch Local Cache<br>• Open Food Facts<br>• Swiss FSVO<br>• USDA FoodData Central]
     end
     
     classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px;
@@ -131,8 +131,9 @@ Business logic layer:
 - **Nutrition Service:** Handles AI flows and macro estimations.
 - **Product Service:** Implements a multi-layer waterfall architecture:
   1. **Cache:** Local Meilisearch index (fast, typo-tolerant).
-  2. **Primary:** Open Food Facts HTTP API.
-  3. **Secondary:** USDA FoodData Central HTTP API.
+  2. **Primary:** Open Food Facts HTTP API (branded products, barcodes).
+  3. **Secondary:** Swiss FSVO food composition database (~1,100 generic foods).
+  4. **Tertiary:** USDA FoodData Central HTTP API (450K+ foods).
 
 Located in `pkg/` because it may be shared across multiple commands or exposed as a library.
 
@@ -170,6 +171,8 @@ Configuration via Viper with support for:
 | `server.addr` | `localhost:8080` | Server bind address |
 | `logging.level` | `info` | Log level (debug/info/warn/error) |
 | `logging.encoding` | `json` | Log format (json/logfmt) |
+| `fsvo.base-url` | `https://api.webapp...BLV-api` | FSVO API base URL |
+| `fsvo.language` | `de` | FSVO response language (de/en/fr/it) |
 
 ---
 

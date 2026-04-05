@@ -10,7 +10,7 @@ type Product struct {
 	Brand      string        `json:"brand"`
 	Categories []string      `json:"categories"`
 	ImageURL   string        `json:"image_url"`
-	Source     string        `json:"source"`      // "openfoodfacts", "usda"
+	Source     string        `json:"source"`      // "openfoodfacts", "fsvo", "usda"
 	NutriScore string        `json:"nutri_score"` // A-E (OFF only)
 	Macros     MacrosPer100g `json:"macros"`
 }

@@ -82,8 +82,13 @@ func ServerEntryPoint(cmd *cobra.Command, _ []string) error {
 			datasource.WithLanguage(viper.GetString(conf.OFFLanguageArg)),
 			datasource.WithSortBy(viper.GetString(conf.OFFSortByArg)),
 		)
+		fsvoClient := datasource.NewFSVOClient(
+			http.DefaultClient,
+			viper.GetString(conf.FSVOBaseURLArg),
+			datasource.WithFSVOLanguage(viper.GetString(conf.FSVOLanguageArg)),
+		)
 		usdaClient := datasource.NewUSDAClient(http.DefaultClient, viper.GetString(conf.USDAAPIKeyArg))
-		productSvc := service.NewProductService(meiliClient, offClient, usdaClient)
+		productSvc := service.NewProductService(meiliClient, offClient, fsvoClient, usdaClient)
 		productCtrl = controller.NewProductController(productSvc)
 		slog.Info("🔍 Product search enabled")
 	}

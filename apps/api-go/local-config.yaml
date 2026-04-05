@@ -28,6 +28,10 @@ meilisearch:
 usda:
   api-key: "DEMO_KEY" # DEMO_KEY is rate-limited but works out of the box
 
+fsvo:
+  base-url: "https://api.webapp.prod.blv.foodcase-services.com/BLV_WebApp_WS/webresources/BLV-api"
+  language: "de"
+
 openfoodfacts:
   base-url: "https://ch.openfoodfacts.org"
   language: "en"

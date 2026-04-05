@@ -1,0 +1,37 @@
+{
+  "name": "Broccoli, raw",
+  "id": 349687,
+  "isgeneric": true,
+  "isrecipe": false,
+  "synonyms": [],
+  "categories": [
+    { "name": "Fresh vegetables", "id": 6637 }
+  ],
+  "values": [
+    {
+      "id": 6268031,
+      "value": 39,
+      "component": { "name": "Energy, kilocalories", "id": 1777, "code": "ENERCC" }
+    },
+    {
+      "id": 6268030,
+      "value": 3.6,
+      "component": { "name": "Protein", "id": 15478, "code": "PROT625" }
+    },
+    {
+      "id": 6268032,
+      "value": 3.2,
+      "component": { "name": "Carbohydrates, available", "id": 55, "code": "CHO" }
+    },
+    {
+      "id": 6268061,
+      "value": 0.6,
+      "component": { "name": "Fat, total", "id": 282, "code": "FAT" }
+    },
+    {
+      "id": 6268053,
+      "value": 3.2,
+      "component": { "name": "Dietary fibres", "id": 295, "code": "FIBT" }
+    }
+  ]
+}

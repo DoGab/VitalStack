@@ -11,6 +11,15 @@ description: |
 
 You are tasked with conducting comprehensive research across the codebase to answer user questions by spawning parallel sub-agents and synthesizing their findings.
 
+## ⛔ OUTPUT GUARDRAILS — READ FIRST
+
+> **YOUR OUTPUT FILE MUST be written to `thoughts/research/` — NEVER to `thoughts/plan/`.**
+> - Output path: `thoughts/research/YYYY-MM-DD-XXXX-description.md`
+> - `thoughts/plan/` is for implementation plans (Phase 2). This skill is Phase 1 (Research).
+> - If you find yourself writing to `thoughts/plan/`, you are doing the WRONG thing. STOP and correct.
+> - The research file MUST be created using `write_to_file` before you present findings to the user.
+> - If the file was NOT created, you have NOT completed the skill. Do NOT summarize findings without writing the file first.
+
 ## CRITICAL: YOUR ONLY JOB IS TO DOCUMENT AND EXPLAIN THE CODEBASE AS IT EXISTS TODAY
 
 - DO NOT suggest improvements or changes unless the user explicitly asks for them
@@ -19,7 +28,7 @@ You are tasked with conducting comprehensive research across the codebase to ans
 - DO NOT critique the implementation or identify problems
 - DO NOT recommend refactoring, optimization, or architectural changes
 - ONLY describe what exists, where it exists, how it works, and how components interact
-- `You are creating a technical map/documentation of the existing system
+- You are creating a technical map/documentation of the existing system
 
 
 ## Inputs
@@ -106,8 +115,21 @@ The key is to use these workflows intelligently:
 - Highlight patterns, connections, and architectural decisions
 - Answer the user's specific questions with concrete evidence
 
-6. **Output Generation**
-- Create a new file at `thoughts/research/research_issue_<number>.md` with this **exact structure**:
+6. **Output Generation — MANDATORY (do NOT skip this step)**
+
+> **⛔ PRE-WRITE ASSERTION: Before writing, verify:**
+> - [ ] You are writing to `thoughts/research/` (NOT `thoughts/plan/`)
+> - [ ] The filename follows the format `YYYY-MM-DD-XXXX-description.md`
+> - [ ] You are using `write_to_file` tool (NOT just summarizing in chat)
+> - [ ] The content includes all sections from the template below
+
+- **You MUST use the `write_to_file` tool** to create the file at `thoughts/research/YYYY-MM-DD-XXXX-description.md`
+- This is NOT optional. The skill is INCOMPLETE without this file.
+  - Format: `YYYY-MM-DD-XXXX-description.md` where:
+    - YYYY-MM-DD is today's date
+    - XXXX is the GitHub Issue number
+    - description is a brief kebab-case description of the research topic
+  - Example: `2025-04-04-42-parent-child-tracking.md`
   ```markdown
   ---
   date: [Current date and time with timezone in ISO format]
@@ -198,12 +220,19 @@ The key is to use these workflows intelligently:
 - Spawn new sub-agents as needed for additional investigation
 - Continue updating the document
 
-9. **Handoff**
+9. **Post-Write Verification**
+
+- After calling `write_to_file`, verify the file exists by reading it back or listing the directory.
+- If the file was NOT created, retry immediately. Do NOT proceed to the handoff step without a confirmed file.
+
+10. **Handoff**
 
 End the file with:
 > **Research complete. Ready for Planning phase.**
 
-Then tell the user: "Research is saved at `thoughts/research/research_issue_<number>.md`. Start a new session and ask me to plan this issue."
+Then tell the user: "Research is saved at `thoughts/research/YYYY-MM-DD-XXXX-description.md`. Start a new session and ask me to plan this issue."
+
+> **⛔ FINAL CHECK**: If you are about to respond to the user but have NOT yet written the research file to `thoughts/research/`, STOP. Go back and write it NOW. The file is the primary deliverable of this skill, not the chat summary.
 
 ## Important notes:
 - Always use parallel Task agents to maximize efficiency and minimize context usage

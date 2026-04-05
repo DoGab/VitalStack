@@ -154,14 +154,23 @@ Once aligned on approach:
 
 After structure approval:
 
-1. **Write the plan** to `thoughts/plans/YYYY-MM-DD-XXXX-description.md`
-   - Format: `YYYY-MM-DD-XXXX-description.md` where:
-     - YYYY-MM-DD is today's date
-     - XXXX is the GitHub Issue number (omit if no Issue)
-     - description is a brief kebab-case description
-   - Examples:
-     - With Github Issue: `2025-01-08-1478-parent-child-tracking.md`
-     - Without Github Issue: `2025-01-08-improve-error-handling.md`
+1. **Write the plan to TWO locations:**
+
+   a. **Project history file** at `thoughts/plan/YYYY-MM-DD-XXXX-description.md`
+      - Format: `YYYY-MM-DD-XXXX-description.md` where:
+        - YYYY-MM-DD is today's date
+        - XXXX is the GitHub Issue number (omit if no Issue)
+        - description is a brief kebab-case description
+      - Examples:
+        - With Github Issue: `2025-01-08-1478-parent-child-tracking.md`
+        - Without Github Issue: `2025-01-08-improve-error-handling.md`
+
+   b. **Antigravity artifact** at `implementation_plan.md` (the standard artifact path)
+      - This is the same content as (a), written as an artifact with `ArtifactType: implementation_plan` and `RequestFeedback: true`
+      - This enables the user to interactively review and iterate on the plan in the Antigravity UI
+
+   Both files should contain identical content.
+
 2. **Use this template structure**:
 
 ````markdown
@@ -290,8 +299,9 @@ Final overall project verification and architectural doc updates.
 
 1. **Present the draft plan location**:
    ```
-   I've created the initial implementation plan at:
-   `thoughts/plans/YYYY-MM-DD-XXXX-description.md`
+   I've created the implementation plan at:
+   - `thoughts/plan/YYYY-MM-DD-XXXX-description.md` (project history)
+   - `implementation_plan.md` (artifact for interactive review)
 
    Please review it and let me know:
    - Are the phases properly scoped?
