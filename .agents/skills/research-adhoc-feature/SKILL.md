@@ -1,10 +1,10 @@
 ---
 name: research-adhoc-feature
 description: |
-  Phase 1 of the Research → Plan → Implement workflow for ad-hoc features.
+  Researches the codebase for ad-hoc features without a GitHub Issue.
   Use when the user requests a feature without a GitHub Issue.
   Maps the codebase, fetches design context, captures visual baselines.
-  Keywords: research, ad-hoc, feature, phase 1, codebase discovery
+  Keywords: research, ad-hoc, feature, codebase discovery
 ---
 
 # Research Codebase (Ad-Hoc)
@@ -15,10 +15,21 @@ You are tasked with conducting comprehensive research across the codebase to ans
 
 > **YOUR OUTPUT FILE MUST be written to `thoughts/research/` — NEVER to `thoughts/plan/`.**
 > - Output path: `thoughts/research/YYYY-MM-DD-description.md`
-> - `thoughts/plan/` is for implementation plans (Phase 2). This skill is Phase 1 (Research).
+> - `thoughts/plan/` is for implementation plans. This skill is ONLY for research.
 > - If you find yourself writing to `thoughts/plan/`, you are doing the WRONG thing. STOP and correct.
 > - The research file MUST be created using `write_to_file` before you present findings to the user.
 > - If the file was NOT created, you have NOT completed the skill. Do NOT summarize findings without writing the file first.
+
+## ⛔ SKILL ISOLATION — DO NOT CROSS
+
+> **This skill is RESEARCH ONLY. It is NOT a pipeline. It does NOT hand off to anything.**
+> - **DO NOT** read, invoke, or reference the `create-implementation-plan` skill.
+> - **DO NOT** read, invoke, or reference the `execute-implementation-plan` skill.
+> - **DO NOT** create any implementation plans, task breakdowns, or phase plans.
+> - **DO NOT** write code, propose changes, or suggest architecture.
+> - **DO NOT** continue into planning after research is complete.
+> - After writing the research file, your job is **DONE**. Full stop.
+> - The user will manually invoke the planning skill in a **separate session** if and when they choose to.
 
 ## CRITICAL: YOUR ONLY JOB IS TO DOCUMENT AND EXPLAIN THE CODEBASE AS IT EXISTS TODAY
 
@@ -223,12 +234,16 @@ The key is to use these workflows intelligently:
 - After calling `write_to_file`, verify the file exists by reading it back or listing the directory.
 - If the file was NOT created, retry immediately. Do NOT proceed to the handoff step without a confirmed file.
 
-10. **Handoff**
+10. **End of Skill — STOP HERE**
 
-End the file with:
-> **Research complete. Ready for Planning phase.**
+End the research file with:
+> **Research complete.**
 
-Then tell the user: "Research is saved at `thoughts/research/YYYY-MM-DD-description.md`. Start a new session and ask me to plan this feature."
+Then tell the user:
+> "Research is saved at `thoughts/research/YYYY-MM-DD-description.md`.
+> When you're ready, start a **new session** and invoke the planning skill manually."
+
+**After delivering this message, you are DONE. Do not continue working. Do not invoke other skills. Do not start planning. Yield control to the user.**
 
 > **⛔ FINAL CHECK**: If you are about to respond to the user but have NOT yet written the research file to `thoughts/research/`, STOP. Go back and write it NOW. The file is the primary deliverable of this skill, not the chat summary.
 
@@ -272,4 +287,6 @@ Then tell the user: "Research is saved at `thoughts/research/YYYY-MM-DD-descript
 ## Context Size Notes
 
 - This skill runs as its own conversation — do NOT carry over into planning
-- The research file is the ONLY artifact passed to the next phase
+- The research file is the ONLY output of this skill
+- **NEVER** read or invoke other skills (especially `create-implementation-plan` or `execute-implementation-plan`)
+- After the research file is written and confirmed, the skill is COMPLETE — yield to the user

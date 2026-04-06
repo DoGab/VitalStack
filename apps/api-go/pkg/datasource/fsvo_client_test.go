@@ -37,7 +37,7 @@ func TestFSVOClient_SearchProducts_Success(t *testing.T) {
 
 	client := datasource.NewFSVOClient(srv.Client(), srv.URL, datasource.WithFSVOLanguage("de"))
 
-	products, err := client.SearchProducts(context.Background(), "broccoli", 10)
+	products, err := client.SearchProducts(context.Background(), "broccoli", 10, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -77,7 +77,7 @@ func TestFSVOClient_SearchProducts_NutrientMapping(t *testing.T) {
 
 	client := datasource.NewFSVOClient(srv.Client(), srv.URL, datasource.WithFSVOLanguage("de"))
 
-	products, err := client.SearchProducts(context.Background(), "broccoli", 10)
+	products, err := client.SearchProducts(context.Background(), "broccoli", 10, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -103,7 +103,7 @@ func TestFSVOClient_SearchProducts_NutrientMapping(t *testing.T) {
 func TestFSVOClient_LookupBarcode_AlwaysNotFound(t *testing.T) {
 	client := datasource.NewFSVOClient(http.DefaultClient, "http://unused", datasource.WithFSVOLanguage("de"))
 
-	_, err := client.LookupBarcode(context.Background(), "0000000000000")
+	_, err := client.LookupBarcode(context.Background(), "0000000000000", "")
 	if !errors.Is(err, datasource.ErrNotFound) {
 		t.Fatalf("expected ErrNotFound, got %v", err)
 	}
@@ -118,7 +118,7 @@ func TestFSVOClient_SearchProducts_EmptyResults(t *testing.T) {
 
 	client := datasource.NewFSVOClient(srv.Client(), srv.URL, datasource.WithFSVOLanguage("de"))
 
-	products, err := client.SearchProducts(context.Background(), "zzzznonexistent", 5)
+	products, err := client.SearchProducts(context.Background(), "zzzznonexistent", 5, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

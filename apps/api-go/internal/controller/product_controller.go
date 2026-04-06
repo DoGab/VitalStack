@@ -17,8 +17,8 @@ const (
 
 // ProductServicer defines the interface needed by ProductController.
 type ProductServicer interface {
-	LookupBarcode(ctx context.Context, barcode string) (*types.Product, error)
-	SearchProducts(ctx context.Context, query string, limit int) ([]types.Product, error)
+	LookupBarcode(ctx context.Context, barcode string, lang string) (*types.Product, error)
+	SearchProducts(ctx context.Context, query string, limit int, lang string) ([]types.Product, error)
 }
 
 // ProductController handles product lookup and search HTTP endpoints.
@@ -34,11 +34,11 @@ func NewProductController(svc ProductServicer) *ProductController {
 // Register registers the product endpoints with the Huma API.
 func (c *ProductController) Register(api huma.API) {
 	huma.Register(api, huma.Operation{
-		Path:        "/api/products/barcode/{ean}",
+		Path:        "/api/products/barcode/{barcode}",
 		Method:      http.MethodGet,
 		OperationID: "lookup-product-barcode",
 		Summary:     "Look up product by barcode",
-		Description: "Look up a food product by its EAN/UPC barcode. First checks the local cache, then queries Open Food Facts and USDA FoodData Central.",
+		Description: "Look up a food product by its EAN/UPC barcode. First checks the local cache, then queries Open Food Facts, FSVO, and USDA FoodData Central.",
 		Tags:        []string{"products"},
 	}, c.BarcodeHandler)
 
@@ -53,16 +53,16 @@ func (c *ProductController) Register(api huma.API) {
 }
 
 // BarcodeHandler handles barcode lookup requests.
-func (c *ProductController) BarcodeHandler(ctx context.Context, input *BarcodeInput) (*BarcodeOutput, error) {
-	product, err := c.Service.LookupBarcode(ctx, input.EAN)
+func (c *ProductController) BarcodeHandler(ctx context.Context, input *LookupBarcodeInput) (*BarcodeOutput, error) {
+	product, err := c.Service.LookupBarcode(ctx, input.Barcode, input.Lang)
 	if err != nil {
 		if errors.Is(err, datasource.ErrNotFound) {
-			return nil, huma.Error404NotFound("product not found for barcode: " + input.EAN)
+			return nil, huma.Error404NotFound("product not found for barcode: " + input.Barcode)
 		}
 		return nil, huma.Error500InternalServerError("failed to look up product", err)
 	}
 
-	body := productBodyFromDomain(*product)
+	body := productOutputFromDomain(*product)
 	return &BarcodeOutput{Body: &body}, nil
 }
 
@@ -72,22 +72,22 @@ func (c *ProductController) SearchHandler(ctx context.Context, input *SearchProd
 		input.Limit = 10
 	}
 
-	products, err := c.Service.SearchProducts(ctx, input.Query, input.Limit)
+	products, err := c.Service.SearchProducts(ctx, input.Query, input.Limit, input.Lang)
 	if err != nil {
 		return nil, huma.Error500InternalServerError("failed to search products", err)
 	}
 
-	bodies := make([]ProductBody, 0, len(products))
+	outputs := make([]ProductOutput, 0, len(products))
 	hasOFF := false
 	for _, p := range products {
-		bodies = append(bodies, productBodyFromDomain(p))
+		outputs = append(outputs, productOutputFromDomain(p))
 		if p.Source == "openfoodfacts" {
 			hasOFF = true
 		}
 	}
 
 	resp := &SearchProductsOutputBody{
-		Products: bodies,
+		Products: outputs,
 	}
 	if hasOFF {
 		resp.Attribution = offAttribution

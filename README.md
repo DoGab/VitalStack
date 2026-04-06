@@ -50,7 +50,7 @@ make dev
 
 | Service | URL |
 |---------|-----|
-| Frontend | http://localhost:5173 |
+| Frontend | https://localhost:5173 |
 | API | http://localhost:8080 |
 | API Docs | http://localhost:8080/docs |
 

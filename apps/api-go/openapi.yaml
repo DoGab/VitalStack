@@ -176,7 +176,7 @@ components:
           readOnly: true
           type: string
         confidence:
-          description: Detection confidence score
+          description: Detection confidence score (omit for product-based logs)
           examples:
             - 0.92
           format: double
@@ -187,7 +187,7 @@ components:
             - Grilled Chicken Salad
           type: string
         ingredients:
-          description: Breakdown of individual ingredients with their macros
+          description: Breakdown of individual ingredients with their macros (optional for product-based logs)
           items:
             $ref: "#/components/schemas/IngredientBody"
           type:
@@ -196,14 +196,17 @@ components:
         macros:
           $ref: "#/components/schemas/MacroData"
           description: Nutritional macro information
+        product_id:
+          description: Optional product reference ID
+          examples:
+            - off-7613035466432
+          type: string
         user_id:
           description: Optional UUID of the user logging the meal (defaults to auth context if implemented)
           type: string
       required:
         - food_name
-        - confidence
         - macros
-        - ingredients
       type: object
     LogFoodOutputBody:
       additionalProperties: false
@@ -268,7 +271,7 @@ components:
         - fat
         - fiber
       type: object
-    MacrosPer100gBody:
+    MacrosOutput:
       additionalProperties: false
       properties:
         calories:
@@ -373,58 +376,63 @@ components:
         - serving_size
         - emoji
       type: object
-    ProductBody:
+    ProductOutput:
       additionalProperties: false
       properties:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - //schemas/ProductBody.json
+            - //schemas/ProductOutput.json
           format: uri
           readOnly: true
           type: string
         barcode:
           description: EAN/UPC barcode
-          examples:
-            - "0049000000443"
           type: string
         brand:
           description: Brand name
-          examples:
-            - Emmi
           type: string
+        categories:
+          description: Product categories
+          items:
+            type: string
+          type:
+            - array
+            - "null"
         id:
-          description: Product identifier
-          examples:
-            - off-0049000000443
+          description: Composite product identifier
           type: string
         image_url:
           description: Product image URL
           type: string
         macros:
-          $ref: "#/components/schemas/MacrosPer100gBody"
+          $ref: "#/components/schemas/MacrosOutput"
           description: Nutritional values per 100g
         name:
-          description: Product name
-          examples:
-            - Caffè Latte
+          description: Product display name
           type: string
         nutri_score:
-          description: Nutri-Score grade (A-E)
-          examples:
-            - C
+          description: NutriScore grade (A-E)
+          type: string
+        serving_quantity:
+          description: Serving quantity in grams/ml
+          format: double
+          type: number
+        serving_size:
+          description: Human-readable serving size (e.g. 250ml)
           type: string
         source:
-          description: Data source
-          examples:
-            - openfoodfacts
+          description: Data source identifier
           type: string
       required:
         - id
         - barcode
         - name
         - brand
+        - categories
+        - image_url
         - source
+        - nutri_score
         - macros
       type: object
     ScanInputBody:
@@ -505,7 +513,7 @@ components:
         products:
           description: List of matching products
           items:
-            $ref: "#/components/schemas/ProductBody"
+            $ref: "#/components/schemas/ProductOutput"
           type:
             - array
             - "null"
@@ -671,27 +679,37 @@ paths:
       summary: Scan food image for nutritional information
       tags:
         - nutrition
-  /api/products/barcode/{ean}:
+  /api/products/barcode/{barcode}:
     get:
-      description: Look up a food product by its EAN/UPC barcode. First checks the local cache, then queries Open Food Facts and USDA FoodData Central.
+      description: Look up a food product by its EAN/UPC barcode. First checks the local cache, then queries Open Food Facts, FSVO, and USDA FoodData Central.
       operationId: lookup-product-barcode
       parameters:
-        - description: EAN/UPC barcode
-          example: "0049000000443"
+        - description: EAN/UPC barcode to look up
+          example: "7613035466432"
           in: path
-          name: ean
+          name: barcode
           required: true
           schema:
-            description: EAN/UPC barcode
+            description: EAN/UPC barcode to look up
             examples:
-              - "0049000000443"
+              - "7613035466432"
+            type: string
+        - description: Preferred language code (e.g. de, fr, en)
+          example: de
+          explode: false
+          in: query
+          name: lang
+          schema:
+            description: Preferred language code (e.g. de, fr, en)
+            examples:
+              - de
             type: string
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProductBody"
+                $ref: "#/components/schemas/ProductOutput"
           description: OK
         default:
           content:
@@ -707,29 +725,37 @@ paths:
       description: Full-text search across cached and external food product databases. Results are deduplicated and cached for future queries.
       operationId: search-products
       parameters:
-        - description: Search query
-          example: yogurt
+        - description: Free-text search query
+          example: nutella
           explode: false
           in: query
           name: query
-          required: true
           schema:
-            description: Search query
+            description: Free-text search query
             examples:
-              - yogurt
+              - nutella
             type: string
-        - description: Max results to return
-          example: 10
+        - description: Maximum number of results
           explode: false
           in: query
           name: limit
           schema:
             default: 10
-            description: Max results to return
-            examples:
-              - 10
+            description: Maximum number of results
             format: int64
+            maximum: 50
+            minimum: 1
             type: integer
+        - description: Preferred language code (e.g. de, fr, en)
+          example: de
+          explode: false
+          in: query
+          name: lang
+          schema:
+            description: Preferred language code (e.g. de, fr, en)
+            examples:
+              - de
+            type: string
       responses:
         "200":
           content:

@@ -49,9 +49,10 @@ type LogFoodInput struct {
 type LogFoodInputBody struct {
 	UserID      *string          `json:"user_id,omitempty" doc:"Optional UUID of the user logging the meal (defaults to auth context if implemented)"`
 	FoodName    string           `json:"food_name" example:"Grilled Chicken Salad" doc:"Detected food name"`
-	Confidence  float64          `json:"confidence" example:"0.92" doc:"Detection confidence score"`
+	Confidence  *float64         `json:"confidence,omitempty" example:"0.92" doc:"Detection confidence score (omit for product-based logs)"`
 	Macros      *MacroData       `json:"macros" doc:"Nutritional macro information"`
-	Ingredients []IngredientBody `json:"ingredients" doc:"Breakdown of individual ingredients with their macros"`
+	Ingredients []IngredientBody `json:"ingredients,omitempty" doc:"Breakdown of individual ingredients with their macros (optional for product-based logs)"`
+	ProductID   *string          `json:"product_id,omitempty" example:"off-7613035466432" doc:"Optional product reference ID"`
 }
 
 // LogFoodOutput represents the log response

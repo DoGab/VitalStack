@@ -76,7 +76,8 @@ func (c *USDAClient) Name() string {
 // LookupBarcode searches for a branded product by its UPC barcode.
 // USDA doesn't have a dedicated barcode endpoint, so we search by UPC
 // and filter results to match the exact barcode.
-func (c *USDAClient) LookupBarcode(ctx context.Context, barcode string) (*types.Product, error) {
+// The lang parameter is accepted to satisfy the interface but is ignored (USDA has no language support).
+func (c *USDAClient) LookupBarcode(ctx context.Context, barcode string, _ string) (*types.Product, error) {
 	foods, err := c.searchFoods(ctx, barcode, "Branded", 5)
 	if err != nil {
 		return nil, err
@@ -94,7 +95,8 @@ func (c *USDAClient) LookupBarcode(ctx context.Context, barcode string) (*types.
 }
 
 // SearchProducts performs a free-text search and returns up to limit results.
-func (c *USDAClient) SearchProducts(ctx context.Context, query string, limit int) ([]types.Product, error) {
+// The lang parameter is accepted to satisfy the interface but is ignored (USDA has no language support).
+func (c *USDAClient) SearchProducts(ctx context.Context, query string, limit int, _ string) ([]types.Product, error) {
 	foods, err := c.searchFoods(ctx, query, "", limit)
 	if err != nil {
 		return nil, err

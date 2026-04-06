@@ -16,14 +16,16 @@ The VitalStack web frontend is a **SvelteKit** application with a mobile-first, 
 
 ### Libraries
 
-| Technology    | Version | Purpose                     |
-| ------------- | ------- | --------------------------- |
-| SvelteKit     | 2.x     | Full-stack framework        |
-| Svelte        | 5.x     | UI framework (Runes mode)   |
-| TailwindCSS   | 4.x     | Utility-first CSS           |
-| shadcn-svelte | 1.x     | Component library (Bits UI) |
-| Lucide Svelte | -       | Icon library                |
-| adapter-node  | -       | Production Node.js adapter  |
+| Technology    | Version | Purpose                        |
+| ------------- | ------- | ------------------------------ |
+| SvelteKit     | 2.x     | Full-stack framework           |
+| Svelte        | 5.x     | UI framework (Runes mode)      |
+| TailwindCSS   | 4.x     | Utility-first CSS              |
+| shadcn-svelte | 1.x     | Component library (Bits UI)    |
+| Lucide Svelte | -       | Icon library                   |
+| openapi-fetch | -       | Type-safe API client (OpenAPI) |
+| barqode       | 0.0.2   | Svelte 5 barcode scanner       |
+| adapter-node  | -       | Production Node.js adapter     |
 
 ---
 
@@ -37,10 +39,20 @@ apps/web/
 │   ├── app.d.ts             # TypeScript declarations
 │   ├── service-worker.ts    # PWA offline support
 │   ├── lib/                 # Shared utilities and components
-│   │   └── assets/          # Static assets (favicon, etc.)
+│   │   ├── api/             # Generated OpenAPI client + typed schema
+│   │   ├── assets/          # Static assets (favicon, etc.)
+│   │   └── components/
+│   │       ├── food/        # Food-related modals & cards
+│   │       │   ├── FoodScannerModal.svelte    # AI image scan
+│   │       │   ├── ProductSearchModal.svelte   # Debounced product search
+│   │       │   ├── BarcodeScannerModal.svelte  # Camera barcode scanner (barqode)
+│   │       │   ├── ProductResultCard.svelte    # Product display card
+│   │       │   └── ProductLogDrawer.svelte     # Serving size & logging
+│   │       ├── navigation/  # App shell, nav, AddEntryModal
+│   │       └── ui/          # shadcn-svelte primitives
 │   └── routes/              # SvelteKit file-based routing
 │       ├── +layout.svelte   # App shell (Navbar, bottom nav)
-│       └── +page.svelte     # Homepage with upload UI
+│       └── +page.svelte     # Dashboard
 ├── static/
 │   └── manifest.json        # PWA manifest
 ├── vite.config.ts           # Vite + TailwindCSS plugin
@@ -153,34 +165,43 @@ Defined in `src/app.css` using shadcn CSS variable system with `@theme` (without
 
 ## API Integration
 
-### Backend Communication
+### Type-Safe API Client
 
+The frontend uses `openapi-fetch` with a generated TypeScript schema for type-safe API calls:
+
+```typescript
+import { api } from "$lib/api/client";
+
+// Typed search — params, response, and errors are all inferred
+const { data } = await api.GET("/api/products/search", {
+  params: { query: { query: "Nutella", lang: "en" } }
+});
 ```
-Frontend (localhost:5173)  ──HTTP──▶  Backend (localhost:8080)
-         │                                      │
-         │    POST /api/nutrition/scan          │
-         │◀─────── JSON Response ───────────────│
-```
 
-### Planned API Client
+### API Endpoints Used
 
-Future: Generate TypeScript client from OpenAPI spec:
+| Method | Endpoint                      | Component           | Purpose              |
+| ------ | ----------------------------- | ------------------- | -------------------- |
+| `POST` | `/api/nutrition/scan`         | FoodScannerModal    | AI image analysis    |
+| `POST` | `/api/nutrition/log`          | ProductLogDrawer    | Log food entry       |
+| `GET`  | `/api/products/search`        | ProductSearchModal  | Search by name/brand |
+| `GET`  | `/api/products/barcode/{ean}` | BarcodeScannerModal | Barcode lookup       |
+
+### Schema Regeneration
 
 ```bash
-# From apps/web
-npx openapi-typescript http://localhost:8080/openapi.json -o src/lib/api/schema.d.ts
+make openapi  # Regenerates src/lib/api/schema.d.ts from the Go API
 ```
 
 ---
 
 ## Key Routes
 
-| Route      | Component      | Description             |
-| ---------- | -------------- | ----------------------- |
-| `/`        | `+page.svelte` | Homepage with upload UI |
-| `/scan`    | (planned)      | Camera/upload flow      |
-| `/history` | (planned)      | Scan history            |
-| `/profile` | (planned)      | User settings           |
+| Route      | Component      | Description              |
+| ---------- | -------------- | ------------------------ |
+| `/`        | `+page.svelte` | Dashboard with daily log |
+| `/history` | `+page.svelte` | Scan history             |
+| `/profile` | (planned)      | User settings            |
 
 ## Color Scheme
 

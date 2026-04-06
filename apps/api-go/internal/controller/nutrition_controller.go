@@ -161,6 +161,7 @@ func (c *NutritionController) LogFoodHandler(ctx context.Context, input *LogFood
 			Fiber:    input.Body.Macros.Fiber,
 		},
 		Ingredients: serviceIngredients,
+		ProductID:   input.Body.ProductID,
 	}
 
 	resp, err := c.Service.LogFood(ctx, serviceReq)

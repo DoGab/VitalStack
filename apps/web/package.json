@@ -50,6 +50,7 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "barqode": "^0.0.2",
     "d3-scale": "^4.0.2",
     "lucide-svelte": "^0.563.0",
     "openapi-fetch": "^0.15.0"

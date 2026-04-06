@@ -16,7 +16,7 @@ const (
 	offBaseURL   = "https://ch.openfoodfacts.org"
 	offUserAgent = "VitalStack/1.0 (github.com/DoGab/VitalStack)"
 	offSource    = "openfoodfacts"
-	offFields    = "code,product_name,brands,categories_tags,image_url,nutriments,nutriscore_grade"
+	offFields    = "code,product_name,brands,categories_tags,image_url,nutriments,nutriscore_grade,serving_size,serving_quantity"
 )
 
 // offProductResponse represents the Open Food Facts API response for a single product lookup.
@@ -32,13 +32,15 @@ type offSearchResponse struct {
 
 // offProduct represents a single product from the Open Food Facts API.
 type offProduct struct {
-	Code           string        `json:"code"`
-	ProductName    string        `json:"product_name"`
-	Brands         string        `json:"brands"`
-	CategoriesTags []string      `json:"categories_tags"`
-	ImageURL       string        `json:"image_url"`
-	NutriScore     string        `json:"nutriscore_grade"`
-	Nutriments     offNutriments `json:"nutriments"`
+	Code            string        `json:"code"`
+	ProductName     string        `json:"product_name"`
+	Brands          string        `json:"brands"`
+	CategoriesTags  []string      `json:"categories_tags"`
+	ImageURL        string        `json:"image_url"`
+	NutriScore      string        `json:"nutriscore_grade"`
+	Nutriments      offNutriments `json:"nutriments"`
+	ServingSize     string        `json:"serving_size"`
+	ServingQuantity float64       `json:"serving_quantity"`
 }
 
 // offNutriments represents the nutriment data from the Open Food Facts API.
@@ -109,10 +111,16 @@ func (c *OFFClient) Name() string {
 }
 
 // LookupBarcode searches for a product by its EAN/UPC barcode.
-func (c *OFFClient) LookupBarcode(ctx context.Context, barcode string) (*types.Product, error) {
+// The lang parameter overrides the client's default language when non-empty.
+func (c *OFFClient) LookupBarcode(ctx context.Context, barcode string, lang string) (*types.Product, error) {
+	effectiveLang := c.language
+	if lang != "" {
+		effectiveLang = lang
+	}
+
 	reqURL := fmt.Sprintf("%s/api/v2/product/%s?fields=%s", c.baseURL, url.PathEscape(barcode), offFields)
-	if c.language != "" {
-		reqURL += "&lc=" + url.QueryEscape(c.language)
+	if effectiveLang != "" {
+		reqURL += "&lc=" + url.QueryEscape(effectiveLang)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
@@ -146,7 +154,12 @@ func (c *OFFClient) LookupBarcode(ctx context.Context, barcode string) (*types.P
 }
 
 // SearchProducts performs a free-text search and returns up to limit results.
-func (c *OFFClient) SearchProducts(ctx context.Context, query string, limit int) ([]types.Product, error) {
+// The lang parameter overrides the client's default language when non-empty.
+func (c *OFFClient) SearchProducts(ctx context.Context, query string, limit int, lang string) ([]types.Product, error) {
+	effectiveLang := c.language
+	if lang != "" {
+		effectiveLang = lang
+	}
 	reqURL := fmt.Sprintf(
 		"%s/cgi/search.pl?search_terms=%s&json=1&page_size=%d&fields=%s",
 		c.baseURL,
@@ -155,8 +168,8 @@ func (c *OFFClient) SearchProducts(ctx context.Context, query string, limit int)
 		offFields,
 	)
 
-	if c.language != "" {
-		reqURL += "&lc=" + url.QueryEscape(c.language)
+	if effectiveLang != "" {
+		reqURL += "&lc=" + url.QueryEscape(effectiveLang)
 	}
 	if c.sortBy != "" {
 		reqURL += "&sort_by=" + url.QueryEscape(c.sortBy)
@@ -214,14 +227,16 @@ func (c *OFFClient) SearchProducts(ctx context.Context, query string, limit int)
 // offProductToDomain converts an OFF API product to the domain Product type.
 func offProductToDomain(p offProduct) types.Product {
 	return types.Product{
-		ID:         fmt.Sprintf("off-%s", p.Code),
-		Barcode:    p.Code,
-		Name:       p.ProductName,
-		Brand:      p.Brands,
-		Categories: cleanCategories(p.CategoriesTags),
-		ImageURL:   p.ImageURL,
-		Source:     offSource,
-		NutriScore: p.NutriScore,
+		ID:              fmt.Sprintf("off-%s", p.Code),
+		Barcode:         p.Code,
+		Name:            p.ProductName,
+		Brand:           p.Brands,
+		Categories:      cleanCategories(p.CategoriesTags),
+		ImageURL:        p.ImageURL,
+		Source:          offSource,
+		NutriScore:      p.NutriScore,
+		ServingSize:     p.ServingSize,
+		ServingQuantity: p.ServingQuantity,
 		Macros: types.MacrosPer100g{
 			Calories: p.Nutriments.EnergyKcal100g,
 			Protein:  p.Nutriments.Proteins100g,

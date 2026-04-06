@@ -29,8 +29,10 @@ func NewProductService(index search.ProductSearchIndex, datasources ...datasourc
 	}
 }
 
-// LookupBarcode looks up a product by barcode using the waterfall strategy.
-func (s *ProductService) LookupBarcode(ctx context.Context, barcode string) (*types.Product, error) {
+// LookupBarcode searches all configured datasources in waterfall order.
+// It returns the first matching product, or ErrNotFound if no datasource has a match.
+// The lang parameter is forwarded to each datasource for localized results.
+func (s *ProductService) LookupBarcode(ctx context.Context, barcode string, lang string) (*types.Product, error) {
 	// Step 1: Check the search index (cache)
 	product, err := s.index.LookupBarcode(ctx, barcode)
 	if err != nil {
@@ -43,7 +45,7 @@ func (s *ProductService) LookupBarcode(ctx context.Context, barcode string) (*ty
 
 	// Step 2: Waterfall through external datasources
 	for _, ds := range s.datasources {
-		product, err = ds.LookupBarcode(ctx, barcode)
+		product, err = ds.LookupBarcode(ctx, barcode, lang)
 		if err != nil {
 			if errors.Is(err, datasource.ErrNotFound) {
 				slog.Debug("ProductService: barcode not found in datasource", "barcode", barcode, "datasource", ds.Name())
@@ -63,7 +65,7 @@ func (s *ProductService) LookupBarcode(ctx context.Context, barcode string) (*ty
 }
 
 // SearchProducts performs a product search using the waterfall strategy.
-func (s *ProductService) SearchProducts(ctx context.Context, query string, limit int) ([]types.Product, error) {
+func (s *ProductService) SearchProducts(ctx context.Context, query string, limit int, lang string) ([]types.Product, error) {
 	// Step 1: Search the index
 	results, err := s.index.Search(ctx, query, limit)
 	if err != nil {
@@ -87,7 +89,7 @@ func (s *ProductService) SearchProducts(ctx context.Context, query string, limit
 
 	var newProducts []types.Product
 	for _, ds := range s.datasources {
-		external, err := ds.SearchProducts(ctx, query, remaining)
+		external, err := ds.SearchProducts(ctx, query, remaining, lang)
 		if err != nil {
 			slog.Warn("ProductService: external search failed", "query", query, "datasource", ds.Name(), "error", err)
 			continue

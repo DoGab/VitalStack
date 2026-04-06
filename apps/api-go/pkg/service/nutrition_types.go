@@ -152,9 +152,10 @@ func (m *MacroData) LogValue() slog.Value {
 type LogFoodInput struct {
 	UserID      *string
 	FoodName    string
-	Confidence  float64
+	Confidence  *float64
 	Macros      MacroData
 	Ingredients []Ingredient
+	ProductID   *string
 }
 
 // LogFoodOutput represents the log response

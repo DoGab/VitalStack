@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Checkbox } from "$lib/components/ui/checkbox";
-  import { Input } from "$lib/components/ui/input";
+  import MacroDots from "$lib/components/ui/macro-dots.svelte";
+  import IngredientServingDrawer from "$lib/components/food/IngredientServingDrawer.svelte";
+  import ChevronRight from "lucide-svelte/icons/chevron-right";
   import type { components } from "$lib/api/schema";
 
   export type EditableIngredient = components["schemas"]["IngredientBody"] & {
@@ -22,9 +24,12 @@
 
   let { ingredients = $bindable(), readonly = false }: Props = $props();
 
-  function fmt(value: number, decimals = 0): string {
-    return value.toFixed(decimals);
-  }
+  // Serving drawer state
+  let servingDrawerOpen = $state(false);
+  let selectedIngredientIndex = $state<number | null>(null);
+  let selectedIngredient = $derived(
+    selectedIngredientIndex !== null ? ingredients[selectedIngredientIndex] : null
+  );
 
   function fmtWeight(item: EditableIngredient): string {
     const qty = item.serving_quantity ?? 1;
@@ -35,22 +40,24 @@
     return `${qty} serving`;
   }
 
-  function handleQuantityChange(item: EditableIngredient, newQty: number) {
-    if (newQty < 0) return;
-    const ratio = newQty / (item.base_quantity || 1);
-    item.macros = {
-      calories: item.base_macros.calories * ratio,
-      protein: item.base_macros.protein * ratio,
-      carbs: item.base_macros.carbs * ratio,
-      fat: item.base_macros.fat * ratio,
-      fiber: item.base_macros.fiber * ratio
+  function openServingDrawer(index: number) {
+    selectedIngredientIndex = index;
+    servingDrawerOpen = true;
+  }
+
+  function handleServingUpdate(updated: EditableIngredient) {
+    if (selectedIngredientIndex === null) return;
+    // Update the ingredient in-place so the parent's bindable array reflects changes
+    ingredients[selectedIngredientIndex] = {
+      ...ingredients[selectedIngredientIndex],
+      macros: updated.macros,
+      serving_quantity: updated.serving_quantity
     };
-    item.serving_quantity = newQty;
   }
 </script>
 
 <div class="flex flex-col divide-y divide-border/40">
-  {#each ingredients as item (item.name)}
+  {#each ingredients as item, i (item.name)}
     <div
       class="flex flex-row items-center gap-3 py-2.5 transition-opacity {item.selected
         ? ''
@@ -65,56 +72,43 @@
         />
       {/if}
 
-      <!-- Name + macros column -->
-      <div class="flex-1 min-w-0 flex flex-col justify-center">
-        <span class="text-sm font-semibold text-foreground truncate leading-tight">
-          {item.name}
-        </span>
-
-        <!-- Macro dots row — always visible -->
-        <div class="flex items-center gap-3 mt-1 flex-wrap">
-          <span class="flex items-center gap-1 text-xs text-muted-foreground">
-            <span class="size-2 rounded-full bg-[#D65A31] shrink-0"></span>
-            {fmt(item.macros.calories)} Cal
-          </span>
-          <span class="flex items-center gap-1 text-xs text-muted-foreground">
-            <span class="size-2 rounded-full bg-red-500 shrink-0"></span>
-            {fmt(item.macros.protein)}P
-          </span>
-          <span class="flex items-center gap-1 text-xs text-muted-foreground">
-            <span class="size-2 rounded-full bg-blue-500 shrink-0"></span>
-            {fmt(item.macros.fat)}F
-          </span>
-          <span class="flex items-center gap-1 text-xs text-muted-foreground">
-            <span class="size-2 rounded-full bg-amber-500 shrink-0"></span>
-            {fmt(item.macros.carbs)}C
-          </span>
-        </div>
-      </div>
-
-      <!-- Weight display / editable qty -->
+      <!-- Tappable ingredient row — opens serving drawer in edit mode -->
       {#if readonly}
+        <div class="flex-1 min-w-0 flex flex-col justify-center">
+          <span class="text-sm font-semibold text-foreground truncate leading-tight">
+            {item.name}
+          </span>
+          <MacroDots macros={item.macros} class="mt-1" />
+        </div>
         <span class="text-xs text-muted-foreground shrink-0 font-mono">
           {fmtWeight(item)}
         </span>
       {:else}
-        <div class="flex items-center gap-1 shrink-0 font-mono text-xs">
-          <Input
-            type="number"
-            step="0.1"
-            min="0"
-            class="w-14 h-7 text-center text-xs p-1 font-mono border-outline_variant/30 bg-surface_container_low"
-            value={item.serving_quantity ?? 1}
-            oninput={(e) => {
-              const val = parseFloat(e.currentTarget.value);
-              if (!isNaN(val)) handleQuantityChange(item, val);
-            }}
-          />
-          <span class="text-muted-foreground"
-            >× {item.serving_size ?? ""}{item.serving_unit ?? "srv"}</span
-          >
-        </div>
+        <button
+          type="button"
+          class="flex-1 min-w-0 flex items-center gap-2 text-left rounded-lg -mx-1 px-1 py-0.5
+            hover:bg-accent/50 active:scale-[0.98] transition-all"
+          onclick={() => openServingDrawer(i)}
+        >
+          <div class="flex-1 min-w-0 flex flex-col justify-center">
+            <span class="text-sm font-semibold text-foreground truncate leading-tight">
+              {item.name}
+            </span>
+            <MacroDots macros={item.macros} class="mt-1" />
+          </div>
+          <span class="text-xs text-muted-foreground shrink-0 font-mono">
+            {fmtWeight(item)}
+          </span>
+          <ChevronRight class="size-3.5 text-muted-foreground/50 shrink-0" />
+        </button>
       {/if}
     </div>
   {/each}
 </div>
+
+<!-- Serving Size Drawer -->
+<IngredientServingDrawer
+  bind:open={servingDrawerOpen}
+  ingredient={selectedIngredient}
+  onupdate={handleServingUpdate}
+/>

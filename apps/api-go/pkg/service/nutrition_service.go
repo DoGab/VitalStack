@@ -169,9 +169,14 @@ func (s *NutritionService) LogFood(ctx context.Context, input *LogFoodInput) (*L
 	}
 
 	// Create the FoodLog database model
+	var confidence float64
+	if input.Confidence != nil {
+		confidence = *input.Confidence
+	}
+
 	dbLog := &models.FoodLog{
 		FoodName:            input.FoodName,
-		DetectionConfidence: input.Confidence,
+		DetectionConfidence: confidence,
 		UserID:              input.UserID,
 		Calories:            input.Macros.Calories,
 		Protein:             input.Macros.Protein,

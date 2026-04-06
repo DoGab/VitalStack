@@ -52,12 +52,12 @@ type mockDatasource struct {
 
 func (m *mockDatasource) Name() string { return m.name }
 
-func (m *mockDatasource) LookupBarcode(_ context.Context, _ string) (*types.Product, error) {
+func (m *mockDatasource) LookupBarcode(_ context.Context, _ string, _ string) (*types.Product, error) {
 	m.lookupCalled = true
 	return m.lookupResult, m.lookupErr
 }
 
-func (m *mockDatasource) SearchProducts(_ context.Context, _ string, _ int) ([]types.Product, error) {
+func (m *mockDatasource) SearchProducts(_ context.Context, _ string, _ int, _ string) ([]types.Product, error) {
 	m.searchCalled = true
 	return m.searchResults, m.searchErr
 }
@@ -69,7 +69,7 @@ func TestProductService_LookupBarcode_CacheHit(t *testing.T) {
 
 	svc := service.NewProductService(idx, ds)
 
-	product, err := svc.LookupBarcode(context.Background(), "123")
+	product, err := svc.LookupBarcode(context.Background(), "123", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -89,7 +89,7 @@ func TestProductService_LookupBarcode_CacheMiss_FallsToExternal(t *testing.T) {
 
 	svc := service.NewProductService(idx, offDS, usdaDS)
 
-	product, err := svc.LookupBarcode(context.Background(), "456")
+	product, err := svc.LookupBarcode(context.Background(), "456", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -118,7 +118,7 @@ func TestProductService_LookupBarcode_CascadesToUSDA(t *testing.T) {
 
 	svc := service.NewProductService(idx, offDS, usdaDS)
 
-	product, err := svc.LookupBarcode(context.Background(), "789")
+	product, err := svc.LookupBarcode(context.Background(), "789", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -140,7 +140,7 @@ func TestProductService_LookupBarcode_AllMiss(t *testing.T) {
 
 	svc := service.NewProductService(idx, offDS, usdaDS)
 
-	_, err := svc.LookupBarcode(context.Background(), "000")
+	_, err := svc.LookupBarcode(context.Background(), "000", "")
 	if !errors.Is(err, datasource.ErrNotFound) {
 		t.Fatalf("expected ErrNotFound, got %v", err)
 	}
@@ -156,7 +156,7 @@ func TestProductService_SearchProducts_IndexSufficient(t *testing.T) {
 
 	svc := service.NewProductService(idx, ds)
 
-	results, err := svc.SearchProducts(context.Background(), "product", 2)
+	results, err := svc.SearchProducts(context.Background(), "product", 2, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -189,7 +189,7 @@ func TestProductService_SearchProducts_FanOut(t *testing.T) {
 
 	svc := service.NewProductService(idx, offDS, usdaDS)
 
-	results, err := svc.SearchProducts(context.Background(), "product", 5)
+	results, err := svc.SearchProducts(context.Background(), "product", 5, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -214,7 +214,7 @@ func TestProductService_SearchProducts_Deduplication(t *testing.T) {
 
 	svc := service.NewProductService(idx, offDS)
 
-	results, err := svc.SearchProducts(context.Background(), "product", 10)
+	results, err := svc.SearchProducts(context.Background(), "product", 10, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -104,7 +104,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/products/barcode/{ean}": {
+    "/api/products/barcode/{barcode}": {
         parameters: {
             query?: never;
             header?: never;
@@ -113,7 +113,7 @@ export interface paths {
         };
         /**
          * Look up product by barcode
-         * @description Look up a food product by its EAN/UPC barcode. First checks the local cache, then queries Open Food Facts and USDA FoodData Central.
+         * @description Look up a food product by its EAN/UPC barcode. First checks the local cache, then queries Open Food Facts, FSVO, and USDA FoodData Central.
          */
         get: operations["lookup-product-barcode"];
         put?: never;
@@ -271,19 +271,24 @@ export interface components {
             readonly $schema?: string;
             /**
              * Format: double
-             * @description Detection confidence score
+             * @description Detection confidence score (omit for product-based logs)
              * @example 0.92
              */
-            confidence: number;
+            confidence?: number;
             /**
              * @description Detected food name
              * @example Grilled Chicken Salad
              */
             food_name: string;
-            /** @description Breakdown of individual ingredients with their macros */
-            ingredients: components["schemas"]["IngredientBody"][] | null;
+            /** @description Breakdown of individual ingredients with their macros (optional for product-based logs) */
+            ingredients?: components["schemas"]["IngredientBody"][] | null;
             /** @description Nutritional macro information */
             macros: components["schemas"]["MacroData"];
+            /**
+             * @description Optional product reference ID
+             * @example off-7613035466432
+             */
+            product_id?: string;
             /** @description Optional UUID of the user logging the meal (defaults to auth context if implemented) */
             user_id?: string;
         };
@@ -337,7 +342,7 @@ export interface components {
              */
             protein: number;
         };
-        MacrosPer100gBody: {
+        MacrosOutput: {
             /**
              * Format: double
              * @description Calories per 100g
@@ -417,46 +422,37 @@ export interface components {
              */
             time: string;
         };
-        ProductBody: {
+        ProductOutput: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example //schemas/ProductBody.json
+             * @example //schemas/ProductOutput.json
              */
             readonly $schema?: string;
-            /**
-             * @description EAN/UPC barcode
-             * @example 0049000000443
-             */
+            /** @description EAN/UPC barcode */
             barcode: string;
-            /**
-             * @description Brand name
-             * @example Emmi
-             */
+            /** @description Brand name */
             brand: string;
-            /**
-             * @description Product identifier
-             * @example off-0049000000443
-             */
+            /** @description Product categories */
+            categories: string[] | null;
+            /** @description Composite product identifier */
             id: string;
             /** @description Product image URL */
-            image_url?: string;
+            image_url: string;
             /** @description Nutritional values per 100g */
-            macros: components["schemas"]["MacrosPer100gBody"];
-            /**
-             * @description Product name
-             * @example Caffè Latte
-             */
+            macros: components["schemas"]["MacrosOutput"];
+            /** @description Product display name */
             name: string;
+            /** @description NutriScore grade (A-E) */
+            nutri_score: string;
             /**
-             * @description Nutri-Score grade (A-E)
-             * @example C
+             * Format: double
+             * @description Serving quantity in grams/ml
              */
-            nutri_score?: string;
-            /**
-             * @description Data source
-             * @example openfoodfacts
-             */
+            serving_quantity?: number;
+            /** @description Human-readable serving size (e.g. 250ml) */
+            serving_size?: string;
+            /** @description Data source identifier */
             source: string;
         };
         ScanInputBody: {
@@ -509,7 +505,7 @@ export interface components {
             /** @description Data attribution notice */
             attribution?: string;
             /** @description List of matching products */
-            products: components["schemas"]["ProductBody"][] | null;
+            products: components["schemas"]["ProductOutput"][] | null;
         };
     };
     responses: never;
@@ -688,14 +684,20 @@ export interface operations {
     };
     "lookup-product-barcode": {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Preferred language code (e.g. de, fr, en)
+                 * @example de
+                 */
+                lang?: string;
+            };
             header?: never;
             path: {
                 /**
-                 * @description EAN/UPC barcode
-                 * @example 0049000000443
+                 * @description EAN/UPC barcode to look up
+                 * @example 7613035466432
                  */
-                ean: string;
+                barcode: string;
             };
             cookie?: never;
         };
@@ -707,7 +709,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductBody"];
+                    "application/json": components["schemas"]["ProductOutput"];
                 };
             };
             /** @description Error */
@@ -723,17 +725,19 @@ export interface operations {
     };
     "search-products": {
         parameters: {
-            query: {
+            query?: {
                 /**
-                 * @description Search query
-                 * @example yogurt
+                 * @description Free-text search query
+                 * @example nutella
                  */
-                query: string;
-                /**
-                 * @description Max results to return
-                 * @example 10
-                 */
+                query?: string;
+                /** @description Maximum number of results */
                 limit?: number;
+                /**
+                 * @description Preferred language code (e.g. de, fr, en)
+                 * @example de
+                 */
+                lang?: string;
             };
             header?: never;
             path?: never;

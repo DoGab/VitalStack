@@ -38,7 +38,7 @@
   {#if hasMeals}
     <!-- Desktop: horizontal cards -->
     <div class="hidden md:grid md:grid-cols-3 gap-4">
-      {#each meals as meal (meal.name)}
+      {#each meals as meal (meal.id)}
         <Card.Root
           class="overflow-hidden hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 active:scale-[0.98]"
           onclick={() => openMealDetails(meal)}
@@ -73,7 +73,7 @@
 
     <!-- Mobile: vertical list -->
     <div class="md:hidden space-y-2">
-      {#each meals as meal (meal.name)}
+      {#each meals as meal (meal.id)}
         <Card.Root
           class="cursor-pointer hover:bg-muted/50 active:scale-[0.98] transition-transform"
           onclick={() => openMealDetails(meal)}

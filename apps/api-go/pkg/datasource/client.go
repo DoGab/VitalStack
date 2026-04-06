@@ -18,10 +18,14 @@ var ErrNotFound = errors.New("product not found")
 type FoodDatasource interface {
 	// LookupBarcode searches for a product by its EAN/UPC barcode.
 	// Returns ErrNotFound if no product matches the barcode.
-	LookupBarcode(ctx context.Context, barcode string) (*types.Product, error)
+	// The lang parameter specifies the preferred language for localized results (e.g. "de").
+	// An empty lang falls back to the client's default language.
+	LookupBarcode(ctx context.Context, barcode string, lang string) (*types.Product, error)
 
 	// SearchProducts performs a free-text search and returns up to limit results.
-	SearchProducts(ctx context.Context, query string, limit int) ([]types.Product, error)
+	// The lang parameter specifies the preferred language for localized results (e.g. "de").
+	// An empty lang falls back to the client's default language.
+	SearchProducts(ctx context.Context, query string, limit int, lang string) ([]types.Product, error)
 
 	// Name returns the datasource identifier (e.g. "openfoodfacts", "usda").
 	Name() string

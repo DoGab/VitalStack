@@ -17,12 +17,14 @@ C4Context
   System_Ext(supabase, "Supabase", "Stores user data, authentication, and food logs.")
   System_Ext(llm, "LLM Provider", "Gemini/OpenAI for image analysis and macro estimation.")
   System_Ext(off, "Open Food Facts", "Primary open food database.")
+  System_Ext(fsvo, "Swiss FSVO", "Swiss food composition database (~1,100 generic foods).")
   System_Ext(usda, "USDA FoodData Central", "Secondary authoritative food database.")
 
   Rel(user, vitalstack, "Uses")
   Rel(vitalstack, supabase, "Reads from and writes to")
   Rel(vitalstack, llm, "Analyzes food images using")
   Rel(vitalstack, off, "Searches product barcodes")
+  Rel(vitalstack, fsvo, "Looks up generic Swiss foods")
   Rel(vitalstack, usda, "Falls back for product data")
 ```
 
@@ -86,7 +88,9 @@ C4Container
 
 ---
 
-## Request Flow
+## Request Flows
+
+### AI Food Scan
 
 ```mermaid
 sequenceDiagram
@@ -103,6 +107,26 @@ sequenceDiagram
     S-->>U: Display Macros
 ```
 
+### Product Search & Barcode Scan
+
+```mermaid
+sequenceDiagram
+    participant U as User (Browser)
+    participant S as SvelteKit (Frontend)
+    participant A as Go API (Controller)
+    participant DS as Datasources (OFF/FSVO/USDA)
+    
+    U->>S: Search or Scan Barcode
+    S->>A: GET /api/products/search or /barcode/{ean}
+    A->>DS: Waterfall lookup (Cache → OFF → FSVO → USDA)
+    DS-->>A: Product Data
+    A-->>S: JSON Response
+    S-->>U: Display Product Card
+    U->>S: Select Serving & Log
+    S->>A: POST /api/nutrition/log
+    A-->>S: Log Confirmation
+```
+
 ---
 
 ## API Endpoints
@@ -111,6 +135,9 @@ sequenceDiagram
 |--------|----------|-------------|
 | `GET` | `/api/health` | Health check |
 | `POST` | `/api/nutrition/scan` | Analyze food image |
+| `POST` | `/api/nutrition/log` | Log a food entry (AI or product-based) |
+| `GET` | `/api/products/search` | Full-text product search (waterfall) |
+| `GET` | `/api/products/barcode/{ean}` | Lookup product by barcode |
 | `GET` | `/docs` | OpenAPI documentation |
 | `GET` | `/openapi.json` | OpenAPI 3.1 spec |
 

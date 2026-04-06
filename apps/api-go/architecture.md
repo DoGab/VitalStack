@@ -129,7 +129,7 @@ HTTP DTOs include `doc`, `example` tags for OpenAPI. Service types are clean dom
 
 Business logic layer:
 - **Nutrition Service:** Handles AI flows and macro estimations.
-- **Product Service:** Implements a multi-layer waterfall architecture:
+- **Product Service:** Implements a multi-layer waterfall architecture with per-request language propagation (`lang` query param):
   1. **Cache:** Local Meilisearch index (fast, typo-tolerant).
   2. **Primary:** Open Food Facts HTTP API (branded products, barcodes).
   3. **Secondary:** Swiss FSVO food composition database (~1,100 generic foods).
@@ -152,8 +152,9 @@ Infrastructure integrations logic:
 |--------|------|-------------|
 | `GET` | `/api/health` | Health check |
 | `POST` | `/api/nutrition/scan` | Scan food image for macros |
-| `GET` | `/api/products/search` | Full-text product search (waterfall) |
-| `GET` | `/api/products/barcode/{ean}` | Lookup product by barcode |
+| `POST` | `/api/nutrition/log` | Log a food entry (AI or product-based) |
+| `GET` | `/api/products/search` | Full-text product search (waterfall, `?lang=` supported) |
+| `GET` | `/api/products/barcode/{ean}` | Lookup product by barcode (`?lang=` supported) |
 | `GET` | `/docs` | OpenAPI documentation UI |
 | `GET` | `/openapi.json` | OpenAPI 3.1 spec |
 

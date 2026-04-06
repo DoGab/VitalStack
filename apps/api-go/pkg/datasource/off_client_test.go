@@ -39,7 +39,7 @@ func TestOFFClient_LookupBarcode_Success(t *testing.T) {
 	client := datasource.NewOFFClient(srv.Client())
 	client.SetBaseURL(srv.URL) // test helper
 
-	product, err := client.LookupBarcode(context.Background(), "7613035466432")
+	product, err := client.LookupBarcode(context.Background(), "7613035466432", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -84,7 +84,7 @@ func TestOFFClient_LookupBarcode_NotFound(t *testing.T) {
 	client := datasource.NewOFFClient(srv.Client())
 	client.SetBaseURL(srv.URL)
 
-	_, err := client.LookupBarcode(context.Background(), "0000000000000")
+	_, err := client.LookupBarcode(context.Background(), "0000000000000", "")
 	if !errors.Is(err, datasource.ErrNotFound) {
 		t.Fatalf("expected ErrNotFound, got %v", err)
 	}
@@ -100,7 +100,7 @@ func TestOFFClient_LookupBarcode_MalformedJSON(t *testing.T) {
 	client := datasource.NewOFFClient(srv.Client())
 	client.SetBaseURL(srv.URL)
 
-	_, err := client.LookupBarcode(context.Background(), "123")
+	_, err := client.LookupBarcode(context.Background(), "123", "")
 	if err == nil {
 		t.Fatal("expected error for malformed JSON")
 	}
@@ -124,7 +124,7 @@ func TestOFFClient_SearchProducts_Success(t *testing.T) {
 	client := datasource.NewOFFClient(srv.Client())
 	client.SetBaseURL(srv.URL)
 
-	products, err := client.SearchProducts(context.Background(), "nutella", 10)
+	products, err := client.SearchProducts(context.Background(), "nutella", 10, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -150,7 +150,7 @@ func TestOFFClient_SearchProducts_EmptyResults(t *testing.T) {
 	client := datasource.NewOFFClient(srv.Client())
 	client.SetBaseURL(srv.URL)
 
-	products, err := client.SearchProducts(context.Background(), "zzzznonexistent", 5)
+	products, err := client.SearchProducts(context.Background(), "zzzznonexistent", 5, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -180,7 +180,7 @@ func TestOFFClient_LookupBarcode_MissingNutriments(t *testing.T) {
 	client := datasource.NewOFFClient(srv.Client())
 	client.SetBaseURL(srv.URL)
 
-	product, err := client.LookupBarcode(context.Background(), "123")
+	product, err := client.LookupBarcode(context.Background(), "123", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

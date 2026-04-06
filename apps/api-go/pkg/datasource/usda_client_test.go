@@ -24,7 +24,7 @@ func TestUSDAClient_SearchProducts_Success(t *testing.T) {
 	client := datasource.NewUSDAClient(srv.Client(), "test-api-key")
 	client.SetBaseURL(srv.URL)
 
-	products, err := client.SearchProducts(context.Background(), "yogurt", 10)
+	products, err := client.SearchProducts(context.Background(), "yogurt", 10, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -59,7 +59,7 @@ func TestUSDAClient_SearchProducts_NutrientMapping(t *testing.T) {
 	client := datasource.NewUSDAClient(srv.Client(), "test-key")
 	client.SetBaseURL(srv.URL)
 
-	products, err := client.SearchProducts(context.Background(), "yogurt", 10)
+	products, err := client.SearchProducts(context.Background(), "yogurt", 10, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -96,7 +96,7 @@ func TestUSDAClient_APIKeyInjection(t *testing.T) {
 	client := datasource.NewUSDAClient(srv.Client(), "my-secret-key")
 	client.SetBaseURL(srv.URL)
 
-	_, err := client.SearchProducts(context.Background(), "test", 5)
+	_, err := client.SearchProducts(context.Background(), "test", 5, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -118,7 +118,7 @@ func TestUSDAClient_LookupBarcode_Success(t *testing.T) {
 	client := datasource.NewUSDAClient(srv.Client(), "test-key")
 	client.SetBaseURL(srv.URL)
 
-	product, err := client.LookupBarcode(context.Background(), "0894700010045")
+	product, err := client.LookupBarcode(context.Background(), "0894700010045", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -137,7 +137,7 @@ func TestUSDAClient_LookupBarcode_NotFound(t *testing.T) {
 	client := datasource.NewUSDAClient(srv.Client(), "test-key")
 	client.SetBaseURL(srv.URL)
 
-	_, err := client.LookupBarcode(context.Background(), "nonexistent")
+	_, err := client.LookupBarcode(context.Background(), "nonexistent", "")
 	if !errors.Is(err, datasource.ErrNotFound) {
 		t.Fatalf("expected ErrNotFound, got %v", err)
 	}
@@ -153,7 +153,7 @@ func TestUSDAClient_SearchProducts_EmptyResults(t *testing.T) {
 	client := datasource.NewUSDAClient(srv.Client(), "test-key")
 	client.SetBaseURL(srv.URL)
 
-	products, err := client.SearchProducts(context.Background(), "zzznonexistent", 5)
+	products, err := client.SearchProducts(context.Background(), "zzznonexistent", 5, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

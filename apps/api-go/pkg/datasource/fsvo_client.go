@@ -106,15 +106,21 @@ func (c *FSVOClient) Name() string {
 }
 
 // LookupBarcode always returns ErrNotFound because FSVO has no barcode data.
-func (c *FSVOClient) LookupBarcode(_ context.Context, _ string) (*types.Product, error) {
+func (c *FSVOClient) LookupBarcode(_ context.Context, _ string, _ string) (*types.Product, error) {
 	return nil, ErrNotFound
 }
 
 // SearchProducts searches the FSVO database by name.
 // This is a two-step process: search for foods, then fetch detail for each.
-func (c *FSVOClient) SearchProducts(ctx context.Context, query string, limit int) ([]types.Product, error) {
+// The lang parameter overrides the client's default language when non-empty.
+func (c *FSVOClient) SearchProducts(ctx context.Context, query string, limit int, lang string) ([]types.Product, error) {
+	effectiveLang := c.language
+	if lang != "" {
+		effectiveLang = lang
+	}
+
 	// Step 1: Search for matching foods (returns metadata only, no macros).
-	searchFoods, err := c.searchFoods(ctx, query, limit)
+	searchFoods, err := c.searchFoods(ctx, query, limit, effectiveLang)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +128,7 @@ func (c *FSVOClient) SearchProducts(ctx context.Context, query string, limit int
 	// Step 2: Fetch full detail for each search result to get macros.
 	products := make([]types.Product, 0, len(searchFoods))
 	for _, sf := range searchFoods {
-		food, err := c.getFood(ctx, sf.ID)
+		food, err := c.getFood(ctx, sf.ID, effectiveLang)
 		if err != nil {
 			// Skip individual failures — don't fail the whole batch.
 			continue
@@ -134,10 +140,10 @@ func (c *FSVOClient) SearchProducts(ctx context.Context, query string, limit int
 }
 
 // searchFoods calls the FSVO /foods search endpoint.
-func (c *FSVOClient) searchFoods(ctx context.Context, query string, limit int) ([]fsvoSearchFood, error) {
+func (c *FSVOClient) searchFoods(ctx context.Context, query string, limit int, lang string) ([]fsvoSearchFood, error) {
 	params := url.Values{
 		"search": {query},
-		"lang":   {c.language},
+		"lang":   {lang},
 		"limit":  {strconv.Itoa(limit)},
 	}
 
@@ -167,8 +173,8 @@ func (c *FSVOClient) searchFoods(ctx context.Context, query string, limit int) (
 }
 
 // getFood fetches a single food by DBID from the FSVO /food/{DBID} endpoint.
-func (c *FSVOClient) getFood(ctx context.Context, dbid int) (*fsvoFood, error) {
-	reqURL := fmt.Sprintf("%s/food/%d?lang=%s", c.baseURL, dbid, c.language)
+func (c *FSVOClient) getFood(ctx context.Context, dbid int, lang string) (*fsvoFood, error) {
+	reqURL := fmt.Sprintf("%s/food/%d?lang=%s", c.baseURL, dbid, lang)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {
